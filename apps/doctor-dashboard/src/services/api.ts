@@ -1,0 +1,74 @@
+import {
+  Patient,
+  Encounter,
+  ControlledClinicalSummary,
+  RedFlagAlert,
+} from '@medikiosk/shared-types';
+
+const API_BASE = '/api/v1';
+
+async function fetchJson<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const res = await fetch(`${API_BASE}${url}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  const json = await res.json();
+  if (!res.ok || json.success === false) {
+    const errorMsg = json.error?.message || `Request failed with status ${res.status}`;
+    throw new Error(errorMsg);
+  }
+
+  return json.data as T;
+}
+
+export const DoctorApi = {
+  // Encounters & Clinical Briefing
+  getClinicalBriefing: (encounterId: string) =>
+    fetchJson<{
+      encounter: Encounter;
+      patient: Patient;
+      activeRedFlags: RedFlagAlert[];
+      facts: any[];
+      medications: any[];
+      allergies: any[];
+      timeline: any[];
+      documents: any[];
+      summary: ControlledClinicalSummary | null;
+    }>(`/encounters/${encounterId}/clinical-briefing`),
+
+  // Summaries & Verification
+  generateSummary: (encounterId: string) =>
+    fetchJson<ControlledClinicalSummary>('/summaries/generate', {
+      method: 'POST',
+      body: JSON.stringify({ encounterId }),
+    }),
+
+  verifySummary: (encounterId: string, data: {
+    clinicalNotes?: string;
+    physicianNotes?: string;
+    provisionalDiagnosis?: string;
+    treatmentPlan?: string;
+    editedFields?: Record<string, unknown>;
+  }) =>
+    fetchJson<{ summary: ControlledClinicalSummary; reviewId: string }>(
+      `/summaries/${encounterId}/verify`,
+      { method: 'POST', body: JSON.stringify(data) }
+    ),
+
+  // FHIR R4 Bundle Export
+  exportFhirBundle: (encounterId: string) =>
+    fetchJson<Record<string, unknown>>(`/fhir/export/${encounterId}`),
+
+  // Red Flags & Alerts
+  listAlerts: () => fetchJson<RedFlagAlert[]>('/alerts'),
+  acknowledgeAlert: (alertId: string) =>
+    fetchJson<RedFlagAlert>(`/alerts/${alertId}/acknowledge`, { method: 'POST' }),
+
+  // Documents & OCR
+  processDocument: (documentId: string) =>
+    fetchJson<any>(`/documents/${documentId}/process`, { method: 'POST' }),
+};

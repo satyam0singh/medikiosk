@@ -299,3 +299,58 @@ export class FhirMapper {
     };
   }
 }
+
+export function toFhirBundle(params: {
+  patient: Patient;
+  encounter: Encounter;
+  medications?: MedicationFact[];
+  allergies?: AllergyFact[];
+  observations?: Array<{
+    id: string;
+    code: string;
+    display: string;
+    value: string;
+    effectiveDateTime?: string;
+  }>;
+}): FhirBundle {
+  const fhirPatient = FhirMapper.mapPatient(params.patient);
+  const fhirEncounter = FhirMapper.mapEncounter(params.encounter, params.patient.fullName);
+  const fhirMeds = FhirMapper.mapMedications(params.medications || [], params.patient.id);
+  const fhirAllergies = FhirMapper.mapAllergies(params.allergies || [], params.patient.id);
+
+  const entries: Array<{ fullUrl?: string; resource: FhirResource }> = [
+    { fullUrl: `urn:uuid:${params.patient.id}`, resource: fhirPatient },
+    { fullUrl: `urn:uuid:${params.encounter.id}`, resource: fhirEncounter },
+    ...fhirMeds.map(m => ({ fullUrl: `urn:uuid:${m.id}`, resource: m })),
+    ...fhirAllergies.map(a => ({ fullUrl: `urn:uuid:${a.id}`, resource: a })),
+  ];
+
+  if (params.observations) {
+    for (const obs of params.observations) {
+      const observationResource: FhirObservation = {
+        resourceType: 'Observation',
+        id: obs.id,
+        status: 'final',
+        subject: {
+          reference: `Patient/${params.patient.id}`,
+        },
+        code: { text: obs.display },
+        valueString: obs.value,
+        effectiveDateTime: obs.effectiveDateTime || new Date().toISOString(),
+      };
+      entries.push({
+        fullUrl: `urn:uuid:${obs.id}`,
+        resource: observationResource,
+      });
+    }
+  }
+
+  return {
+    resourceType: 'Bundle',
+    id: `bundle-${params.encounter.id}`,
+    type: 'document',
+    timestamp: new Date().toISOString(),
+    entry: entries,
+  };
+}
+

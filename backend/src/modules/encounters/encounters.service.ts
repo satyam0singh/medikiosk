@@ -90,6 +90,90 @@ export class EncountersService {
     return res.rows.map(this.mapRowToEncounter);
   }
 
+  public static async getClinicalBriefing(encounterId: string): Promise<{
+    encounter: Encounter;
+    patient: any;
+    activeRedFlags: any[];
+    facts: any[];
+    medications: any[];
+    allergies: any[];
+    timeline: any[];
+    documents: any[];
+    summary: any;
+  }> {
+    const encounter = await this.getById(encounterId);
+
+    // Fetch patient
+    const patRes = await query(
+      `SELECT id, abha_id, hospital_patient_id, full_name, gender, age, contact_number, preferred_language, created_at, updated_at
+       FROM patients WHERE id = $1`,
+      [encounter.patientId]
+    );
+    const patient = patRes.rows[0];
+
+    // Fetch active red flags
+    const alertsRes = await query(
+      `SELECT id, encounter_id, patient_id, rule_id, severity, alert_message, trigger_facts, is_acknowledged, acknowledged_at, created_at
+       FROM red_flag_events WHERE encounter_id = $1`,
+      [encounterId]
+    );
+
+    // Fetch facts
+    const factsRes = await query(
+      `SELECT id, field, value, source_type, source_id, source_page, confidence, verification_status, created_at
+       FROM clinical_facts WHERE encounter_id = $1 ORDER BY created_at ASC`,
+      [encounterId]
+    );
+
+    // Fetch timeline
+    const timelineRes = await query(
+      `SELECT id, event_date, is_date_estimated, event_type, title, description, source_type, confidence, verification_status
+       FROM timeline_events WHERE encounter_id = $1 OR patient_id = $2 ORDER BY event_date ASC`,
+      [encounterId, encounter.patientId]
+    );
+
+    // Fetch documents
+    const docsRes = await query(
+      `SELECT id, file_name, mime_type, file_size_bytes, document_type, processing_state, uploaded_at, processed_at
+       FROM documents WHERE encounter_id = $1`,
+      [encounterId]
+    );
+
+    // Fetch summary
+    const sumRes = await query(
+      `SELECT summary_payload, is_physician_verified, status FROM clinical_summaries WHERE encounter_id = $1 ORDER BY version DESC LIMIT 1`,
+      [encounterId]
+    );
+    const sumRow = sumRes.rows[0];
+    const summary = sumRow
+      ? (typeof sumRow.summary_payload === 'string' ? JSON.parse(sumRow.summary_payload) : sumRow.summary_payload)
+      : null;
+
+    const facts = factsRes.rows.map(r => ({
+      id: r.id,
+      field: r.field,
+      value: typeof r.value === 'string' ? JSON.parse(r.value) : r.value,
+      sourceType: r.source_type,
+      sourceId: r.source_id,
+      sourcePage: r.source_page,
+      confidence: parseFloat(r.confidence),
+      verificationStatus: r.verification_status,
+      createdAt: r.created_at,
+    }));
+
+    return {
+      encounter,
+      patient,
+      activeRedFlags: alertsRes.rows,
+      facts,
+      medications: summary?.currentMedications || [],
+      allergies: summary?.allergies || [],
+      timeline: timelineRes.rows,
+      documents: docsRes.rows,
+      summary,
+    };
+  }
+
   private static mapRowToEncounter(r: any): Encounter {
     return {
       id: r.id,

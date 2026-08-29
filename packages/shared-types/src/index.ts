@@ -493,6 +493,44 @@ export interface ClinicalSummary {
   generatedAt: string;
 }
 
+export interface ControlledClinicalSummary {
+  encounterId: string;
+  patientId: string;
+  chiefComplaint: {
+    primary: string;
+    onset?: string;
+    severity?: number;
+    character?: string;
+    radiation?: string;
+    aggravatingFactors?: string[];
+    relievingFactors?: string[];
+  };
+  hpiNarrative: string;
+  currentMedications: MedicationFact[];
+  allergies: AllergyFact[];
+  pastMedicalHistory?: string[];
+  ayushAssessment?: AyushAssessment;
+  redFlags?: Array<{
+    ruleId: string;
+    severity: RedFlagSeverity;
+    message: string;
+    isAcknowledged: boolean;
+  }>;
+  uncertainties?: Array<{
+    field: string;
+    reason: string;
+    suggestedAction: string;
+  }>;
+  suggestedInvestigations?: string[];
+  provisionalDiagnosis?: string;
+  icd10Codes?: string[];
+  treatmentPlan?: string;
+  generatedAt: string;
+  isPhysicianVerified: boolean;
+  verifiedBy?: string;
+  verifiedAt?: string;
+}
+
 export interface PhysicianReviewRecord {
   id: string;
   encounterId: string;

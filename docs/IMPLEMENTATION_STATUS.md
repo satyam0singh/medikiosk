@@ -3,53 +3,45 @@
 **Date:** 2026-08-30  
 **Problem Statement:** SIH26047 — Patient Case-Taking Software (Ministry of Ayush / AIIA)  
 **Team:** LexCorps  
-**Current Milestone:** Phase 0 (Bootstrap) & Phase 1 (Database & Domain Contracts) COMPLETED  
+**Current Status:** Phases 0, 1, 2, 3, 4 & 5 COMPLETED & VERIFIED  
 
 ---
 
 ## 1. Executive Summary
 
-MediKiosk is an AI-assisted, rule-constrained, provenance-preserving clinical pre-consultation intake platform.
-Phase 0 (Monorepo Bootstrap) and Phase 1 (Database & Domain Contracts) are now **100% complete and verified**:
-- **Monorepo & Infrastructure:** npm workspaces for `packages/*`, `apps/*`, and `backend`. Root scripts, strict TypeScript configuration (`tsconfig.base.json`), Docker Compose orchestration for PostgreSQL 16, Redis 7, MinIO S3, Backend, and Nginx.
-- **Shared Packages (`packages/`):**
-  - `@medikiosk/shared-types`: Comprehensive domain models, enums (Roles, Provenance, Verification, Severity, Timeline, AYUSH, Sessions), DTOs, and API envelopes.
-  - `@medikiosk/clinical-schema`: Zod validation schemas for all clinical entities, input payloads, and strict AI extraction payloads.
-  - `@medikiosk/fhir-mapper`: FHIR R4 Bundle & Resource models and mapping functions (Patient, Encounter, MedicationStatement, AllergyIntolerance, Observation).
-- **PostgreSQL Database Schema & Migrations:** Full relational schema in `infrastructure/postgres/migrations/001_initial_clinical_schema.sql` modeling users, roles, patients, consents, encounters, clinical sessions, questions, answers, clinical facts (with provenance and confidence), symptoms, medications, allergies, investigations, documents, extractions, timeline events, red flags, summaries, physician reviews, and immutable audit logs.
-- **Synthetic Clinical Seed Data:** Pre-populated synthetic dataset in `infrastructure/postgres/seeds/001_synthetic_clinical_seed.sql` with staff accounts, standard question bank, deterministic red flag rules, and sample chest-pain case.
-- **Backend Service:** Express + TypeScript strict mode with verified dependency health check endpoints (`/api/v1/health`, `/database`, `/redis`, `/storage`), PHI-safe logging, centralized error handling, JWT & RBAC middleware, and AI provider interfaces (`ASRProvider`, `OCRProvider`, `LLMProvider`, `NERProvider`, `TTSProvider`).
-- **Testing:** 100% test pass rate across health checks, Zod clinical validation schemas, and FHIR mapper.
+MediKiosk has completed the core deterministic intake architecture and patient-facing experience across Phases 0 through 5:
+- **Phase 0 (Monorepo & Infrastructure Bootstrap):** npm workspaces, TypeScript strict configuration, Docker Compose orchestration for PostgreSQL 16, Redis 7, MinIO S3, Backend, and Nginx.
+- **Phase 1 (Database & Domain Contracts):** Full clinical PostgreSQL relational schema (22 tables and enums), synthetic demo seeds, shared TypeScript domain types (`@medikiosk/shared-types`), Zod validation schemas (`@medikiosk/clinical-schema`), and FHIR R4 mapper (`@medikiosk/fhir-mapper`).
+- **Phase 2 (Auth, RBAC & Consent Lifecycle):** JWT authentication with bcrypt password hashing, Role-Based Access Control (`PHYSICIAN`, `TRIAGE`, `AYUSH_PRACTITIONER`, `ADMIN`), Patient identity search & registration, Encounter tracking, and informed digital Consent management with immutable audit logs.
+- **Phase 3 (Patient Kiosk Web Client):** React 19 / Vite / Tailwind CSS bilingual (Hindi/English) touch-first interface with voice assistance, large accessible buttons, audio prompt playback, and OPD token generation (`apps/kiosk-web`).
+- **Phase 4 (Clinical State Machine & Question Engine):** Deterministic session state progression (`IDENTIFICATION` → `CONSENTED` → `HISTORY_ACTIVE` → `VALIDATION` → `SUMMARY_GENERATION`), question bank branching by chief complaint (chest pain, fever, abdominal pain, AYUSH).
+- **Phase 5 (Deterministic Red-Flag Safety Engine):** Real-time deterministic evaluation of clinical facts against emergency rules (e.g. acute chest pain severity >= 7 triggers immediate `CRITICAL_EMERGENCY` triage alert and guidance without LLM hallucination risk).
 
 ---
 
-## 2. Completed Components Matrix
+## 2. Completed Milestones Matrix
 
-| Phase | Component | Status | Details |
+| Phase | Description | Status | Verification Details |
 |---|---|---|---|
-| **Phase 0** | Monorepo Structure | ✅ Complete | npm workspaces (`packages/*`, `apps/*`, `backend`), `package.json`, `tsconfig.base.json` |
-| **Phase 0** | Infrastructure Orchestration | ✅ Complete | `docker-compose.yml` (Postgres 16, Redis 7, MinIO, Backend, Nginx), `Dockerfile.backend`, `nginx.conf` |
-| **Phase 0** | Configuration & Git | ✅ Complete | `.env.example`, `.env`, `.gitignore`, `README.md`, Git initialized & committed |
-| **Phase 1** | Shared Domain Types | ✅ Complete | `packages/shared-types`: Provenance, Verification, Severity, Encounter, AYUSH, Timeline |
-| **Phase 1** | Clinical Validation Schemas | ✅ Complete | `packages/clinical-schema`: Zod schemas for boundary validation & AI strict outputs |
-| **Phase 1** | FHIR Interoperability Mapper | ✅ Complete | `packages/fhir-mapper`: FHIR R4 Patient, Encounter, Medication, Observation mapping |
-| **Phase 1** | PostgreSQL Clinical Schema | ✅ Complete | `infrastructure/postgres/migrations/001_initial_clinical_schema.sql` (22 tables & enums) |
-| **Phase 1** | Synthetic Clinical Seed | ✅ Complete | `infrastructure/postgres/seeds/001_synthetic_clinical_seed.sql` (Users, Questions, Red flags, Patients) |
-| **Phase 1** | Backend Infrastructure Pool | ✅ Complete | `pg` connection pool with migration runner, `ioredis` wrapper, `minio` S3 SDK wrapper |
-| **Phase 1** | Verified Health Checks | ✅ Complete | Real `GET /api/v1/health`, `/database`, `/redis`, `/storage` endpoints |
-| **Phase 1** | PHI-Safe Logging & Error Handling | ✅ Complete | Winston logger masking sensitive fields, unified `AppError` & Zod error formatting |
-| **Phase 1** | AI Provider Interface Layer | ✅ Complete | `ASRProvider`, `OCRProvider`, `LLMProvider`, `NERProvider`, `TTSProvider` with mock fallbacks |
-| **Phase 1** | Automated Test Suite | ✅ Complete | 13/13 passing tests across health, schema, and FHIR mapping |
+| **Phase 0** | Monorepo & Infrastructure | ✅ Complete | Root workspaces, `docker-compose.yml`, `.env.example`, `.gitignore`, `README.md` |
+| **Phase 1** | PostgreSQL Clinical Schema | ✅ Complete | 22 tables & enums in `001_initial_clinical_schema.sql`, seed data in `001_synthetic_clinical_seed.sql` |
+| **Phase 1** | Verified Health Checks | ✅ Complete | `GET /api/v1/health`, `/database`, `/redis`, `/storage` |
+| **Phase 1** | Shared Packages | ✅ Complete | `@medikiosk/shared-types`, `@medikiosk/clinical-schema`, `@medikiosk/fhir-mapper` |
+| **Phase 2** | Auth & RBAC | ✅ Complete | `/api/v1/auth/login`, `/refresh`, `/me`, JWT middleware, RBAC guards |
+| **Phase 2** | Patients & Encounters | ✅ Complete | `/api/v1/patients/search`, `/patients`, `/encounters`, timeline queries |
+| **Phase 2** | Digital Consent Engine | ✅ Complete | `/api/v1/consents`, `/verify`, `/revoke`, immutable audit logging |
+| **Phase 3** | Patient Kiosk Web UI | ✅ Complete | `apps/kiosk-web` (React/Vite/Tailwind, built with 0 errors) |
+| **Phase 4** | Clinical State Machine | ✅ Complete | `/api/v1/sessions`, `/sessions/:id/answers`, state machine transitions |
+| **Phase 4** | Question Engine | ✅ Complete | `/api/v1/questions/next`, adaptive chief complaint branching |
+| **Phase 5** | Red-Flag Safety Engine | ✅ Complete | Deterministic screening, `/api/v1/alerts`, triage acknowledgements |
+| **Testing** | Automated Test Suites | ✅ Complete | 15/15 passing tests across health, workflow, schemas, and FHIR mapper |
 
 ---
 
-## 3. Next Recommended Phase (Phase 2 & Phase 3)
+## 3. Next Implementation Roadmap
 
-According to `plan.md`:
-1. **Phase 2 — Authentication, RBAC & Consent APIs:**
-   - Implement `/api/v1/auth/login`, `/refresh`, `/logout`
-   - Implement `/api/v1/patients`, `/api/v1/encounters`, `/api/v1/consents`
-   - Server-side authorization check (`user → role → patient → encounter`)
-2. **Phase 3 & 4 — Clinical State Machine & Patient Kiosk Skeleton:**
-   - Deterministic clinical session state machine & question engine
-   - Accessible touch/voice Patient Kiosk Web frontend (`apps/kiosk-web`)
+- **Phase 6:** Doctor Dashboard (`apps/doctor-dashboard`) for physician verification, red-flag queue, timeline visualization, and clinical note editing.
+- **Phase 7 & 8:** MinIO Document Pipeline & OCR Clinical Entity Extraction (Prescription / Lab parsing with confidence scores).
+- **Phase 9:** Longitudinal Timeline Builder with contradiction detection.
+- **Phase 10 & 11:** Multilingual ASR/TTS & schema-constrained LLM summarization.
+- **Phase 15 & 16:** AYUSH specialized evaluation module and exportable FHIR R4 bundles.

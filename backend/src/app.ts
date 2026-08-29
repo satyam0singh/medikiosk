@@ -12,6 +12,10 @@ import { consentRoutes } from './modules/consent/consent.routes';
 import { sessionRoutes } from './modules/sessions/sessions.routes';
 import { questionRoutes } from './modules/questions/questions.routes';
 import { safetyRoutes } from './modules/safety/safety.routes';
+import { documentRoutes } from './modules/documents/documents.routes';
+import { timelineRoutes } from './modules/timeline/timeline.routes';
+import { summaryRoutes } from './modules/summaries/summaries.routes';
+import { fhirRoutes } from './modules/fhir/fhir.routes';
 
 export function createApp(): Express {
   const app = express();
@@ -51,6 +55,10 @@ export function createApp(): Express {
   apiV1Router.use('/sessions', sessionRoutes);
   apiV1Router.use('/questions', questionRoutes);
   apiV1Router.use('/alerts', safetyRoutes);
+  apiV1Router.use('/documents', documentRoutes);
+  apiV1Router.use('/timeline', timelineRoutes);
+  apiV1Router.use('/summaries', summaryRoutes);
+  apiV1Router.use('/fhir', fhirRoutes);
 
   app.use(env.API_PREFIX, apiV1Router);
 

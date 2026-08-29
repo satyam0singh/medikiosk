@@ -91,4 +91,21 @@ export class EncountersController {
       next(error);
     }
   }
+
+  public static async getClinicalBriefing(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const briefing = await EncountersService.getClinicalBriefing(req.params.id as string);
+      const response: ApiResponse = {
+        success: true,
+        data: briefing,
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+        },
+      };
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
