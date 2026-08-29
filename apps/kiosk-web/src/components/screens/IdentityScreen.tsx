@@ -67,7 +67,6 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
     }
   };
 
-  // Demo synthetic patients for instant 1-tap testing
   const DEMO_PATIENTS: Patient[] = [
     {
       id: 'b0000000-0000-0000-0000-000000000001',
@@ -98,42 +97,44 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
   return (
     <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-6">
       {/* Title & Prompt Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-3xl font-extrabold text-white flex items-center gap-3">
-            <UserCheck className="w-8 h-8 text-teal-400" />
-            <span>{language === LanguageCode.HI ? 'मरीज की पहचान' : 'Patient Identification'}</span>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
+            {language === LanguageCode.HI ? 'मरीज पहचान व सत्यापन' : 'Patient Identification'}
           </h2>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
             {language === LanguageCode.HI
-              ? 'आभा कार्ड, मोबाइल नंबर या अस्पताल पंजीकरण संख्या से खोजें'
-              : 'Search via ABHA Health ID, Mobile Number, or MRN'}
+              ? 'आभा संख्या, मोबाइल नंबर या त्वरित पंजीकरण द्वारा शुरू करें'
+              : 'Search via ABHA ID, Mobile Number, or select a seeded record below'}
           </p>
         </div>
-        <AudioPromptButton text={promptText} language={language} />
+        <AudioPromptButton text={promptText} language={language} size="md" />
       </div>
 
-      {/* 1-Tap Quick Demo Selection Banner */}
-      <div className="bg-gradient-to-r from-teal-950/60 via-slate-900 to-slate-900 border border-teal-500/30 rounded-3xl p-5 mb-8 shadow-xl">
-        <div className="flex items-center gap-2 text-teal-300 font-bold text-sm mb-3">
-          <Sparkles className="w-4 h-4 text-teal-400" />
-          <span>{language === LanguageCode.HI ? 'त्वरित 1-टच डेमो मरीज चुनें:' : 'Quick 1-Touch Demo Selection:'}</span>
+      {/* 1-Tap Fast Demo Card (SIH Evaluator Convenience) */}
+      <div className="border border-teal-500/30 rounded-3xl p-6 bg-teal-500/10 mb-8 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+          <h4 className="text-xs font-black uppercase tracking-wider text-teal-700 dark:text-teal-300">
+            {language === LanguageCode.HI ? 'त्वरित डेमो मरीज (1-टैप परीक्षण)' : '1-Tap Quick Demo (Seeded Clinical Test Cases)'}
+          </h4>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {DEMO_PATIENTS.map((p) => (
             <button
               key={p.id}
+              type="button"
               onClick={() => handleSelectDemoPatient(p)}
-              className="kiosk-card p-4 rounded-2xl bg-slate-800/90 hover:bg-teal-600/20 border border-slate-700 hover:border-teal-400 flex items-center justify-between text-left group"
+              className="p-4 rounded-2xl border border-teal-500/30 bg-white dark:bg-slate-900 hover:border-teal-500 flex items-center justify-between text-left transition-all active:scale-[0.98] shadow-sm hover:shadow-md"
             >
               <div>
-                <h4 className="font-bold text-white text-base group-hover:text-teal-300">{p.fullName}</h4>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {p.gender} • {p.age} yrs • ABHA: <span className="font-mono text-teal-400">{p.abhaId}</span>
+                <h5 className="text-sm font-bold">{p.fullName}</h5>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {p.gender} • {p.age} yrs • <span className="font-mono text-teal-600 dark:text-teal-400">{p.abhaId}</span>
                 </p>
               </div>
-              <div className="w-9 h-9 rounded-xl bg-teal-500/20 group-hover:bg-teal-500 flex items-center justify-center text-teal-300 group-hover:text-slate-950 transition-colors">
-                <ArrowRight className="w-5 h-5" />
+              <div className="w-8 h-8 rounded-xl bg-teal-500 text-slate-950 flex items-center justify-center font-bold">
+                <ArrowRight className="w-4 h-4" />
               </div>
             </button>
           ))}
@@ -141,121 +142,127 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
       </div>
 
       {/* Search Input Box */}
-      <div className="bg-slate-850 border border-slate-700 rounded-3xl p-6 shadow-xl mb-6">
-        <label className="block text-sm font-bold text-slate-300 mb-2">
-          {language === LanguageCode.HI ? 'खोजें (आभा आईडी / मोबाइल नंबर / नाम)' : 'Search (ABHA ID / Phone / Name)'}
-        </label>
-        <div className="relative">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder={language === LanguageCode.HI ? 'उदा. 9876543210 या Ramesh' : 'e.g. 91-4829-1029-4820 or Ramesh'}
-            className="w-full bg-slate-900 border-2 border-slate-700 focus:border-teal-400 rounded-2xl py-4 pl-12 pr-4 text-white text-lg font-medium outline-none transition-colors"
-          />
-          <Search className="w-6 h-6 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+      <div className="relative mb-6">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+          <Search className="w-5 h-5" />
         </div>
-
-        {/* Search Results List */}
-        {isSearching && <p className="text-xs text-teal-400 mt-3 animate-pulse">Searching patient records...</p>}
-        {searchResults.length > 0 && (
-          <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
-            {searchResults.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => onPatientIdentified(p)}
-                className="w-full p-4 rounded-xl bg-slate-900 hover:bg-teal-500/20 border border-slate-700 hover:border-teal-400 flex items-center justify-between text-left"
-              >
-                <div>
-                  <h4 className="font-bold text-white">{p.fullName}</h4>
-                  <p className="text-xs text-slate-400">
-                    {p.gender} • {p.age} yrs • MRN: {p.hospitalPatientId} • ABHA: {p.abhaId || 'N/A'}
-                  </p>
-                </div>
-                <ArrowRight className="w-5 h-5 text-teal-400" />
-              </button>
-            ))}
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => handleSearch(e.target.value)}
+          placeholder={
+            language === LanguageCode.HI
+              ? 'आभा संख्या (ABHA ID), मोबाइल या नाम दर्ज करें...'
+              : 'Enter ABHA ID (e.g. 91-4829-1029-4820), Mobile, or Name...'
+          }
+          className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-medium text-sm sm:text-base outline-none focus:border-teal-500 shadow-sm"
+        />
+        {isSearching && (
+          <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+            <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </div>
 
-      {/* Quick Register New Patient Toggle */}
-      <div className="bg-slate-850/60 border border-slate-800 rounded-3xl p-6">
+      {/* Search Results */}
+      {searchResults.length > 0 && (
+        <div className="space-y-3 mb-8">
+          <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            {language === LanguageCode.HI ? 'खोज परिणाम' : 'Search Results'}
+          </h4>
+          {searchResults.map((patient) => (
+            <div
+              key={patient.id}
+              className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between shadow-sm"
+            >
+              <div>
+                <h5 className="font-bold text-slate-900 dark:text-white">{patient.fullName}</h5>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {patient.gender} • {patient.age} yrs • ABHA: <span className="font-mono text-teal-600 dark:text-teal-400">{patient.abhaId || 'N/A'}</span>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onPatientIdentified(patient)}
+                className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all"
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>{language === LanguageCode.HI ? 'चयन करें' : 'Select'}</span>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Quick Registration Collapsible */}
+      <div className="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800">
         <button
           type="button"
           onClick={() => setShowQuickRegister(!showQuickRegister)}
-          className="w-full flex items-center justify-between font-bold text-teal-300 text-sm hover:text-teal-200"
+          className="text-xs font-bold text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1.5"
         >
-          <div className="flex items-center gap-2">
-            <UserPlus className="w-5 h-5" />
-            <span>{language === LanguageCode.HI ? 'नया मरीज पंजीकरण करें (त्वरित पर्चा)' : 'Register New Patient (Quick Intake)'}</span>
-          </div>
-          <span>{showQuickRegister ? '▲' : '▼'}</span>
+          <UserPlus className="w-4 h-4" />
+          <span>
+            {showQuickRegister
+              ? (language === LanguageCode.HI ? 'पंजीकरण फॉर्म बंद करें' : 'Close Registration Form')
+              : (language === LanguageCode.HI ? 'नया मरीज त्वरित पंजीकरण करें (+)' : 'Register New Walk-in Patient (+)')}
+          </span>
         </button>
 
         {showQuickRegister && (
-          <form onSubmit={handleQuickRegister} className="mt-5 space-y-4 pt-4 border-t border-slate-700">
+          <form onSubmit={handleQuickRegister} className="mt-4 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4 shadow-md">
+            <h4 className="font-bold text-sm">
+              {language === LanguageCode.HI ? 'नया मरीज विवरण' : 'New Patient Fast Registration'}
+            </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
-                  {language === LanguageCode.HI ? 'पूरा नाम' : 'Full Name'} *
-                </label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">Full Name (पूरा नाम)</label>
                 <input
                   type="text"
                   required
                   value={newFullName}
                   onChange={(e) => setNewFullName(e.target.value)}
-                  placeholder="e.g. Ankit Sharma"
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm"
+                  placeholder="e.g. Amit Verma"
+                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-sm outline-none focus:border-teal-500"
                 />
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
-                  {language === LanguageCode.HI ? 'लिंग' : 'Gender'}
-                </label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">Age (आयु)</label>
+                <input
+                  type="number"
+                  required
+                  value={newAge}
+                  onChange={(e) => setNewAge(e.target.value)}
+                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-sm outline-none focus:border-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1">Gender (लिंग)</label>
                 <select
                   value={newGender}
                   onChange={(e) => setNewGender(e.target.value as any)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm"
+                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-sm outline-none focus:border-teal-500"
                 >
                   <option value="MALE">Male (पुरुष)</option>
                   <option value="FEMALE">Female (महिला)</option>
                   <option value="OTHER">Other (अन्य)</option>
                 </select>
               </div>
-
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
-                  {language === LanguageCode.HI ? 'आयु (वर्ष)' : 'Age (Years)'}
-                </label>
-                <input
-                  type="number"
-                  value={newAge}
-                  onChange={(e) => setNewAge(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
-                  {language === LanguageCode.HI ? 'मोबाइल नंबर' : 'Phone Number'}
-                </label>
+                <label className="block text-xs font-bold text-slate-500 mb-1">Mobile Number (मोबाइल)</label>
                 <input
                   type="text"
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm"
+                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-sm outline-none focus:border-teal-500"
                 />
               </div>
             </div>
-
             <button
               type="submit"
-              className="kiosk-btn w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold mt-2"
+              className="w-full py-3.5 bg-teal-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold text-sm shadow-md active:scale-95 transition-all"
             >
-              <span>{language === LanguageCode.HI ? 'पंजीकरण कर आगे बढ़ें' : 'Register & Proceed'}</span>
-              <ArrowRight className="w-5 h-5" />
+              {language === LanguageCode.HI ? 'पंजीकृत करें और आगे बढ़ें' : 'Register & Continue'}
             </button>
           </form>
         )}
