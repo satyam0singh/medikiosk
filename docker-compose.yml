@@ -38,7 +38,7 @@ services:
       - medikiosk-net
 
   minio:
-    image: minio/minio:RELEASE.2024-06-13T22-53-53Z
+    image: minio/minio:latest
     container_name: medikiosk-minio
     restart: unless-stopped
     ports:
@@ -59,7 +59,7 @@ services:
       - medikiosk-net
 
   create-buckets:
-    image: minio/mc:RELEASE.2024-06-13T21-48-26Z
+    image: minio/mc:latest
     container_name: medikiosk-minio-init
     depends_on:
       minio:
