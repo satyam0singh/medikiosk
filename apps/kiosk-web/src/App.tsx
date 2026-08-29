@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { ProgressBar, KioskStep } from './components/ProgressBar';
 import { WelcomeScreen } from './components/screens/WelcomeScreen';
@@ -18,6 +18,18 @@ export const App: React.FC = () => {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [activeAlert, setActiveAlert] = useState<RedFlagAlert | null>(null);
+  const [isLightMode, setIsLightMode] = useState<boolean>(() => {
+    return localStorage.getItem('medikiosk_kiosk_theme') === 'light';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('medikiosk_kiosk_theme', isLightMode ? 'light' : 'dark');
+    if (isLightMode) {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, [isLightMode]);
 
   // Step 1: Language Selection
   const handleSelectLanguage = (lang: LanguageCode) => {
@@ -67,7 +79,7 @@ export const App: React.FC = () => {
 
       setCurrentStep('INTERVIEW');
     } catch (err) {
-      console.warn('Backend encounter creation failed (using local session):', err);
+      console.warn('Backend encounter creation fallback:', err);
       setSessionId('local-demo-session-id');
       setCurrentStep('INTERVIEW');
     }
@@ -88,8 +100,12 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-teal-500 selection:text-slate-950">
-      {/* Universal Kiosk Header */}
+    <div className={`min-h-screen flex flex-col transition-colors ${
+      isLightMode
+        ? 'bg-slate-50 text-slate-900 selection:bg-teal-500 selection:text-white'
+        : 'bg-slate-950 text-slate-100 selection:bg-teal-500 selection:text-slate-950'
+    }`}>
+      {/* Universal Kiosk Header with Theme Toggle */}
       <Header
         currentLanguage={language}
         onToggleLanguage={(lang) => setLanguage(lang)}
@@ -100,13 +116,17 @@ export const App: React.FC = () => {
             patientId: patient?.id || 'manual',
             ruleId: 'MANUAL_EMERGENCY_BUTTON',
             severity: 'CRITICAL_EMERGENCY' as any,
-            alertMessage: 'Patient pressed emergency assistance button on kiosk screen.',
+            alertMessage: language === LanguageCode.HI
+              ? 'मरीज ने कियोस्क स्क्रीन पर आपातकालीन सहायता बटन दबाया है।'
+              : 'Patient pressed emergency assistance button on kiosk screen.',
             triggerFacts: [],
             isAcknowledged: false,
             createdAt: new Date().toISOString(),
           });
           setCurrentStep('RED_FLAG');
         }}
+        isLightMode={isLightMode}
+        onToggleTheme={() => setIsLightMode(!isLightMode)}
       />
 
       {/* Progress Tracker */}
@@ -141,12 +161,13 @@ export const App: React.FC = () => {
           />
         )}
 
-        {currentStep === 'INTERVIEW' && sessionId && (
+        {currentStep === 'INTERVIEW' && (
           <InterviewScreen
-            sessionId={sessionId}
+            sessionId={sessionId || 'demo-session'}
             language={language}
             onInterviewCompleted={() => setCurrentStep('DOCUMENTS')}
             onRedFlagTriggered={handleRedFlagTriggered}
+            isLightMode={isLightMode}
           />
         )}
 

@@ -40,6 +40,18 @@ export const App: React.FC = () => {
   const [alerts, setAlerts] = useState<RedFlagAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFhirModalOpen, setIsFhirModalOpen] = useState(false);
+  const [isLightMode, setIsLightMode] = useState<boolean>(() => {
+    return localStorage.getItem('medikiosk_doctor_theme') === 'light';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('medikiosk_doctor_theme', isLightMode ? 'light' : 'dark');
+    if (isLightMode) {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, [isLightMode]);
 
   const fetchBriefing = async (encId: string) => {
     setIsLoading(true);
@@ -107,7 +119,7 @@ export const App: React.FC = () => {
       const allAlerts = await DoctorApi.listAlerts();
       setAlerts(allAlerts);
     } catch (err) {
-      // Ignore in mock
+      // Ignore
     }
   };
 
@@ -117,11 +129,17 @@ export const App: React.FC = () => {
   }, [selectedEncounterId]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
-      {/* Header */}
+    <div className={`min-h-screen flex flex-col transition-colors ${
+      isLightMode
+        ? 'bg-slate-50 text-slate-900 selection:bg-sky-500 selection:text-white'
+        : 'bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-slate-950'
+    }`}>
+      {/* Header with Theme Toggle */}
       <DoctorHeader
         alerts={alerts}
         onOpenAlerts={() => {}}
+        isLightMode={isLightMode}
+        onToggleTheme={() => setIsLightMode(!isLightMode)}
       />
 
       {/* Main Split Layout */}
@@ -131,10 +149,11 @@ export const App: React.FC = () => {
           queue={queue}
           selectedEncounterId={selectedEncounterId}
           onSelectEncounter={(encId) => setSelectedEncounterId(encId)}
+          isLightMode={isLightMode}
         />
 
         {/* Center/Right: Clinical Briefing View */}
-        <main className="flex-1 flex flex-col bg-slate-950 overflow-hidden">
+        <main className={`flex-1 flex flex-col overflow-hidden ${isLightMode ? 'bg-slate-50' : 'bg-slate-950'}`}>
           {isLoading ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="w-10 h-10 border-4 border-sky-500 border-t-transparent rounded-full animate-spin" />
@@ -144,6 +163,7 @@ export const App: React.FC = () => {
               briefing={briefing}
               onRefresh={() => fetchBriefing(selectedEncounterId)}
               onOpenFhirExport={() => setIsFhirModalOpen(true)}
+              isLightMode={isLightMode}
             />
           ) : (
             <div className="p-8 text-center text-slate-400">Select a patient from the queue.</div>

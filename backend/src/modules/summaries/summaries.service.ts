@@ -135,6 +135,12 @@ export class SummariesService {
     encounterId: string,
     data: VerifySummaryInput
   ): Promise<{ summary: ControlledClinicalSummary; reviewId: string }> {
+    // Ensure summary exists before verification
+    let existingSummary = await this.getByEncounter(encounterId);
+    if (!existingSummary) {
+      existingSummary = await this.generateSummary(encounterId);
+    }
+
     return await withTransaction(async (client) => {
       // 1. Fetch existing summary
       const sumRes = await client.query(
