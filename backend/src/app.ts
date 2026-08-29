@@ -5,6 +5,13 @@ import { env } from './config/env';
 import { logger } from './middleware/logger';
 import { errorHandler, AppError } from './middleware/errorHandler';
 import { healthRoutes } from './modules/health/health.routes';
+import { authRoutes } from './modules/auth/auth.routes';
+import { patientRoutes } from './modules/patients/patients.routes';
+import { encounterRoutes } from './modules/encounters/encounters.routes';
+import { consentRoutes } from './modules/consent/consent.routes';
+import { sessionRoutes } from './modules/sessions/sessions.routes';
+import { questionRoutes } from './modules/questions/questions.routes';
+import { safetyRoutes } from './modules/safety/safety.routes';
 
 export function createApp(): Express {
   const app = express();
@@ -37,6 +44,13 @@ export function createApp(): Express {
   // Base API v1 Routes
   const apiV1Router = express.Router();
   apiV1Router.use('/health', healthRoutes);
+  apiV1Router.use('/auth', authRoutes);
+  apiV1Router.use('/patients', patientRoutes);
+  apiV1Router.use('/encounters', encounterRoutes);
+  apiV1Router.use('/consents', consentRoutes);
+  apiV1Router.use('/sessions', sessionRoutes);
+  apiV1Router.use('/questions', questionRoutes);
+  apiV1Router.use('/alerts', safetyRoutes);
 
   app.use(env.API_PREFIX, apiV1Router);
 

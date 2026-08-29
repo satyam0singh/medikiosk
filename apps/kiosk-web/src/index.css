@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 text-slate-100;
+  }
+}
+
+/* Touch friendly tap animations */
+.kiosk-card {
+  @apply transition-all duration-200 active:scale-95 cursor-pointer touch-manipulation;
+}
+
+.kiosk-btn {
+  @apply min-h-[56px] px-6 py-3 rounded-2xl font-semibold flex items-center justify-center gap-3 transition-all duration-150 active:scale-95 shadow-lg;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(20, 184, 166, 0.4);
+  border-radius: 4px;
+}
