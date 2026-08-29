@@ -1,0 +1,490 @@
+/**
+ * MediKiosk Core Shared Domain Types & Contracts
+ * Authoritative contracts for SIH26047 - LexCorps
+ */
+export declare enum UserRole {
+    PATIENT = "PATIENT",
+    PHYSICIAN = "PHYSICIAN",
+    TRIAGE = "TRIAGE",
+    AYUSH_PRACTITIONER = "AYUSH_PRACTITIONER",
+    ADMIN = "ADMIN",
+    IT_ADMIN = "IT_ADMIN"
+}
+export declare enum ProvenanceType {
+    PATIENT_REPORTED = "PATIENT_REPORTED",
+    DOCUMENT_OCR = "DOCUMENT_OCR",
+    AI_EXTRACTED = "AI_EXTRACTED",
+    SYSTEM_RULE = "SYSTEM_RULE",
+    PHYSICIAN_VERIFIED = "PHYSICIAN_VERIFIED"
+}
+export declare enum VerificationStatus {
+    PENDING = "PENDING",
+    VERIFIED = "VERIFIED",
+    REJECTED = "REJECTED",
+    MODIFIED = "MODIFIED"
+}
+export declare enum ConfidenceLevel {
+    HIGH = "HIGH",// >= 0.85
+    MEDIUM = "MEDIUM",// 0.60 - 0.84
+    LOW = "LOW"
+}
+export declare enum EncounterStatus {
+    CREATED = "CREATED",
+    IN_PROGRESS = "IN_PROGRESS",
+    AWAITING_PHYSICIAN = "AWAITING_PHYSICIAN",
+    VERIFIED = "VERIFIED",
+    EXPORTED = "EXPORTED",
+    COMPLETED = "COMPLETED",
+    CANCELLED = "CANCELLED"
+}
+export declare enum ClinicalSessionState {
+    CREATED = "CREATED",
+    IDENTIFICATION = "IDENTIFICATION",
+    CONSENT_PENDING = "CONSENT_PENDING",
+    CONSENTED = "CONSENTED",
+    LANGUAGE_SELECTED = "LANGUAGE_SELECTED",
+    HISTORY_ACTIVE = "HISTORY_ACTIVE",
+    SAFETY_REVIEW = "SAFETY_REVIEW",
+    DOCUMENT_CAPTURE = "DOCUMENT_CAPTURE",
+    DOCUMENT_PROCESSING = "DOCUMENT_PROCESSING",
+    VALIDATION = "VALIDATION",
+    SUMMARY_GENERATION = "SUMMARY_GENERATION",
+    PHYSICIAN_REVIEW = "PHYSICIAN_REVIEW",
+    VERIFIED = "VERIFIED",
+    EXPORTED = "EXPORTED",
+    COMPLETED = "COMPLETED",
+    FAILED = "FAILED"
+}
+export declare enum ConsentStatus {
+    PENDING = "PENDING",
+    GRANTED = "GRANTED",
+    REVOKED = "REVOKED",
+    EXPIRED = "EXPIRED"
+}
+export declare enum DocumentType {
+    PRESCRIPTION = "PRESCRIPTION",
+    LAB_REPORT = "LAB_REPORT",
+    DISCHARGE_SUMMARY = "DISCHARGE_SUMMARY",
+    RADIOLOGY_REPORT = "RADIOLOGY_REPORT",
+    OTHER = "OTHER"
+}
+export declare enum DocumentProcessingState {
+    UPLOADED = "UPLOADED",
+    VALIDATED = "VALIDATED",
+    PROCESSING = "PROCESSING",
+    OCR_COMPLETE = "OCR_COMPLETE",
+    EXTRACTION_COMPLETE = "EXTRACTION_COMPLETE",
+    COMPLETED = "COMPLETED",
+    LOW_CONFIDENCE = "LOW_CONFIDENCE",
+    REVIEW_REQUIRED = "REVIEW_REQUIRED",
+    FAILED = "FAILED"
+}
+export declare enum RedFlagSeverity {
+    CRITICAL_EMERGENCY = "CRITICAL_EMERGENCY",// Immediate clinical staff alert
+    PRIORITY_URGENT = "PRIORITY_URGENT",// Priority queue placement
+    WARNING = "WARNING",// Highlight in physician dashboard
+    INFO = "INFO"
+}
+export declare enum TimelineEventType {
+    CHIEF_COMPLAINT = "CHIEF_COMPLAINT",
+    SYMPTOM_ONSET = "SYMPTOM_ONSET",
+    MEDICATION_STARTED = "MEDICATION_STARTED",
+    MEDICATION_STOPPED = "MEDICATION_STOPPED",
+    LAB_INVESTIGATION = "LAB_INVESTIGATION",
+    HOSPITALIZATION = "HOSPITALIZATION",
+    SURGERY = "SURGERY",
+    DIAGNOSIS = "DIAGNOSIS",
+    ALLERGY_REACTION = "ALLERGY_REACTION",
+    CONSULTATION = "CONSULTATION"
+}
+export declare enum LanguageCode {
+    HI = "hi",// Hindi
+    EN = "en",// English
+    HINGLISH = "hinglish",
+    MR = "mr",// Marathi
+    TA = "ta",// Tamil
+    TE = "te",// Telugu
+    BN = "bn"
+}
+export interface User {
+    id: string;
+    email: string;
+    fullName: string;
+    roles: UserRole[];
+    isActive: boolean;
+    hospitalId?: string;
+    department?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface Patient {
+    id: string;
+    abhaId?: string;
+    hospitalPatientId?: string;
+    fullName: string;
+    gender: 'MALE' | 'FEMALE' | 'OTHER';
+    dateOfBirth?: string;
+    age?: number;
+    contactNumber?: string;
+    preferredLanguage: LanguageCode;
+    address?: {
+        line1?: string;
+        city?: string;
+        state?: string;
+        pincode?: string;
+    };
+    createdAt: string;
+    updatedAt: string;
+}
+export interface ConsentRecord {
+    id: string;
+    patientId: string;
+    encounterId?: string;
+    status: ConsentStatus;
+    scope: string[];
+    version: string;
+    capturedVia: 'VOICE' | 'TOUCH_SCREEN' | 'PAPER_SIGNED';
+    grantedAt: string;
+    revokedAt?: string;
+    ipAddress?: string;
+    auditSignature?: string;
+}
+export interface Encounter {
+    id: string;
+    patientId: string;
+    physicianId?: string;
+    status: EncounterStatus;
+    department: string;
+    encounterType: 'OPD_GENERAL' | 'OPD_AYUSH' | 'EMERGENCY' | 'TELECONSULT';
+    chiefComplaintSummary?: string;
+    startedAt: string;
+    completedAt?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface ClinicalSession {
+    id: string;
+    encounterId: string;
+    patientId: string;
+    currentState: ClinicalSessionState;
+    selectedLanguage: LanguageCode;
+    isDegradedMode: boolean;
+    metadata: Record<string, unknown>;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface QuestionOption {
+    id: string;
+    label: Record<LanguageCode, string>;
+    value: string;
+    iconName?: string;
+}
+export interface ClinicalQuestion {
+    id: string;
+    code: string;
+    section: 'CHIEF_COMPLAINT' | 'HPI' | 'PAST_HISTORY' | 'MEDICATIONS' | 'ALLERGIES' | 'AYUSH' | 'LIFESTYLE';
+    prompt: Record<LanguageCode, string>;
+    audioUrl?: Record<LanguageCode, string>;
+    inputType: 'SINGLE_CHOICE' | 'MULTI_CHOICE' | 'VOICE_OR_TOUCH' | 'TEXT' | 'NUMERIC_SCALE' | 'BODY_LOCATION';
+    options?: QuestionOption[];
+    targetField: string;
+    isRequired: boolean;
+    conditions?: Array<{
+        field: string;
+        operator: 'EQUALS' | 'NOT_EQUALS' | 'CONTAINS' | 'EXISTS';
+        value: unknown;
+    }>;
+}
+export interface SessionAnswer {
+    id: string;
+    sessionId: string;
+    questionId: string;
+    rawText?: string;
+    selectedOptions?: string[];
+    audioRecordId?: string;
+    confidence: number;
+    sourceType: ProvenanceType;
+    capturedAt: string;
+}
+export interface ClinicalFact {
+    id: string;
+    patientId: string;
+    encounterId: string;
+    field: string;
+    value: unknown;
+    normalizedValue?: unknown;
+    sourceType: ProvenanceType;
+    sourceId?: string;
+    sourcePage?: number;
+    confidence: number;
+    verificationStatus: VerificationStatus;
+    verifiedByUserId?: string;
+    verifiedAt?: string;
+    rejectionReason?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface SymptomFact {
+    name: string;
+    location?: string;
+    character?: string;
+    severityScale?: number;
+    onsetDuration?: string;
+    onsetDate?: string;
+    frequency?: string;
+    aggravatingFactors?: string[];
+    relievingFactors?: string[];
+    associatedSymptoms?: string[];
+    provenance: {
+        sourceType: ProvenanceType;
+        sourceId?: string;
+        confidence: number;
+        verificationStatus: VerificationStatus;
+    };
+}
+export interface MedicationFact {
+    id?: string;
+    drugName: string;
+    dosage?: string;
+    route?: string;
+    frequency?: string;
+    duration?: string;
+    indication?: string;
+    prescribedDate?: string;
+    isCurrent: boolean;
+    provenance: {
+        sourceType: ProvenanceType;
+        sourceId?: string;
+        sourcePage?: number;
+        confidence: number;
+        verificationStatus: VerificationStatus;
+    };
+}
+export interface AllergyFact {
+    id?: string;
+    allergen: string;
+    allergyType: 'DRUG' | 'FOOD' | 'ENVIRONMENTAL' | 'OTHER';
+    reaction?: string;
+    severity: 'MILD' | 'MODERATE' | 'SEVERE';
+    provenance: {
+        sourceType: ProvenanceType;
+        confidence: number;
+        verificationStatus: VerificationStatus;
+    };
+}
+export interface InvestigationFact {
+    id?: string;
+    testName: string;
+    category?: 'BIOCHEMISTRY' | 'HEMATOLOGY' | 'RADIOLOGY' | 'PATHOLOGY';
+    testDate?: string;
+    resultValue?: string;
+    unit?: string;
+    referenceRange?: string;
+    isAbnormal?: boolean;
+    provenance: {
+        sourceType: ProvenanceType;
+        sourceId?: string;
+        sourcePage?: number;
+        confidence: number;
+        verificationStatus: VerificationStatus;
+    };
+}
+export interface AyushAssessment {
+    prakriti?: {
+        vataScore: number;
+        pittaScore: number;
+        kaphaScore: number;
+        dominantPrakriti: 'VATA' | 'PITTA' | 'KAPHA' | 'VATA_PITTA' | 'PITTA_KAPHA' | 'VATA_KAPHA' | 'TRIDOSHA';
+    };
+    vikriti?: {
+        doshaImbalance: string[];
+        manifestation: string;
+    };
+    ashtavidha?: {
+        nadi?: string;
+        mutra?: string;
+        mala?: string;
+        jihwa?: string;
+        shabda?: string;
+        sparsha?: string;
+        drik?: string;
+        akriti?: string;
+    };
+    dashavidha?: {
+        dushya?: string;
+        desha?: string;
+        bala?: string;
+        kala?: string;
+        anala?: 'MANDA' | 'TIKSHNA' | 'VISHAMA' | 'SAMA';
+        prakriti?: string;
+        vaya?: 'BALA' | 'MADHYA' | 'VRIDDHA';
+        sattva?: 'PRAVARA' | 'MADHYAMA' | 'AVARA';
+        satmya?: string;
+        ahara?: 'PRAVARA' | 'MADHYAMA' | 'AVARA';
+    };
+    aharaVihara?: {
+        dietaryHabits?: string;
+        sleepPattern?: string;
+        physicalActivity?: string;
+        bowelHabits?: string;
+    };
+    verificationStatus: VerificationStatus;
+}
+export interface DocumentRecord {
+    id: string;
+    patientId: string;
+    encounterId: string;
+    fileName: string;
+    mimeType: string;
+    fileSizeBytes: number;
+    storageKey: string;
+    documentType: DocumentType;
+    processingState: DocumentProcessingState;
+    pageCount?: number;
+    uploadedAt: string;
+    processedAt?: string;
+    errorMessage?: string;
+}
+export interface DocumentExtractionResult {
+    id: string;
+    documentId: string;
+    rawOcrText: string;
+    classifiedType: DocumentType;
+    overallConfidence: number;
+    extractedEntities: {
+        medications: MedicationFact[];
+        investigations: InvestigationFact[];
+        allergies: AllergyFact[];
+        diagnoses: string[];
+        dates: string[];
+    };
+    lowConfidenceReasons?: string[];
+    status: VerificationStatus;
+    createdAt: string;
+}
+export interface RedFlagRule {
+    id: string;
+    code: string;
+    title: string;
+    description: string;
+    severity: RedFlagSeverity;
+    category: 'CARDIOLOGY' | 'RESPIRATORY' | 'NEUROLOGY' | 'SURGICAL' | 'PEDIATRIC' | 'OBSTETRIC' | 'GENERAL';
+    isEnabled: boolean;
+    deterministicLogic: string;
+}
+export interface RedFlagAlert {
+    id: string;
+    encounterId: string;
+    patientId: string;
+    ruleId: string;
+    severity: RedFlagSeverity;
+    alertMessage: string;
+    triggerFacts: Array<{
+        field: string;
+        value: unknown;
+        sourceType: ProvenanceType;
+    }>;
+    isAcknowledged: boolean;
+    acknowledgedByUserId?: string;
+    acknowledgedAt?: string;
+    createdAt: string;
+}
+export interface TimelineEvent {
+    id: string;
+    patientId: string;
+    encounterId?: string;
+    eventDate?: string;
+    isDateEstimated: boolean;
+    eventType: TimelineEventType;
+    title: string;
+    description: string;
+    sourceType: ProvenanceType;
+    sourceDocumentId?: string;
+    sourcePage?: number;
+    confidence: number;
+    verificationStatus: VerificationStatus;
+    hasConflict: boolean;
+    conflictDetails?: string;
+    metadata?: Record<string, unknown>;
+    createdAt: string;
+}
+export interface ClinicalSummary {
+    id: string;
+    encounterId: string;
+    patientId: string;
+    chiefComplaint: string;
+    hpiNarrative: string;
+    symptoms: SymptomFact[];
+    currentMedications: MedicationFact[];
+    allergies: AllergyFact[];
+    investigations: InvestigationFact[];
+    timeline: TimelineEvent[];
+    redFlags: RedFlagAlert[];
+    ayushAssessment?: AyushAssessment;
+    completenessScore: number;
+    unansweredRequiredFields: string[];
+    conflictingFactsCount: number;
+    overallConfidence: number;
+    isVerifiedByPhysician: boolean;
+    generatedAt: string;
+}
+export interface PhysicianReviewRecord {
+    id: string;
+    encounterId: string;
+    physicianId: string;
+    summaryId: string;
+    isApproved: boolean;
+    editedFields: Record<string, {
+        oldValue: unknown;
+        newValue: unknown;
+    }>;
+    clinicalNotes?: string;
+    triageClassification?: string;
+    reviewedAt: string;
+}
+export interface AuditLogEntry {
+    id: string;
+    actorId?: string;
+    actorRole?: UserRole;
+    action: string;
+    patientId?: string;
+    encounterId?: string;
+    ipAddress?: string;
+    userAgent?: string;
+    payload?: Record<string, unknown>;
+    timestamp: string;
+}
+export interface ApiResponse<T = unknown> {
+    success: boolean;
+    data?: T;
+    error?: {
+        code: string;
+        message: string;
+        details?: unknown;
+    };
+    meta?: {
+        timestamp: string;
+        requestId?: string;
+        version: string;
+    };
+}
+export interface DependencyHealthStatus {
+    status: 'UP' | 'DOWN' | 'DEGRADED';
+    latencyMs?: number;
+    message?: string;
+    details?: Record<string, unknown>;
+}
+export interface SystemHealthReport {
+    status: 'HEALTHY' | 'UNHEALTHY' | 'DEGRADED';
+    version: string;
+    environment: string;
+    uptimeSeconds: number;
+    timestamp: string;
+    dependencies: {
+        database: DependencyHealthStatus;
+        redis: DependencyHealthStatus;
+        storage: DependencyHealthStatus;
+        aiProviders?: Record<string, DependencyHealthStatus>;
+    };
+}
+//# sourceMappingURL=index.d.ts.map

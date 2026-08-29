@@ -1,0 +1,17 @@
+{
+  "name": "@medikiosk/fhir-mapper",
+  "version": "0.1.0",
+  "description": "FHIR R4 transformation layer and ABDM interoperability mapper for MediKiosk",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@medikiosk/shared-types": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

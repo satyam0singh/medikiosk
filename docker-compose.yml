@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: medikiosk-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: medikiosk_user
+      POSTGRES_PASSWORD: medikiosk_password
+      POSTGRES_DB: medikiosk_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medikiosk_user -d medikiosk_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - medikiosk-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: medikiosk-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - medikiosk-net
+
+  minio:
+    image: minio/minio:RELEASE.2024-06-13T22-53-53Z
+    container_name: medikiosk-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: medikiosk_minio_admin
+      MINIO_ROOT_PASSWORD: medikiosk_minio_secret_key
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - medikiosk-net
+
+  create-buckets:
+    image: minio/mc:RELEASE.2024-06-13T21-48-26Z
+    container_name: medikiosk-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 medikiosk_minio_admin medikiosk_minio_secret_key;
+      /usr/bin/mc mb myminio/medikiosk-documents --ignore-existing;
+      /usr/bin/mc mb myminio/medikiosk-audio --ignore-existing;
+      exit 0;
+      "
+    networks:
+      - medikiosk-net
+
+  backend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.backend
+    container_name: medikiosk-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: medikiosk_db
+      DB_USER: medikiosk_user
+      DB_PASSWORD: medikiosk_password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: medikiosk_minio_admin
+      MINIO_SECRET_KEY: medikiosk_minio_secret_key
+      MINIO_BUCKET_DOCUMENTS: medikiosk-documents
+      MINIO_BUCKET_AUDIO: medikiosk-audio
+      JWT_SECRET: super_secret_jwt_dev_key_change_in_production_min_32_bytes_long
+      ASR_PROVIDER: mock
+      OCR_PROVIDER: mock
+      LLM_PROVIDER: mock
+      TTS_PROVIDER: mock
+      NER_PROVIDER: mock
+      FHIR_MODE: mock
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - medikiosk-net
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  medikiosk-net:
+    driver: bridge

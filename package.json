@@ -1,0 +1,35 @@
+{
+  "name": "medikiosk",
+  "version": "0.1.0",
+  "description": "Pre-consultation clinical intake and information-structuring platform (SIH26047 - LexCorps)",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "backend"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspace=backend",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev:backend": "npm run dev --workspace=backend",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "keywords": [
+    "medikiosk",
+    "sih26047",
+    "healthcare",
+    "ayush",
+    "clinical-intake",
+    "fhir"
+  ],
+  "author": "LexCorps",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "typescript": "^5.7.3"
+  }
+}

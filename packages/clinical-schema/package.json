@@ -1,0 +1,18 @@
+{
+  "name": "@medikiosk/clinical-schema",
+  "version": "0.1.0",
+  "description": "Zod boundary validation and clinical schemas for MediKiosk",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@medikiosk/shared-types": "*",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
