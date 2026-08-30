@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
-import { LanguageCode } from '@medikiosk/shared-types';
+import { LanguageCode, INDIC_LANGUAGES } from '@medikiosk/shared-types';
 
 interface AudioPromptButtonProps {
   text: string;
@@ -16,6 +16,9 @@ export const AudioPromptButton: React.FC<AudioPromptButtonProps> = ({
   size = 'md',
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const langInfo = INDIC_LANGUAGES.find((l) => l.code === language);
+  const speechTag = langInfo?.speechTag || (language === LanguageCode.HI ? 'hi-IN' : 'en-IN');
 
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -33,7 +36,7 @@ export const AudioPromptButton: React.FC<AudioPromptButtonProps> = ({
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language === LanguageCode.HI ? 'hi-IN' : 'en-IN';
+    utterance.lang = speechTag;
     utterance.rate = 0.95; // Slightly slower for low-literacy clarity
 
     utterance.onstart = () => setIsPlaying(true);
@@ -49,6 +52,33 @@ export const AudioPromptButton: React.FC<AudioPromptButtonProps> = ({
     lg: 'px-6 py-3.5 text-base',
   };
 
+  const getButtonLabel = () => {
+    switch (language) {
+      case LanguageCode.HI:
+        return 'बोलकर सुनें';
+      case LanguageCode.BN:
+        return 'শুনুন';
+      case LanguageCode.MR:
+        return 'ऐका';
+      case LanguageCode.TA:
+        return 'கேளுங்கள்';
+      case LanguageCode.TE:
+        return 'వినండి';
+      case LanguageCode.GU:
+        return 'સાંભળો';
+      case LanguageCode.KN:
+        return 'ಆಲಿಸಿ';
+      case LanguageCode.ML:
+        return 'കേൾക്കുക';
+      case LanguageCode.PA:
+        return 'ਸੁਣੋ';
+      case LanguageCode.OR:
+        return 'ଶୁଣନ୍ତୁ';
+      default:
+        return 'Listen';
+    }
+  };
+
   return (
     <button
       type="button"
@@ -58,10 +88,11 @@ export const AudioPromptButton: React.FC<AudioPromptButtonProps> = ({
           ? 'bg-amber-500/20 border-amber-500/40 text-amber-300 animate-pulse'
           : 'bg-teal-500/10 hover:bg-teal-500/20 border-teal-500/30 text-teal-300'
       } ${sizeClasses[size]} ${className}`}
-      title={language === LanguageCode.HI ? 'आवाज सुनें' : 'Listen audio'}
+      title={`Listen in ${langInfo?.name || 'Language'}`}
     >
       {isPlaying ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-      <span>{language === LanguageCode.HI ? 'बोलकर सुनें' : 'Listen'}</span>
+      <span>{getButtonLabel()}</span>
     </button>
   );
 };
+

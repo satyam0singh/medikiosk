@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HeartPulse, Globe, AlertTriangle, Sun, Moon, Clock, ShieldCheck } from 'lucide-react';
-import { LanguageCode } from '@medikiosk/shared-types';
+import { LanguageCode, INDIC_LANGUAGES } from '@medikiosk/shared-types';
+import { LanguageSelectorModal } from './LanguageSelectorModal';
 
 interface HeaderProps {
   currentLanguage: LanguageCode;
@@ -18,6 +19,9 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleTheme,
 }) => {
   const [time, setTime] = useState<string>('');
+  const [showLangModal, setShowLangModal] = useState<boolean>(false);
+
+  const activeLangInfo = INDIC_LANGUAGES.find((l) => l.code === currentLanguage);
 
   useEffect(() => {
     const updateTime = () => {
@@ -98,41 +102,29 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         {/* Language Switcher */}
-        <div
-          className={`flex items-center rounded-md p-0.5 border ${
-            isLightMode ? 'bg-[#F7F6F3] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
-          }`}
-        >
+        <div className="relative">
           <button
             type="button"
-            onClick={() => onToggleLanguage(LanguageCode.EN)}
-            className={`px-2 sm:px-2.5 py-1 min-h-[36px] rounded text-xs font-medium flex items-center gap-1 transition-all ${
-              currentLanguage === LanguageCode.EN
-                ? isLightMode
-                  ? 'bg-[#FFFFFF] text-[#111111] shadow-xs'
-                  : 'bg-[#282D3D] text-[#FFFFFF]'
-                : isLightMode
-                ? 'text-[#777777] hover:text-[#111111]'
-                : 'text-[#888888] hover:text-[#FFFFFF]'
+            onClick={() => setShowLangModal(true)}
+            className={`px-2.5 sm:px-3 py-1.5 min-h-[38px] rounded-md border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              isLightMode
+                ? 'bg-[#F7F6F3] border-[#EAEAEA] text-[#111111] hover:bg-[#EAEAEA]'
+                : 'bg-[#1A1D27] border-[#2A2E3D] text-[#F4F4F6] hover:bg-[#222634]'
             }`}
           >
-            <Globe className="w-3 h-3" /> EN
+            <Globe className="w-3.5 h-3.5 text-[#1F6C9F] dark:text-[#70B8FF]" />
+            <span>{activeLangInfo ? activeLangInfo.nativeName : 'Language'}</span>
+            <span className="text-[10px] text-[#787774] dark:text-[#8E94A4]">▼</span>
           </button>
-          <button
-            type="button"
-            onClick={() => onToggleLanguage(LanguageCode.HI)}
-            className={`px-2 sm:px-2.5 py-1 min-h-[36px] rounded text-xs font-medium flex items-center gap-1 transition-all ${
-              currentLanguage === LanguageCode.HI
-                ? isLightMode
-                  ? 'bg-[#FFFFFF] text-[#111111] shadow-xs'
-                  : 'bg-[#282D3D] text-[#FFFFFF]'
-                : isLightMode
-                ? 'text-[#777777] hover:text-[#111111]'
-                : 'text-[#888888] hover:text-[#FFFFFF]'
-            }`}
-          >
-            <Globe className="w-3 h-3" /> हिंदी
-          </button>
+
+          {showLangModal && (
+            <LanguageSelectorModal
+              currentLanguage={currentLanguage}
+              onSelectLanguage={onToggleLanguage}
+              onClose={() => setShowLangModal(false)}
+              isLightMode={isLightMode}
+            />
+          )}
         </div>
 
         {/* Emergency Triage Alert Button */}

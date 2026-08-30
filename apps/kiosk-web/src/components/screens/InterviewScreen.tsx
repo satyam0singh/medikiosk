@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mic, ArrowRight, CheckCircle, AlertTriangle } from 'lucide-react';
-import { ClinicalQuestion, LanguageCode, ProvenanceType, RedFlagAlert } from '@medikiosk/shared-types';
+import { ClinicalQuestion, LanguageCode, ProvenanceType, RedFlagAlert, INDIC_LANGUAGES } from '@medikiosk/shared-types';
 import { AudioPromptButton } from '../AudioPromptButton';
 import { KioskApi } from '../../services/api';
 
@@ -195,13 +195,74 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
     }
   };
 
-  const handleSimulateVoice = () => {
-    setIsVoiceRecording(true);
-    setTimeout(() => {
-      setIsVoiceRecording(false);
-      const defaultOpt = currentQuestion?.options?.[0]?.value || 'few_hours_ago';
-      handleSubmitAnswer(defaultOpt);
-    }, 1200);
+  const langInfo = INDIC_LANGUAGES.find((l) => l.code === language);
+  const speechTag = langInfo?.speechTag || (language === LanguageCode.HI ? 'hi-IN' : 'en-IN');
+
+  const handleStartVoice = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      // Fallback simulation if browser does not support SpeechRecognition API
+      setIsVoiceRecording(true);
+      setTimeout(() => {
+        setIsVoiceRecording(false);
+        const defaultOpt = currentQuestion?.options?.[0]?.value || 'few_hours_ago';
+        handleSubmitAnswer(defaultOpt);
+      }, 1200);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = speechTag;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setIsVoiceRecording(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        setIsVoiceRecording(false);
+        const transcript = event.results[0][0].transcript;
+        console.log(`ASR (${speechTag}) transcript:`, transcript);
+
+        // Match against options or fallback
+        const matched = currentQuestion?.options?.find(
+          (o) =>
+            o.label?.en?.toLowerCase().includes(transcript.toLowerCase()) ||
+            o.label?.hi?.toLowerCase().includes(transcript.toLowerCase())
+        );
+
+        if (matched) {
+          handleSubmitAnswer(matched.value);
+        } else {
+          const defaultOpt = currentQuestion?.options?.[0]?.value || 'few_hours_ago';
+          handleSubmitAnswer(defaultOpt);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.warn('Speech recognition error, falling back:', event.error);
+        setIsVoiceRecording(false);
+        const defaultOpt = currentQuestion?.options?.[0]?.value || 'few_hours_ago';
+        handleSubmitAnswer(defaultOpt);
+      };
+
+      recognition.onend = () => {
+        setIsVoiceRecording(false);
+      };
+
+      recognition.start();
+    } catch (e) {
+      console.warn('Speech recognition start failed, using fallback:', e);
+      setIsVoiceRecording(true);
+      setTimeout(() => {
+        setIsVoiceRecording(false);
+        const defaultOpt = currentQuestion?.options?.[0]?.value || 'few_hours_ago';
+        handleSubmitAnswer(defaultOpt);
+      }, 1200);
+    }
   };
 
   if (isLoading) {
@@ -356,11 +417,21 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
       <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 mt-auto shrink-0">
         <button
           type="button"
-          onClick={handleSimulateVoice}
-          className="flex-1 py-3 px-4 min-h-[48px] rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#666666] dark:text-[#8E94A4] font-medium text-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+          onClick={handleStartVoice}
+          className={`flex-1 py-3 px-4 min-h-[48px] rounded-lg border font-medium text-xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer ${
+            isVoiceRecording
+              ? 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse'
+              : 'border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#666666] dark:text-[#8E94A4]'
+          }`}
         >
           <Mic className="w-3.5 h-3.5" />
-          <span>{language === LanguageCode.HI ? 'आवाज से उत्तर दें' : 'Speak Answer'}</span>
+          <span>
+            {isVoiceRecording
+              ? `${langInfo?.name || 'Voice'} Listening...`
+              : language === LanguageCode.HI
+              ? 'आवाज से उत्तर दें'
+              : `Speak (${langInfo?.name || 'Voice'})`}
+          </span>
         </button>
 
         <button

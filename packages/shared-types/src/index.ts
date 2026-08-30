@@ -114,14 +114,68 @@ export enum TimelineEventType {
 }
 
 export enum LanguageCode {
-  HI = 'hi',   // Hindi
-  EN = 'en',   // English
-  HINGLISH = 'hinglish',
-  MR = 'mr',   // Marathi
-  TA = 'ta',   // Tamil
-  TE = 'te',   // Telugu
-  BN = 'bn',   // Bengali
+  HI = 'hi',             // Hindi (हिन्दी)
+  EN = 'en',             // English
+  HINGLISH = 'hinglish', // Hinglish (हिंग्लिश)
+  BN = 'bn',             // Bengali (বাংলা)
+  MR = 'mr',             // Marathi (मराठी)
+  TE = 'te',             // Telugu (తెలుగు)
+  TA = 'ta',             // Tamil (தமிழ்)
+  GU = 'gu',             // Gujarati (ગુજરાતી)
+  UR = 'ur',             // Urdu (اردو)
+  KN = 'kn',             // Kannada (ಕನ್ನಡ)
+  OR = 'or',             // Odia (ଓଡ଼ିଆ)
+  ML = 'ml',             // Malayalam (മലയാളം)
+  PA = 'pa',             // Punjabi (ਪੰਜਾਬੀ)
+  AS = 'as',             // Assamese (অসমীয়া)
+  MAI = 'mai',           // Maithili (मैथिली)
+  SAT = 'sat',           // Santali (ᱥᱟᱱᱛᱟᱲᱤ)
+  KS = 'ks',             // Kashmiri (کٲشُر)
+  NE = 'ne',             // Nepali (नेपाली)
+  KOK = 'kok',           // Konkani (कोंकणी)
+  SD = 'sd',             // Sindhi (سنڌي)
+  DGO = 'dgo',           // Dogri (डोगरी)
+  MNI = 'mni',           // Manipuri (ꯃꯤꯇꯩꯂꯣꯟ)
+  BRX = 'brx',           // Bodo (बड़ो)
+  SA = 'sa',             // Sanskrit (संस्कृतम्)
 }
+
+export interface IndicLanguageInfo {
+  code: LanguageCode;
+  name: string;
+  nativeName: string;
+  script: string;
+  region: string;
+  speechTag: string;
+  bhashiniCode: string;
+}
+
+export const INDIC_LANGUAGES: IndicLanguageInfo[] = [
+  { code: LanguageCode.HI, name: 'Hindi', nativeName: 'हिन्दी', script: 'Devanagari', region: 'North / Central India', speechTag: 'hi-IN', bhashiniCode: 'hi' },
+  { code: LanguageCode.EN, name: 'English', nativeName: 'English (Indian)', script: 'Latin', region: 'Pan-India', speechTag: 'en-IN', bhashiniCode: 'en' },
+  { code: LanguageCode.HINGLISH, name: 'Hinglish', nativeName: 'Hinglish (हिंग्लिश)', script: 'Latin / Devanagari', region: 'Urban Multilingual', speechTag: 'hi-IN', bhashiniCode: 'hi' },
+  { code: LanguageCode.BN, name: 'Bengali', nativeName: 'বাংলা', script: 'Bengali', region: 'West Bengal, Tripura', speechTag: 'bn-IN', bhashiniCode: 'bn' },
+  { code: LanguageCode.MR, name: 'Marathi', nativeName: 'मराठी', script: 'Devanagari', region: 'Maharashtra', speechTag: 'mr-IN', bhashiniCode: 'mr' },
+  { code: LanguageCode.TE, name: 'Telugu', nativeName: 'తెలుగు', script: 'Telugu', region: 'Andhra Pradesh, Telangana', speechTag: 'te-IN', bhashiniCode: 'te' },
+  { code: LanguageCode.TA, name: 'Tamil', nativeName: 'தமிழ்', script: 'Tamil', region: 'Tamil Nadu, Puducherry', speechTag: 'ta-IN', bhashiniCode: 'ta' },
+  { code: LanguageCode.GU, name: 'Gujarati', nativeName: 'ગુજરાતી', script: 'Gujarati', region: 'Gujarat', speechTag: 'gu-IN', bhashiniCode: 'gu' },
+  { code: LanguageCode.UR, name: 'Urdu', nativeName: 'اردو', script: 'Perso-Arabic', region: 'North / Deccan', speechTag: 'ur-IN', bhashiniCode: 'ur' },
+  { code: LanguageCode.KN, name: 'Kannada', nativeName: 'ಕನ್ನಡ', script: 'Kannada', region: 'Karnataka', speechTag: 'kn-IN', bhashiniCode: 'kn' },
+  { code: LanguageCode.OR, name: 'Odia', nativeName: 'ଓଡ଼ିଆ', script: 'Odia', region: 'Odisha', speechTag: 'or-IN', bhashiniCode: 'or' },
+  { code: LanguageCode.ML, name: 'Malayalam', nativeName: 'മലയാളം', script: 'Malayalam', region: 'Kerala', speechTag: 'ml-IN', bhashiniCode: 'ml' },
+  { code: LanguageCode.PA, name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', script: 'Gurmukhi', region: 'Punjab', speechTag: 'pa-IN', bhashiniCode: 'pa' },
+  { code: LanguageCode.AS, name: 'Assamese', nativeName: 'অসমীয়া', script: 'Bengali-Assamese', region: 'Assam', speechTag: 'as-IN', bhashiniCode: 'as' },
+  { code: LanguageCode.MAI, name: 'Maithili', nativeName: 'मैथिली', script: 'Devanagari', region: 'Bihar, Jharkhand', speechTag: 'mai-IN', bhashiniCode: 'mai' },
+  { code: LanguageCode.SAT, name: 'Santali', nativeName: 'ᱥᱟᱱᱛᱟᱲᱤ', script: 'Ol Chiki', region: 'Jharkhand, Odisha', speechTag: 'sat-IN', bhashiniCode: 'sat' },
+  { code: LanguageCode.KS, name: 'Kashmiri', nativeName: 'کٲشُر', script: 'Perso-Arabic', region: 'Jammu & Kashmir', speechTag: 'ks-IN', bhashiniCode: 'ks' },
+  { code: LanguageCode.NE, name: 'Nepali', nativeName: 'नेपाली', script: 'Devanagari', region: 'Sikkim, North Bengal', speechTag: 'ne-NP', bhashiniCode: 'ne' },
+  { code: LanguageCode.KOK, name: 'Konkani', nativeName: 'कोंकणी', script: 'Devanagari', region: 'Goa, Coastal Karnataka', speechTag: 'kok-IN', bhashiniCode: 'kok' },
+  { code: LanguageCode.SD, name: 'Sindhi', nativeName: 'سنڌي', script: 'Perso-Arabic / Devanagari', region: 'Western India', speechTag: 'sd-IN', bhashiniCode: 'sd' },
+  { code: LanguageCode.DGO, name: 'Dogri', nativeName: 'डोगरी', script: 'Devanagari', region: 'Jammu', speechTag: 'doi-IN', bhashiniCode: 'doi' },
+  { code: LanguageCode.MNI, name: 'Manipuri', nativeName: 'ꯃꯤꯇꯩꯂꯣꯟ', script: 'Meetei Mayek', region: 'Manipur', speechTag: 'mni-IN', bhashiniCode: 'mni' },
+  { code: LanguageCode.BRX, name: 'Bodo', nativeName: 'बड़ो', script: 'Devanagari', region: 'Assam Bodoland', speechTag: 'brx-IN', bhashiniCode: 'brx' },
+  { code: LanguageCode.SA, name: 'Sanskrit', nativeName: 'संस्कृतम्', script: 'Devanagari', region: 'Classical / AYUSH Research', speechTag: 'sa-IN', bhashiniCode: 'sa' },
+];
 
 // ============================================================================
 // 2. Identity & Patient Domain

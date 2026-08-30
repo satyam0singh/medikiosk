@@ -1,13 +1,16 @@
-import React from 'react';
-import { ArrowRight, HeartPulse, CheckCircle2, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight, HeartPulse, CheckCircle2, ShieldCheck, Globe, Sparkles } from 'lucide-react';
 import { LanguageCode } from '@medikiosk/shared-types';
 import { AudioPromptButton } from '../AudioPromptButton';
+import { LanguageSelectorModal } from '../LanguageSelectorModal';
 
 interface WelcomeScreenProps {
   onSelectLanguage: (lang: LanguageCode) => void;
+  isLightMode?: boolean;
 }
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectLanguage }) => {
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectLanguage, isLightMode = false }) => {
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const welcomeText =
     'Welcome to MediKiosk at All India Institute of Ayurveda. Please touch your preferred language to begin your OPD check-in.';
 
@@ -23,7 +26,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectLanguage }
       <h2 className="text-2xl sm:text-4xl font-serif tracking-tight leading-tight mb-2 sm:mb-3 text-[#111111] dark:text-[#F4F4F6]">
         स्वागतम् • Welcome to AIIA
       </h2>
-      <p className="text-xs sm:text-sm text-[#666666] dark:text-[#8E94A4] max-w-lg mb-5 sm:mb-7 leading-relaxed px-2">
+      <p className="text-xs sm:text-sm text-[#666666] dark:text-[#8E94A4] max-w-lg mb-4 sm:mb-5 leading-relaxed px-2">
         डॉक्टर से परामर्श से पहले अपनी स्वास्थ्य जानकारी और पुराने पर्चे यहाँ दर्ज करें।
         <br />
         <span className="text-[11px] sm:text-xs text-[#888888] dark:text-[#687082]">
@@ -32,12 +35,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectLanguage }
       </p>
 
       {/* Audio Button */}
-      <div className="mb-5 sm:mb-7">
+      <div className="mb-4 sm:mb-6">
         <AudioPromptButton text={welcomeText} language={LanguageCode.EN} size="md" />
       </div>
 
       {/* Dynamic Bento Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 w-full max-w-lg mb-6 sm:mb-8 px-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 w-full max-w-lg mb-3 px-2">
         {/* Hindi Card */}
         <button
           type="button"
@@ -77,6 +80,35 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectLanguage }
         </button>
       </div>
 
+      {/* 22 Regional Languages Trigger Button */}
+      <div className="w-full max-w-lg mb-6 px-2">
+        <button
+          type="button"
+          onClick={() => setShowLanguageModal(true)}
+          className="w-full p-3.5 rounded-xl border border-[#1F6C9F]/30 dark:border-[#70B8FF]/30 bg-[#1F6C9F]/5 dark:bg-[#70B8FF]/5 hover:bg-[#1F6C9F]/10 dark:hover:bg-[#70B8FF]/10 flex items-center justify-between gap-3 text-left transition-all active:scale-[0.99] cursor-pointer group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#1F6C9F]/15 border border-[#1F6C9F]/30 flex items-center justify-center text-[#1F6C9F] dark:text-[#70B8FF]">
+              <Globe className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs sm:text-sm font-bold text-[#111111] dark:text-[#F4F4F6]">
+                  22 Regional Indian Languages
+                </span>
+                <span className="tag-pastel-blue px-1.5 py-0.2 rounded text-[9px] font-mono uppercase flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5" /> AI4Bharat
+                </span>
+              </div>
+              <p className="text-[11px] text-[#666666] dark:text-[#8E94A4]">
+                বাংলা, தமிழ், తెలుగు, मराठी, ગુજરાતી, ಕನ್ನಡ, മലയാളം, ਪੰਜਾਬੀ...
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-[#1F6C9F] dark:text-[#70B8FF] group-hover:translate-x-1 transition-transform" />
+        </button>
+      </div>
+
       {/* Safety Badges Footer */}
       <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs text-[#787774] dark:text-[#8E94A4] border-t border-[#EAEAEA] dark:border-[#232734] pt-4 w-full px-2">
         <div className="flex items-center gap-1 font-mono text-[10px] sm:text-[11px]">
@@ -92,6 +124,17 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectLanguage }
           <span>Deterministic Triage</span>
         </div>
       </div>
+
+      {/* Language Selector Modal */}
+      {showLanguageModal && (
+        <LanguageSelectorModal
+          currentLanguage={LanguageCode.EN}
+          onSelectLanguage={onSelectLanguage}
+          onClose={() => setShowLanguageModal(false)}
+          isLightMode={isLightMode}
+        />
+      )}
     </div>
   );
 };
+
