@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import { LanguageCode, INDIC_LANGUAGES } from '@medikiosk/shared-types';
+import { speakIndicText } from '../utils/speech';
 
 interface AudioPromptButtonProps {
   text: string;
@@ -18,32 +19,23 @@ export const AudioPromptButton: React.FC<AudioPromptButtonProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
 
   const langInfo = INDIC_LANGUAGES.find((l) => l.code === language);
-  const speechTag = langInfo?.speechTag || (language === LanguageCode.HI ? 'hi-IN' : 'en-IN');
 
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (!('speechSynthesis' in window)) {
-      alert('Speech synthesis not supported in this browser.');
-      return;
-    }
-
     if (isPlaying) {
-      window.speechSynthesis.cancel();
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
       setIsPlaying(false);
       return;
     }
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = speechTag;
-    utterance.rate = 0.95; // Slightly slower for low-literacy clarity
-
-    utterance.onstart = () => setIsPlaying(true);
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
-
-    window.speechSynthesis.speak(utterance);
+    speakIndicText(text, language, {
+      onStart: () => setIsPlaying(true),
+      onEnd: () => setIsPlaying(false),
+      onError: () => setIsPlaying(false),
+    });
   };
 
   const sizeClasses = {

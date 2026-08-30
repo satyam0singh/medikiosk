@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Search, Globe, Volume2, Sparkles, Check } from 'lucide-react';
 import { LanguageCode, INDIC_LANGUAGES, IndicLanguageInfo } from '@medikiosk/shared-types';
+import { NATIVE_GREETINGS, speakIndicText } from '../utils/speech';
 
 interface LanguageSelectorModalProps {
   currentLanguage: LanguageCode;
@@ -27,33 +28,14 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
 
   const handleAudioPreview = (e: React.MouseEvent, lang: IndicLanguageInfo) => {
     e.stopPropagation();
-    if (!('speechSynthesis' in window)) return;
 
-    window.speechSynthesis.cancel();
-    const sampleText =
-      lang.code === LanguageCode.HI
-        ? 'अखिल भारतीय आयुर्वेद संस्थान में आपका स्वागत है।'
-        : lang.code === LanguageCode.BN
-        ? 'অল ইন্ডিয়া ইনস্টিটিউট অফ আয়ুর্বেদে আপনাকে স্বাগতম।'
-        : lang.code === LanguageCode.TA
-        ? 'அகில இந்திய ஆயுர்வேத நிறுவனத்திற்கு வரவேற்கிறோம்.'
-        : lang.code === LanguageCode.TE
-        ? 'ఆల్ ఇండియా ఇన్స్టిట్యూట్ ఆఫ్ ఆయుర్వేదకు స్వాగతం.'
-        : lang.code === LanguageCode.MR
-        ? 'अखिल भारतीय आयुर्वेद संस्थेमध्ये आपले स्वागत आहे.'
-        : lang.code === LanguageCode.GU
-        ? 'ઓલ ઇન્ડિયા ઇન્સ્ટિટ્યૂટ ઓફ આયુર્વેદમાં આપનું સ્વાગત છે.'
-        : `Welcome to All India Institute of Ayurveda in ${lang.name}.`;
+    const greeting = NATIVE_GREETINGS[lang.code] || `Welcome to All India Institute of Ayurveda.`;
 
-    const utterance = new SpeechSynthesisUtterance(sampleText);
-    utterance.lang = lang.speechTag;
-    utterance.rate = 0.95;
-
-    utterance.onstart = () => setPreviewingCode(lang.code);
-    utterance.onend = () => setPreviewingCode(null);
-    utterance.onerror = () => setPreviewingCode(null);
-
-    window.speechSynthesis.speak(utterance);
+    speakIndicText(greeting, lang.code, {
+      onStart: () => setPreviewingCode(lang.code),
+      onEnd: () => setPreviewingCode(null),
+      onError: () => setPreviewingCode(null),
+    });
   };
 
   return (
@@ -90,7 +72,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className={`p-2 rounded-lg border transition-colors ${
+            className={`p-2 rounded-lg border transition-colors cursor-pointer ${
               isLightMode
                 ? 'border-[#EAEAEA] hover:bg-[#EAEAEA] text-[#666666]'
                 : 'border-[#232734] hover:bg-[#1E222D] text-[#8E94A4]'
@@ -112,7 +94,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by language name, native script, or state (e.g. Bengali, বাংলা, Tamil, मराठी)..."
+              placeholder="Search by language name, native script, or state (e.g. Gujarati, ગુજરાતી, Malayalam, മലയാളം)..."
               className={`w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border outline-none transition-all ${
                 isLightMode
                   ? 'border-[#EAEAEA] bg-[#F7F6F3] focus:border-[#1F6C9F] text-[#111111]'
@@ -167,7 +149,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
                   type="button"
                   onClick={(e) => handleAudioPreview(e, lang)}
                   title={`Preview ${lang.name} Speech`}
-                  className={`p-2 rounded-lg border shrink-0 transition-colors ${
+                  className={`p-2 rounded-lg border shrink-0 transition-colors cursor-pointer ${
                     isPreviewing
                       ? 'bg-amber-500/20 border-amber-500 text-amber-500 animate-pulse'
                       : isLightMode
@@ -195,7 +177,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-[#111111] dark:bg-[#F4F4F6] text-white dark:text-black font-semibold text-xs transition-opacity hover:opacity-90"
+            className="px-4 py-1.5 rounded-lg bg-[#111111] dark:bg-[#F4F4F6] text-white dark:text-black font-semibold text-xs transition-opacity hover:opacity-90 cursor-pointer"
           >
             Close
           </button>
