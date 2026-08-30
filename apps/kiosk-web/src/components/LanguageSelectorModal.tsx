@@ -29,7 +29,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
   const handleAudioPreview = (e: React.MouseEvent, lang: IndicLanguageInfo) => {
     e.stopPropagation();
 
-    const greeting = NATIVE_GREETINGS[lang.code] || `Welcome to All India Institute of Ayurveda.`;
+    const greeting = NATIVE_GREETINGS[lang.code] || `Welcome to All India Institute of Ayurveda in ${lang.name}.`;
 
     speakIndicText(greeting, lang.code, {
       onStart: () => setPreviewingCode(lang.code),
@@ -72,7 +72,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className={`p-2 rounded-lg border transition-colors cursor-pointer ${
+            className={`p-2 rounded-lg border transition-colors ${
               isLightMode
                 ? 'border-[#EAEAEA] hover:bg-[#EAEAEA] text-[#666666]'
                 : 'border-[#232734] hover:bg-[#1E222D] text-[#8E94A4]'
@@ -94,7 +94,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by language name, native script, or state (e.g. Gujarati, ગુજરાતી, Malayalam, മലയാളം)..."
+              placeholder="Search by language name, native script, or state (e.g. Bengali, বাংলা, Tamil, मराठी)..."
               className={`w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border outline-none transition-all ${
                 isLightMode
                   ? 'border-[#EAEAEA] bg-[#F7F6F3] focus:border-[#1F6C9F] text-[#111111]'
@@ -149,7 +149,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
                   type="button"
                   onClick={(e) => handleAudioPreview(e, lang)}
                   title={`Preview ${lang.name} Speech`}
-                  className={`p-2 rounded-lg border shrink-0 transition-colors cursor-pointer ${
+                  className={`p-2 rounded-lg border shrink-0 transition-colors ${
                     isPreviewing
                       ? 'bg-amber-500/20 border-amber-500 text-amber-500 animate-pulse'
                       : isLightMode
@@ -177,7 +177,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-[#111111] dark:bg-[#F4F4F6] text-white dark:text-black font-semibold text-xs transition-opacity hover:opacity-90 cursor-pointer"
+            className="px-4 py-1.5 rounded-lg bg-[#111111] dark:bg-[#F4F4F6] text-white dark:text-black font-semibold text-xs transition-opacity hover:opacity-90"
           >
             Close
           </button>

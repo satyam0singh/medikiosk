@@ -24,7 +24,7 @@ export const AudioPromptButton: React.FC<AudioPromptButtonProps> = ({
     e.stopPropagation();
 
     if (isPlaying) {
-      if ('speechSynthesis' in window) {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
       setIsPlaying(false);
@@ -48,6 +48,8 @@ export const AudioPromptButton: React.FC<AudioPromptButtonProps> = ({
     switch (language) {
       case LanguageCode.HI:
         return 'बोलकर सुनें';
+      case LanguageCode.HINGLISH:
+        return 'Listen Karein';
       case LanguageCode.BN:
         return 'শুনুন';
       case LanguageCode.MR:
@@ -66,6 +68,30 @@ export const AudioPromptButton: React.FC<AudioPromptButtonProps> = ({
         return 'ਸੁਣੋ';
       case LanguageCode.OR:
         return 'ଶୁଣନ୍ତୁ';
+      case LanguageCode.AS:
+        return 'শুনক';
+      case LanguageCode.UR:
+        return 'سنیں';
+      case LanguageCode.MAI:
+        return 'सुनू';
+      case LanguageCode.SAT:
+        return 'ᱟᱸᱡᱚᱢ';
+      case LanguageCode.KS:
+        return 'بوزِو';
+      case LanguageCode.NE:
+        return 'सुन्नुहोस्';
+      case LanguageCode.KOK:
+        return 'आयकात';
+      case LanguageCode.SD:
+        return 'ٻڌو';
+      case LanguageCode.DGO:
+        return 'सुन्नो';
+      case LanguageCode.MNI:
+        return 'ꯇꯥꯕꯤꯌꯨ';
+      case LanguageCode.BRX:
+        return 'खोनासं';
+      case LanguageCode.SA:
+        return 'शृणोतु';
       default:
         return 'Listen';
     }
@@ -87,4 +113,5 @@ export const AudioPromptButton: React.FC<AudioPromptButtonProps> = ({
     </button>
   );
 };
+
 
