@@ -7,7 +7,6 @@ import {
   Download,
   UserCheck,
   FileCheck,
-  ArrowLeft,
 } from 'lucide-react';
 import {
   Patient,
@@ -48,7 +47,6 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
   briefing,
   onRefresh,
   onOpenFhirExport,
-  onBackToQueue,
   isLightMode = false,
 }) => {
   const { encounter, patient, activeRedFlags, facts, timeline, documents, summary } = briefing;
@@ -97,30 +95,13 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
 
   return (
     <div
-      className={`flex-1 flex flex-col h-full overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6 transition-colors ${
+      className={`flex-1 flex flex-col h-full overflow-y-auto p-3 sm:p-5 lg:p-6 gap-4 sm:gap-5 transition-colors ${
         isLightMode ? 'bg-[#FBFBFA]' : 'bg-[#0D0F14]'
       }`}
     >
-      {/* Mobile Back to Queue Bar */}
-      {onBackToQueue && (
-        <div className="md:hidden flex items-center justify-between pb-1">
-          <button
-            type="button"
-            onClick={onBackToQueue}
-            className="flex items-center gap-1.5 text-xs font-semibold py-1.5 px-2.5 rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#111111] dark:text-[#F4F4F6] active:scale-95 cursor-pointer"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Queue</span>
-          </button>
-          <span className="text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]">
-            Encounter #{encounter.id.slice(-6)}
-          </span>
-        </div>
-      )}
-
-      {/* 1. Patient & Encounter Header Banner with Dynamic Clamping */}
+      {/* 1. Patient & Encounter Header Banner */}
       <div
-        className={`border rounded-xl p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-5 transition-colors shadow-xs ${
+        className={`border rounded-xl p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shrink-0 transition-colors shadow-xs ${
           isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
         }`}
       >
@@ -133,25 +114,25 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
             {patient.fullName.charAt(0)}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <h2 className={`text-base sm:text-lg font-bold tracking-tight truncate ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
                 {patient.fullName}
               </h2>
               <span
-                className={`px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-mono uppercase tracking-wider rounded-full shrink-0 ${
+                className={`px-2 py-0.5 text-[9px] sm:text-[10px] font-mono uppercase tracking-wider rounded-full shrink-0 ${
                   isLightMode ? 'tag-pastel-blue' : 'tag-pastel-blue'
                 }`}
               >
                 {encounter.department || 'GENERAL MEDICINE'}
               </span>
               {isVerified && (
-                <span className="tag-pastel-green px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-mono uppercase tracking-wider rounded-full flex items-center gap-1 shrink-0">
+                <span className="tag-pastel-green px-2 py-0.5 text-[9px] sm:text-[10px] font-mono uppercase tracking-wider rounded-full flex items-center gap-1 shrink-0">
                   <CheckCircle2 className="w-3 h-3" />
                   <span>VERIFIED</span>
                 </span>
               )}
             </div>
-            <p className={`text-[11px] sm:text-xs mt-0.5 flex flex-wrap items-center gap-1.5 sm:gap-2 font-mono tabular-nums text-[#787774] dark:text-[#8E94A4]`}>
+            <p className="text-[11px] sm:text-xs mt-1 flex flex-wrap items-center gap-1.5 sm:gap-2 font-mono tabular-nums text-[#787774] dark:text-[#8E94A4]">
               <span>
                 {patient.gender} • <strong>{patient.age}y</strong>
               </span>
@@ -186,7 +167,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
 
       {/* 2. Priority Red-Flag Banner */}
       {activeRedFlags.length > 0 && (
-        <div className="space-y-2.5">
+        <div className="space-y-2.5 shrink-0">
           {activeRedFlags.map((alert) => (
             <div
               key={alert.id}
@@ -219,7 +200,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                   <button
                     type="button"
                     onClick={() => handleAcknowledgeAlert(alert.id)}
-                    className="w-full sm:w-auto px-3 py-1.5 min-h-[36px] bg-[#9F2F2D] text-white rounded-md text-xs font-mono uppercase tracking-wider active:scale-95 transition-all cursor-pointer"
+                    className="w-full sm:w-auto px-4 py-2 min-h-[38px] bg-[#9F2F2D] text-white rounded-md text-xs font-mono uppercase tracking-wider active:scale-95 transition-all cursor-pointer font-bold"
                   >
                     Acknowledge
                   </button>
@@ -230,17 +211,17 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         </div>
       )}
 
-      {/* 3. Navigation Tabs with Horizontal Scroll for Mobile */}
-      <div className="flex items-center gap-1 border-b border-[#EAEAEA] dark:border-[#232734] pb-2 overflow-x-auto whitespace-nowrap">
+      {/* 3. Navigation Tabs Bar */}
+      <div className="flex items-center gap-1.5 border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5 shrink-0 overflow-x-auto whitespace-nowrap pt-1">
         <button
           type="button"
           onClick={() => setActiveTab('BRIEFING')}
-          className={`px-3 py-1.5 min-h-[36px] rounded-md text-xs font-medium transition-all shrink-0 cursor-pointer ${
+          className={`px-3 py-2 min-h-[38px] rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
             activeTab === 'BRIEFING'
-              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
+              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14]'
               : isLightMode
-              ? 'text-[#666666] hover:text-[#111111]'
-              : 'text-[#8E94A4] hover:text-[#FFFFFF]'
+              ? 'bg-[#F7F6F3] text-[#666666] hover:text-[#111111]'
+              : 'bg-[#1A1D27] text-[#8E94A4] hover:text-[#FFFFFF]'
           }`}
         >
           Clinical Summary & Verification
@@ -248,12 +229,12 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('FACTS')}
-          className={`px-3 py-1.5 min-h-[36px] rounded-md text-xs font-medium transition-all shrink-0 cursor-pointer ${
+          className={`px-3 py-2 min-h-[38px] rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
             activeTab === 'FACTS'
-              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
+              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14]'
               : isLightMode
-              ? 'text-[#666666] hover:text-[#111111]'
-              : 'text-[#8E94A4] hover:text-[#FFFFFF]'
+              ? 'bg-[#F7F6F3] text-[#666666] hover:text-[#111111]'
+              : 'bg-[#1A1D27] text-[#8E94A4] hover:text-[#FFFFFF]'
           }`}
         >
           Provenance & Facts ({facts.length})
@@ -261,12 +242,12 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('TIMELINE')}
-          className={`px-3 py-1.5 min-h-[36px] rounded-md text-xs font-medium transition-all shrink-0 cursor-pointer ${
+          className={`px-3 py-2 min-h-[38px] rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
             activeTab === 'TIMELINE'
-              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
+              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14]'
               : isLightMode
-              ? 'text-[#666666] hover:text-[#111111]'
-              : 'text-[#8E94A4] hover:text-[#FFFFFF]'
+              ? 'bg-[#F7F6F3] text-[#666666] hover:text-[#111111]'
+              : 'bg-[#1A1D27] text-[#8E94A4] hover:text-[#FFFFFF]'
           }`}
         >
           Timeline ({timeline.length})
@@ -274,12 +255,12 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('DOCUMENTS')}
-          className={`px-3 py-1.5 min-h-[36px] rounded-md text-xs font-medium transition-all shrink-0 cursor-pointer ${
+          className={`px-3 py-2 min-h-[38px] rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
             activeTab === 'DOCUMENTS'
-              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
+              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14]'
               : isLightMode
-              ? 'text-[#666666] hover:text-[#111111]'
-              : 'text-[#8E94A4] hover:text-[#FFFFFF]'
+              ? 'bg-[#F7F6F3] text-[#666666] hover:text-[#111111]'
+              : 'bg-[#1A1D27] text-[#8E94A4] hover:text-[#FFFFFF]'
           }`}
         >
           Documents & OCR ({documents.length})
@@ -289,7 +270,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
       {/* 4. Tab Contents */}
       {activeTab === 'BRIEFING' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
-          {/* Left 2 Cols on Desktop / Top on Mobile: Clinical Narrative, Meds, Labs */}
+          {/* Left 2 Cols: Clinical Narrative, Meds, Labs */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-5">
             {/* Structured HPI Narrative Card */}
             <div
@@ -430,7 +411,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
             </div>
           </div>
 
-          {/* Right Col on Desktop / Bottom on Mobile: Physician Consultation Editor */}
+          {/* Right Col: Physician Consultation Editor */}
           <div className="space-y-4 sm:space-y-5">
             <div
               className={`border rounded-xl p-4 sm:p-5 space-y-3.5 transition-colors shadow-xs ${
@@ -444,7 +425,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                 </div>
               </div>
 
-              {/* Quick ICD-10 Chips with Flexible Wrapping */}
+              {/* Quick ICD-10 Chips */}
               <div>
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] mb-1.5">
                   ICD-10 Presets
