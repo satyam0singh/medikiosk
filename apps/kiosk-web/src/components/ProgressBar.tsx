@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, FileText, Stethoscope, HelpCircle, Upload, CheckCircle2 } from 'lucide-react';
 import { LanguageCode } from '@medikiosk/shared-types';
+import { getTranslation } from '../utils/translations';
 
 export type KioskStep =
   | 'LANGUAGE'
@@ -19,23 +20,23 @@ interface ProgressBarProps {
 
 interface StepItem {
   id: KioskStep;
-  labelEn: string;
-  labelHi: string;
+  translationKey: 'step_identify' | 'step_consent' | 'step_complaint' | 'step_questions' | 'step_records' | 'step_token';
   icon: React.ComponentType<{ className?: string }>;
 }
 
 const STEPS: StepItem[] = [
-  { id: 'IDENTITY', labelEn: 'Identify', labelHi: 'पहचान', icon: User },
-  { id: 'CONSENT', labelEn: 'Consent', labelHi: 'सहमति', icon: FileText },
-  { id: 'COMPLAINT', labelEn: 'Complaint', labelHi: 'लक्षण', icon: Stethoscope },
-  { id: 'INTERVIEW', labelEn: 'Questions', labelHi: 'पूछताछ', icon: HelpCircle },
-  { id: 'DOCUMENTS', labelEn: 'Records', labelHi: 'दस्तावेज़', icon: Upload },
-  { id: 'COMPLETED', labelEn: 'Token', labelHi: 'पर्ची', icon: CheckCircle2 },
+  { id: 'IDENTITY', translationKey: 'step_identify', icon: User },
+  { id: 'CONSENT', translationKey: 'step_consent', icon: FileText },
+  { id: 'COMPLAINT', translationKey: 'step_complaint', icon: Stethoscope },
+  { id: 'INTERVIEW', translationKey: 'step_questions', icon: HelpCircle },
+  { id: 'DOCUMENTS', translationKey: 'step_records', icon: Upload },
+  { id: 'COMPLETED', translationKey: 'step_token', icon: CheckCircle2 },
 ];
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, language }) => {
   if (currentStep === 'LANGUAGE') return null;
 
+  const t = getTranslation(language);
   const currentIdx = STEPS.findIndex((s) => s.id === currentStep);
 
   return (
@@ -66,7 +67,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, language 
                     : 'text-[#AAAAAA] dark:text-[#4A5060]'
                 }`}
               >
-                {language === LanguageCode.HI ? step.labelHi : step.labelEn}
+                {t[step.translationKey]}
               </span>
             </div>
           );
@@ -75,3 +76,4 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, language 
     </div>
   );
 };
+

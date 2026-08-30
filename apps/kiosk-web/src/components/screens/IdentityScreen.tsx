@@ -3,6 +3,7 @@ import { Search, UserPlus, ArrowRight, UserCheck, Sparkles } from 'lucide-react'
 import { Patient, LanguageCode } from '@medikiosk/shared-types';
 import { AudioPromptButton } from '../AudioPromptButton';
 import { KioskApi } from '../../services/api';
+import { getTranslation } from '../../utils/translations';
 
 interface IdentityScreenProps {
   language: LanguageCode;
@@ -22,10 +23,7 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
   const [newAge, setNewAge] = useState('45');
   const [newPhone, setNewPhone] = useState('+91 98765 00000');
 
-  const promptText =
-    language === LanguageCode.HI
-      ? 'कृपया अपना आभा नंबर, मोबाइल नंबर दर्ज करें या त्वरित डेमो मरीज चुनें।'
-      : 'Please enter your ABHA number, mobile number, or select a demo patient to continue.';
+  const t = getTranslation(language);
 
   const handleSearch = async (term: string) => {
     setSearchTerm(term);
@@ -96,15 +94,13 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 shrink-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#111111] dark:text-[#F4F4F6]">
-            {language === LanguageCode.HI ? 'मरीज पहचान व सत्यापन' : 'Patient Identification'}
+            {t.identity_title}
           </h2>
           <p className="text-xs text-[#787774] dark:text-[#8E94A4] mt-0.5">
-            {language === LanguageCode.HI
-              ? 'आभा संख्या, मोबाइल नंबर या त्वरित पंजीकरण द्वारा शुरू करें'
-              : 'Search via ABHA ID, Mobile Number, or select a seeded record below'}
+            {t.identity_subtitle}
           </p>
         </div>
-        <AudioPromptButton text={promptText} language={language} size="md" />
+        <AudioPromptButton text={t.audio_identity} language={language} size="md" />
       </div>
 
       {/* 1-Tap Seeded Demo Cases with Dynamic Aspect Ratio */}
@@ -112,7 +108,7 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
         <div className="flex items-center gap-1.5 mb-2.5">
           <Sparkles className="w-3.5 h-3.5 text-[#1F6C9F] dark:text-[#70B8FF]" />
           <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#555555] dark:text-[#9EA5B5]">
-            {language === LanguageCode.HI ? 'त्वरित डेमो मरीज (1-टैप परीक्षण)' : '1-Tap Seeded Clinical Cases'}
+            {t.seeded_cases}
           </h4>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
@@ -126,10 +122,10 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
               <div className="min-w-0 pr-2">
                 <h5 className="text-xs font-bold text-[#111111] dark:text-[#F4F4F6] truncate">{p.fullName}</h5>
                 <p className="text-[10px] sm:text-[11px] text-[#787774] dark:text-[#8E94A4] mt-0.5 font-mono tabular-nums truncate">
-                  {p.gender} • {p.age}y • <span className="text-[#1F6C9F] dark:text-[#70B8FF]">{p.abhaId}</span>
+                  {p.gender === 'MALE' ? t.male : t.female} • {p.age}y • <span className="text-[#1F6C9F] dark:text-[#70B8FF]">{p.abhaId}</span>
                 </p>
               </div>
-              <div className="w-7 h-7 rounded-md bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] flex items-center justify-center font-bold shrink-0">
+              <div className="w-7 h-7 rounded-full bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] flex items-center justify-center shrink-0">
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </button>
@@ -137,133 +133,151 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
         </div>
       </div>
 
-      {/* Search Input Box */}
+      {/* ABHA / Mobile Live Search Box */}
       <div className="relative mb-4 shrink-0">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#888888]">
-          <Search className="w-4 h-4" />
-        </div>
+        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#787774] dark:text-[#8E94A4]" />
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
-          placeholder={
-            language === LanguageCode.HI
-              ? 'आभा संख्या (ABHA ID), मोबाइल या नाम दर्ज करें...'
-              : 'Enter ABHA ID (e.g. 91-4829-1029-4820), Mobile, or Name...'
-          }
-          className="w-full min-h-[46px] pl-10 pr-4 py-2.5 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#111111] dark:text-[#F4F4F6] placeholder-[#999999] dark:placeholder-[#5D6373] text-xs font-medium outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6] transition-colors"
+          placeholder={t.search_placeholder}
+          className="w-full pl-9 pr-4 py-2.5 min-h-[44px] rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#111111] dark:text-[#F4F4F6] placeholder-[#888888] dark:placeholder-[#666666] text-xs font-mono outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6] transition-colors"
         />
         {isSearching && (
-          <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
-            <div className="w-4 h-4 border-2 border-[#111111] dark:border-[#F4F4F6] border-t-transparent rounded-full animate-spin" />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="w-3.5 h-3.5 border-2 border-[#111111] dark:border-[#F4F4F6] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </div>
 
-      {/* Search Results */}
+      {/* Live Search Results */}
       {searchResults.length > 0 && (
-        <div className="space-y-2 mb-4">
-          {searchResults.map((patient) => (
-            <div
-              key={patient.id}
-              className="p-3 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] flex items-center justify-between"
-            >
-              <div className="min-w-0 pr-2">
-                <h5 className="font-bold text-xs text-[#111111] dark:text-[#F4F4F6] truncate">{patient.fullName}</h5>
-                <p className="text-[11px] text-[#787774] dark:text-[#8E94A4] font-mono tabular-nums truncate">
-                  {patient.gender} • {patient.age} yrs • ABHA:{' '}
-                  <span className="text-[#1F6C9F] dark:text-[#70B8FF]">{patient.abhaId || 'N/A'}</span>
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => onPatientIdentified(patient)}
-                className="px-3 py-1.5 min-h-[38px] bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md font-medium text-xs flex items-center gap-1 active:scale-95 transition-all shrink-0"
+        <div className="border border-[#EAEAEA] dark:border-[#232734] rounded-xl overflow-hidden mb-4 bg-[#FFFFFF] dark:bg-[#141720] shadow-xs shrink-0">
+          <div className="divide-y divide-[#EAEAEA] dark:divide-[#232734]">
+            {searchResults.map((p) => (
+              <div
+                key={p.id}
+                className="p-3 sm:p-4 flex items-center justify-between hover:bg-[#F7F6F3] dark:hover:bg-[#1A1D27] transition-colors"
               >
-                <UserCheck className="w-3.5 h-3.5" />
-                <span>{language === LanguageCode.HI ? 'चयन करें' : 'Select'}</span>
-              </button>
-            </div>
-          ))}
+                <div className="min-w-0 pr-2">
+                  <div className="flex items-center gap-2">
+                    <UserCheck className="w-4 h-4 text-[#346538] dark:text-[#6EE787] shrink-0" />
+                    <h5 className="font-bold text-xs sm:text-sm text-[#111111] dark:text-[#F4F4F6] truncate">
+                      {p.fullName}
+                    </h5>
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-[#787774] dark:text-[#8E94A4] mt-0.5 font-mono tabular-nums">
+                    {p.gender === 'MALE' ? t.male : t.female} • {p.age}y • ABHA: <span className="text-[#1F6C9F] dark:text-[#70B8FF]">{p.abhaId}</span> • MRN: {p.hospitalPatientId}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onPatientIdentified(p)}
+                  className="px-3 py-1.5 min-h-[36px] bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] text-xs font-semibold rounded-md flex items-center gap-1 active:scale-95 transition-all cursor-pointer shrink-0"
+                >
+                  <span>{t.select_btn}</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Quick Registration Collapsible */}
-      <div className="mt-auto pt-3 border-t border-[#EAEAEA] dark:border-[#232734]">
-        <button
-          type="button"
-          onClick={() => setShowQuickRegister(!showQuickRegister)}
-          className="text-xs font-mono uppercase tracking-wider text-[#555555] dark:text-[#8E94A4] hover:text-[#111111] dark:hover:text-[#FFFFFF] flex items-center gap-1.5 cursor-pointer py-1"
-        >
-          <UserPlus className="w-3.5 h-3.5" />
-          <span>
-            {showQuickRegister
-              ? language === LanguageCode.HI
-                ? 'फॉर्म बंद करें'
-                : 'Close Form'
-              : language === LanguageCode.HI
-              ? '+ नया मरीज त्वरित पंजीकरण'
-              : '+ Register Walk-in Patient'}
-          </span>
-        </button>
-
-        {showQuickRegister && (
+      {/* Walk-in Register Toggle & Form */}
+      <div className="mt-auto pt-2 border-t border-[#EAEAEA] dark:border-[#232734] shrink-0">
+        {!showQuickRegister ? (
+          <button
+            type="button"
+            onClick={() => setShowQuickRegister(true)}
+            className="w-full py-2.5 min-h-[44px] rounded-lg border border-dashed border-[#CCCCCC] dark:border-[#333A4D] hover:border-[#111111] dark:hover:border-[#F4F4F6] text-xs font-mono text-[#666666] dark:text-[#8E94A4] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>{t.register_walkin}</span>
+          </button>
+        ) : (
           <form
             onSubmit={handleQuickRegister}
-            className="mt-3 p-4 sm:p-5 rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] space-y-3"
+            className="p-3.5 sm:p-4 rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] space-y-3"
           >
-            <h4 className="font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">
-              {language === LanguageCode.HI ? 'नया मरीज विवरण' : 'Walk-in Patient Fast Registration'}
-            </h4>
+            <div className="flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2">
+              <h4 className="text-xs font-bold text-[#111111] dark:text-[#F4F4F6]">
+                {t.register_walkin}
+              </h4>
+              <button
+                type="button"
+                onClick={() => setShowQuickRegister(false)}
+                className="text-[10px] font-mono text-[#888888] hover:text-[#111111] dark:hover:text-[#F4F4F6]"
+              >
+                ✕ Cancel
+              </button>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-[11px] font-medium text-[#787774] dark:text-[#8E94A4] mb-1">Full Name</label>
+                <label className="block text-[10px] font-mono text-[#787774] dark:text-[#8E94A4] mb-1">
+                  {t.full_name} *
+                </label>
                 <input
                   type="text"
                   required
                   value={newFullName}
                   onChange={(e) => setNewFullName(e.target.value)}
-                  placeholder="e.g. Amit Verma"
-                  className="w-full p-2.5 rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] text-xs outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6]"
+                  placeholder="e.g. Vikas Sharma"
+                  className="w-full px-2.5 py-1.5 min-h-[38px] rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#F7F6F3] dark:bg-[#1A1D27] text-xs text-[#111111] dark:text-[#F4F4F6] outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-[11px] font-medium text-[#787774] dark:text-[#8E94A4] mb-1">Age</label>
-                <input
-                  type="number"
-                  required
-                  value={newAge}
-                  onChange={(e) => setNewAge(e.target.value)}
-                  className="w-full p-2.5 rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] text-xs outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6]"
-                />
-              </div>
-              <div>
-                <label className="block text-[11px] font-medium text-[#787774] dark:text-[#8E94A4] mb-1">Gender</label>
-                <select
-                  value={newGender}
-                  onChange={(e) => setNewGender(e.target.value as any)}
-                  className="w-full p-2.5 rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] text-xs outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6]"
-                >
-                  <option value="MALE">Male (पुरुष)</option>
-                  <option value="FEMALE">Female (महिला)</option>
-                  <option value="OTHER">Other (अन्य)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[11px] font-medium text-[#787774] dark:text-[#8E94A4] mb-1">Mobile Number</label>
-                <input
-                  type="text"
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
-                  className="w-full p-2.5 rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] text-xs outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6]"
-                />
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-mono text-[#787774] dark:text-[#8E94A4] mb-1">
+                    {t.age} *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    max="120"
+                    value={newAge}
+                    onChange={(e) => setNewAge(e.target.value)}
+                    className="w-full px-2.5 py-1.5 min-h-[38px] rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#F7F6F3] dark:bg-[#1A1D27] text-xs text-[#111111] dark:text-[#F4F4F6] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-mono text-[#787774] dark:text-[#8E94A4] mb-1">
+                    {t.gender} *
+                  </label>
+                  <select
+                    value={newGender}
+                    onChange={(e) => setNewGender(e.target.value as any)}
+                    className="w-full px-2.5 py-1.5 min-h-[38px] rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#F7F6F3] dark:bg-[#1A1D27] text-xs text-[#111111] dark:text-[#F4F4F6] outline-none"
+                  >
+                    <option value="MALE">{t.male}</option>
+                    <option value="FEMALE">{t.female}</option>
+                    <option value="OTHER">{t.other}</option>
+                  </select>
+                </div>
               </div>
             </div>
+
+            <div>
+              <label className="block text-[10px] font-mono text-[#787774] dark:text-[#8E94A4] mb-1">
+                {t.mobile}
+              </label>
+              <input
+                type="text"
+                value={newPhone}
+                onChange={(e) => setNewPhone(e.target.value)}
+                placeholder="+91 98765 00000"
+                className="w-full px-2.5 py-1.5 min-h-[38px] rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#F7F6F3] dark:bg-[#1A1D27] text-xs text-[#111111] dark:text-[#F4F4F6] outline-none"
+              />
+            </div>
+
             <button
               type="submit"
-              className="w-full py-2.5 min-h-[44px] bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md font-medium text-xs active:scale-95 transition-all mt-1 cursor-pointer"
+              className="w-full py-2 min-h-[40px] bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] text-xs font-bold rounded-md hover:bg-[#222222] dark:hover:bg-[#EAEAEA] transition-colors cursor-pointer"
             >
-              {language === LanguageCode.HI ? 'पंजीकृत करें और आगे बढ़ें' : 'Register & Continue'}
+              {t.submit_continue}
             </button>
           </form>
         )}
