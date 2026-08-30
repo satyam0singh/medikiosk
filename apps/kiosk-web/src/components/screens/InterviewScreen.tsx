@@ -116,7 +116,6 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
         setCurrentQuestion(data.question);
         setProgress(data.progressPercentage);
       } else {
-        // Use fallback sequence
         const nextIdx = fallbackIndex + 1;
         if (nextIdx < FALLBACK_QUESTIONS.length) {
           setFallbackIndex(nextIdx);
@@ -146,7 +145,7 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
 
     const val = valueToSubmit || selectedOption || (currentQuestion.inputType === 'NUMERIC_SCALE' ? String(scaleValue) : 'yes');
 
-    // Deterministic check for emergency severity
+    // Deterministic check for emergency severity (Score >= 7 triggers CRITICAL_EMERGENCY)
     if (currentQuestion.id === 'q_pain_severity' && scaleValue >= 7) {
       onRedFlagTriggered({
         id: 'rf-alert-chest-severe',
@@ -154,9 +153,10 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
         patientId: 'patient',
         ruleId: 'rf_chest_pain_severe',
         severity: 'CRITICAL_EMERGENCY' as any,
-        alertMessage: language === LanguageCode.HI
-          ? 'सीने में तीव्र दर्द (तीव्रता स्कोर 7+) का पता चला है। तत्काल आपातकालीन सहायता टीम को सूचित किया गया है।'
-          : 'Severe acute chest discomfort (Score >= 7) detected. Immediate triage and physician notification required.',
+        alertMessage:
+          language === LanguageCode.HI
+            ? 'सीने में तीव्र दर्द (तीव्रता स्कोर 7+) का पता चला है। तत्काल आपातकालीन सहायता टीम को सूचित किया गया है।'
+            : 'Severe acute chest discomfort (Score >= 7) detected. Immediate triage and physician notification required.',
         triggerFacts: [{ field: 'hpi.pain_severity', value: scaleValue, sourceType: ProvenanceType.PATIENT_REPORTED }],
         isAcknowledged: false,
         createdAt: new Date().toISOString(),
@@ -173,7 +173,7 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
       });
 
       if (res.triggeredAlerts && res.triggeredAlerts.length > 0) {
-        const emergencyAlert = res.triggeredAlerts.find(a => a.severity === 'CRITICAL_EMERGENCY');
+        const emergencyAlert = res.triggeredAlerts.find((a) => a.severity === 'CRITICAL_EMERGENCY');
         if (emergencyAlert) {
           onRedFlagTriggered(emergencyAlert);
           return;
@@ -224,7 +224,8 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
     return null;
   }
 
-  const prompt = language === LanguageCode.HI ? (currentQuestion.prompt?.hi || currentQuestion.prompt?.en) : currentQuestion.prompt?.en;
+  const prompt =
+    language === LanguageCode.HI ? currentQuestion.prompt?.hi || currentQuestion.prompt?.en : currentQuestion.prompt?.en;
 
   return (
     <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-6">
@@ -232,11 +233,11 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
       <div className="mb-6">
         <div className="flex items-center justify-between text-xs font-bold mb-2">
           <span className={isLightMode ? 'text-slate-600' : 'text-slate-400'}>
-            {language === LanguageCode.HI ? 'केस-टेकिंग प्रगति' : 'Intake Progress'}
+            {language === LanguageCode.HI ? 'केस-टेकिंग प्रगति' : 'Clinical Intake Progress'}
           </span>
-          <span className={isLightMode ? 'text-teal-700' : 'text-teal-400'}>{progress}%</span>
+          <span className="font-mono tabular-nums text-teal-600 dark:text-teal-400 font-black">{progress}%</span>
         </div>
-        <div className={`w-full h-2.5 rounded-full overflow-hidden ${isLightMode ? 'bg-slate-200' : 'bg-slate-800'}`}>
+        <div className={`w-full h-2 rounded-full overflow-hidden ${isLightMode ? 'bg-slate-200' : 'bg-slate-800'}`}>
           <div
             className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full transition-all duration-500"
             style={{ width: `${progress}%` }}
@@ -244,136 +245,155 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
         </div>
       </div>
 
-      {/* Question Card */}
-      <div className={`border rounded-3xl p-6 sm:p-8 shadow-2xl mb-8 space-y-6 transition-colors ${
-        isLightMode
-          ? 'bg-white border-slate-200 shadow-slate-200'
-          : 'bg-slate-900 border-slate-800 shadow-slate-950'
-      }`}>
-        <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-4 ${
-          isLightMode ? 'border-slate-100' : 'border-slate-800'
-        }`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-600 dark:text-teal-300 flex items-center justify-center">
-              <HelpCircle className="w-6 h-6" />
-            </div>
-            <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 border rounded-lg ${
-              isLightMode
-                ? 'bg-teal-50 text-teal-700 border-teal-200'
-                : 'bg-slate-800 text-teal-300 border-slate-700'
-            }`}>
-              {currentQuestion.section}
+      {/* Main Question Card */}
+      <div
+        className={`border rounded-3xl p-6 sm:p-8 shadow-2xl mb-8 space-y-6 transition-colors ${
+          isLightMode ? 'bg-white border-slate-200 shadow-slate-200/50' : 'bg-slate-900 border-slate-800'
+        }`}
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+          <div className="space-y-1">
+            <span className="text-[10px] font-black uppercase tracking-wider text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-md">
+              {currentQuestion.section || 'HPI'} • {currentQuestion.code || 'Q_CP'}
             </span>
+            <h3 className={`text-xl sm:text-2xl font-black tracking-tight leading-snug ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
+              {prompt}
+            </h3>
           </div>
           <AudioPromptButton text={prompt || ''} language={language} size="md" />
         </div>
 
-        {/* Question Prompt */}
-        <h3 className={`text-2xl sm:text-3xl font-extrabold leading-snug ${
-          isLightMode ? 'text-slate-900' : 'text-white'
-        }`}>
-          {prompt}
-        </h3>
-
-        {/* Input Types */}
-        {/* Type 1: Numeric Pain / Severity Scale (1 to 10) */}
-        {currentQuestion.inputType === 'NUMERIC_SCALE' && (
-          <div className="space-y-6 pt-4">
-            <div className="flex items-center justify-between">
-              <span className={`text-sm font-bold ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>1 (Mild / हल्का)</span>
-              <span className={`text-4xl font-black ${isLightMode ? 'text-teal-600' : 'text-teal-400'}`}>{scaleValue}</span>
-              <span className="text-sm font-bold text-rose-500">10 (Severe / अत्यधिक)</span>
-            </div>
-            <input
-              type="range"
-              min="1"
-              max="10"
-              value={scaleValue}
-              onChange={(e) => setScaleValue(parseInt(e.target.value, 10))}
-              className="w-full h-4 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500"
-            />
-            {scaleValue >= 7 && (
-              <div className="p-4 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center gap-3 text-amber-700 dark:text-amber-300 text-xs font-bold">
-                <AlertTriangle className="w-5 h-5 shrink-0 text-amber-500 animate-bounce" />
-                <span>
-                  {language === LanguageCode.HI
-                    ? 'उच्च तीव्रता दर्द (7+) दर्ज किया जा रहा है। अस्पताल के क्लिनिकल ट्राइएज को तत्काल अलर्ट भेजा जाएगा।'
-                    : 'High severity (7+) selected. Priority triage alert will be flagged for the physician immediately.'}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Type 2: Choice Options */}
-        {currentQuestion.options && currentQuestion.options.length > 0 && currentQuestion.inputType !== 'NUMERIC_SCALE' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+        {/* Option 1: Touch / Voice Multiple Choice */}
+        {currentQuestion.inputType === 'VOICE_OR_TOUCH' && currentQuestion.options && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {currentQuestion.options.map((opt) => {
-              const optLabel = language === LanguageCode.HI ? (opt.label?.hi || opt.label?.en) : opt.label?.en;
+              const optLabel =
+                language === LanguageCode.HI ? opt.label?.hi || opt.label?.en : opt.label?.en;
               const isSelected = selectedOption === opt.value;
 
               return (
                 <button
                   key={opt.id}
                   type="button"
-                  onClick={() => {
-                    setSelectedOption(opt.value);
-                    handleSubmitAnswer(opt.value);
-                  }}
-                  className={`p-5 rounded-2xl border-2 flex items-center justify-between text-left transition-all ${
+                  onClick={() => setSelectedOption(opt.value)}
+                  className={`p-5 rounded-2xl border-2 text-left transition-all active:scale-[0.98] flex items-center justify-between group ${
                     isSelected
-                      ? 'bg-teal-500/20 border-teal-500 text-teal-900 dark:text-white shadow-lg shadow-teal-500/10'
+                      ? isLightMode
+                        ? 'bg-teal-50 border-teal-500 shadow-sm'
+                        : 'bg-teal-500/15 border-teal-400 shadow-md shadow-teal-500/10'
                       : isLightMode
-                      ? 'bg-slate-50 border-slate-200 hover:border-teal-400 text-slate-800'
-                      : 'bg-slate-900 border-slate-800 hover:border-slate-600 text-slate-200'
+                      ? 'bg-slate-50 border-slate-200 hover:border-teal-400'
+                      : 'bg-slate-950 border-slate-800 hover:border-slate-700'
                   }`}
                 >
-                  <span className="font-bold text-base">{optLabel}</span>
+                  <span className={`text-sm font-bold ${isSelected ? 'text-teal-700 dark:text-teal-300' : isLightMode ? 'text-slate-800' : 'text-slate-200'}`}>
+                    {optLabel}
+                  </span>
                   <div
                     className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${
                       isSelected
-                        ? 'border-teal-500 bg-teal-500 text-white'
-                        : isLightMode ? 'border-slate-400' : 'border-slate-600'
+                        ? 'bg-teal-500 border-teal-500 text-slate-950 font-bold'
+                        : isLightMode
+                        ? 'border-slate-300'
+                        : 'border-slate-700'
                     }`}
                   >
-                    {isSelected && <CheckCircle className="w-4 h-4" />}
+                    {isSelected && <CheckCircle className="w-4 h-4 stroke-[3]" />}
                   </div>
                 </button>
               );
             })}
           </div>
         )}
+
+        {/* Option 2: Numeric Scale (Pain 1-10) */}
+        {currentQuestion.inputType === 'NUMERIC_SCALE' && (
+          <div className="space-y-6 py-2">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-400">
+              <span>1 - Mild Discomfort (हल्का)</span>
+              <span>5 - Moderate (मध्यम)</span>
+              <span className="text-rose-500">10 - Severe Emergency (अत्यधिक)</span>
+            </div>
+
+            {/* Numeric Quick Buttons (1 to 10) */}
+            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => {
+                const isCurrent = scaleValue === num;
+                const isSevere = num >= 7;
+
+                return (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setScaleValue(num)}
+                    className={`py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 border-2 ${
+                      isCurrent
+                        ? isSevere
+                          ? 'bg-rose-500 text-white border-rose-400 shadow-lg shadow-rose-500/20 scale-105'
+                          : 'bg-teal-500 text-slate-950 border-teal-400 shadow-lg shadow-teal-500/20 scale-105'
+                        : isLightMode
+                        ? 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
+                        : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Slider with dynamic indicator */}
+            <input
+              type="range"
+              min={1}
+              max={10}
+              value={scaleValue}
+              onChange={(e) => setScaleValue(parseInt(e.target.value, 10))}
+              className="w-full accent-teal-500 cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
+            />
+
+            {scaleValue >= 7 && (
+              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
+                <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 animate-bounce" />
+                <span>
+                  {language === LanguageCode.HI
+                    ? 'चेतावनी: स्कोर 7+ होने पर आपातकालीन प्रोटोकॉल सक्रिय होगा।'
+                    : 'Warning: Pain score >= 7 automatically flags Critical Emergency protocol.'}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Voice Simulation & Proceed Footer */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto">
+      {/* Voice Recording Simulation Banner */}
+      {isVoiceRecording && (
+        <div className="mb-6 p-4 rounded-2xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center gap-3 animate-pulse">
+          <div className="w-3 h-3 bg-teal-500 rounded-full animate-ping" />
+          <span className="text-xs font-bold text-teal-700 dark:text-teal-300">
+            {language === LanguageCode.HI ? 'सुन रहा हूँ... बोलिए' : 'Listening... speak clearly into kiosk microphone'}
+          </span>
+        </div>
+      )}
+
+      {/* Footer Navigation Controls */}
+      <div className="flex flex-col sm:flex-row gap-4 mt-auto">
         <button
           type="button"
           onClick={handleSimulateVoice}
-          disabled={isVoiceRecording}
-          className={`p-4 rounded-2xl border font-bold text-sm flex items-center justify-center gap-2 transition-all ${
-            isVoiceRecording
-              ? 'bg-rose-500/20 border-rose-500 text-rose-600 dark:text-rose-300 animate-pulse'
-              : isLightMode
-              ? 'bg-white hover:bg-slate-50 text-slate-800 border-slate-300 shadow-sm'
-              : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
-          }`}
+          className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 border border-slate-300 dark:border-slate-700 transition-all active:scale-[0.98]"
         >
-          <Mic className="w-5 h-5 text-teal-500" />
-          <span>
-            {isVoiceRecording
-              ? (language === LanguageCode.HI ? 'सुन रहे हैं...' : 'Listening...')
-              : (language === LanguageCode.HI ? 'माइक द्वारा बोलें' : 'Speak Voice Answer')}
-          </span>
+          <Mic className="w-4 h-4 text-teal-500" />
+          <span>{language === LanguageCode.HI ? 'आवाज से उत्तर दें (माइक)' : 'Speak Answer (Mic)'}</span>
         </button>
 
         <button
           type="button"
           onClick={() => handleSubmitAnswer()}
-          className="p-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-400 hover:from-teal-400 hover:to-emerald-300 text-slate-950 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 active:scale-95 transition-all"
+          className="flex-1 py-4 bg-gradient-to-r from-teal-500 to-emerald-400 hover:from-teal-400 hover:to-emerald-300 text-slate-950 font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all active:scale-[0.98]"
         >
-          <span>{language === LanguageCode.HI ? 'उत्तर दर्ज करें (आगे बढ़ें)' : 'Submit & Next'}</span>
-          <ArrowRight className="w-5 h-5" />
+          <span>{language === LanguageCode.HI ? 'पुष्टि करें व आगे बढ़ें' : 'Confirm & Next'}</span>
+          <ArrowRight className="w-4 h-4" />
         </button>
       </div>
     </div>
