@@ -85,14 +85,14 @@ export const ChiefComplaintScreen: React.FC<ChiefComplaintScreenProps> = ({
       : 'What is the main problem bringing you to the hospital today? Touch a symptom card or speak.';
 
   return (
-    <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-6">
+    <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full py-2 px-1 sm:px-4 justify-between">
       {/* Title & Audio Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-[#EAEAEA] dark:border-[#232734] pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 border-b border-[#EAEAEA] dark:border-[#232734] pb-3 shrink-0">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-[#111111] dark:text-[#F4F4F6]">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#111111] dark:text-[#F4F4F6]">
             {language === LanguageCode.HI ? 'मुख्य तकलीफ चुनें' : 'Select Chief Complaint'}
           </h2>
-          <p className="text-xs text-[#787774] dark:text-[#8E94A4] mt-1">
+          <p className="text-xs text-[#787774] dark:text-[#8E94A4] mt-0.5">
             {language === LanguageCode.HI
               ? 'आप जिस समस्या के लिए डॉक्टर को दिखाने आए हैं, उस पर टच करें'
               : 'Touch the card that best describes your primary health concern'}
@@ -101,8 +101,8 @@ export const ChiefComplaintScreen: React.FC<ChiefComplaintScreenProps> = ({
         <AudioPromptButton text={promptText} language={language} size="md" />
       </div>
 
-      {/* Grid of Minimalist Symptom Bento Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 mb-6">
+      {/* Grid of Dynamic Bento Symptom Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 mb-4">
         {COMPLAINT_CARDS.map((card) => {
           const Icon = card.icon;
           const label = language === LanguageCode.HI ? card.labelHi : card.labelEn;
@@ -113,38 +113,40 @@ export const ChiefComplaintScreen: React.FC<ChiefComplaintScreenProps> = ({
               key={card.key}
               type="button"
               onClick={() => onSelectComplaint(card.key, label)}
-              className="p-5 rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] hover:border-[#111111] dark:hover:border-[#F4F4F6] flex flex-col items-start text-left transition-all duration-150 active:scale-[0.98] group"
+              className="p-4 sm:p-4.5 min-h-[96px] rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] hover:border-[#111111] dark:hover:border-[#F4F4F6] flex flex-col items-start justify-between text-left transition-all duration-150 active:scale-[0.98] group cursor-pointer shadow-xs"
             >
-              <div className="flex items-center justify-between w-full mb-3">
-                <div className={`p-2 rounded-md ${card.tagClass}`}>
+              <div className="flex items-center justify-between w-full mb-2">
+                <div className={`p-1.5 sm:p-2 rounded-md ${card.tagClass}`}>
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="text-[#999999] group-hover:text-[#111111] dark:group-hover:text-[#F4F4F6] transition-colors">
                   <ArrowRight className="w-3.5 h-3.5" />
                 </div>
               </div>
-              <h3 className="text-sm font-bold text-[#111111] dark:text-[#F4F4F6] mb-1">
-                {label}
-              </h3>
-              <p className="text-[11px] text-[#787774] dark:text-[#8E94A4] leading-relaxed">
-                {sub}
-              </p>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold text-[#111111] dark:text-[#F4F4F6] mb-0.5 leading-snug">
+                  {label}
+                </h3>
+                <p className="text-[10px] sm:text-[11px] text-[#787774] dark:text-[#8E94A4] leading-tight line-clamp-2">
+                  {sub}
+                </p>
+              </div>
             </button>
           );
         })}
       </div>
 
-      {/* Voice Assistant Shortcut */}
-      <div className="mt-auto p-4 rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#F7F6F3] dark:bg-[#141720] flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#FFFFFF] dark:bg-[#1E222D] border border-[#EAEAEA] dark:border-[#2D3242] flex items-center justify-center text-[#111111] dark:text-[#F4F4F6]">
+      {/* Voice Assistant Shortcut with Comfortable Touch Target */}
+      <div className="mt-auto p-3 sm:p-3.5 rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#F7F6F3] dark:bg-[#141720] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="w-8 h-8 rounded-lg bg-[#FFFFFF] dark:bg-[#1E222D] border border-[#EAEAEA] dark:border-[#2D3242] flex items-center justify-center text-[#111111] dark:text-[#F4F4F6] shrink-0">
             <Mic className="w-4 h-4" />
           </div>
-          <div>
-            <h4 className="text-xs font-bold text-[#111111] dark:text-[#F4F4F6]">
+          <div className="min-w-0">
+            <h4 className="text-xs font-bold text-[#111111] dark:text-[#F4F4F6] truncate">
               {language === LanguageCode.HI ? 'बोलकर तकलीफ बताना चाहते हैं?' : 'Prefer speaking your symptoms?'}
             </h4>
-            <p className="text-[11px] text-[#787774] dark:text-[#8E94A4]">
+            <p className="text-[11px] text-[#787774] dark:text-[#8E94A4] truncate">
               {language === LanguageCode.HI ? 'माइक पर बोलें: "कल रात से सीने में दर्द है"' : 'Say clearly: "Chest pain since yesterday"'}
             </p>
           </div>
@@ -157,9 +159,9 @@ export const ChiefComplaintScreen: React.FC<ChiefComplaintScreenProps> = ({
               language === LanguageCode.HI ? 'सीने में दर्द या भारीपन' : 'Chest Pain / Discomfort'
             )
           }
-          className="px-3 py-1.5 bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md text-xs font-medium flex items-center gap-1.5 active:scale-95 transition-all"
+          className="w-full sm:w-auto px-3.5 py-2 min-h-[40px] bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md text-xs font-medium flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer shrink-0"
         >
-          <Mic className="w-3 h-3" />
+          <Mic className="w-3.5 h-3.5" />
           <span>{language === LanguageCode.HI ? 'आवाज से चुनें' : 'Simulate Voice'}</span>
         </button>
       </div>

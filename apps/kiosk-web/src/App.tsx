@@ -56,14 +56,12 @@ export const App: React.FC = () => {
     if (!patient) return;
 
     try {
-      // 1. Create Encounter
       const encounter = await KioskApi.createEncounter({
         patientId: patient.id,
         department: complaintKey === 'ayush_assessment' ? 'Kayachikitsa / AYUSH' : 'General Medicine',
         chiefComplaintSummary: complaintLabel,
       });
 
-      // 2. Create Clinical Session
       const session = await KioskApi.createSession({
         encounterId: encounter.id,
         patientId: patient.id,
@@ -72,7 +70,6 @@ export const App: React.FC = () => {
 
       setSessionId(session.id);
 
-      // Record first answer for chief complaint
       await KioskApi.recordAnswer(session.id, {
         questionId: 'q_chief_complaint',
         selectedOptions: [complaintKey],
@@ -102,11 +99,13 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col transition-colors ${
-      isLightMode
-        ? 'bg-slate-50 text-slate-900 selection:bg-teal-500 selection:text-white'
-        : 'bg-slate-950 text-slate-100 selection:bg-teal-500 selection:text-slate-950'
-    }`}>
+    <div
+      className={`h-screen max-h-screen w-full flex flex-col overflow-hidden select-none transition-colors ${
+        isLightMode
+          ? 'bg-[#FBFBFA] text-[#111111]'
+          : 'bg-[#0D0F14] text-[#F4F4F6]'
+      }`}
+    >
       {/* Universal Kiosk Header with Theme Toggle */}
       <Header
         currentLanguage={language}
@@ -118,9 +117,10 @@ export const App: React.FC = () => {
             patientId: patient?.id || 'manual',
             ruleId: 'MANUAL_EMERGENCY_BUTTON',
             severity: 'CRITICAL_EMERGENCY' as any,
-            alertMessage: language === LanguageCode.HI
-              ? 'मरीज ने कियोस्क स्क्रीन पर आपातकालीन सहायता बटन दबाया है।'
-              : 'Patient pressed emergency assistance button on kiosk screen.',
+            alertMessage:
+              language === LanguageCode.HI
+                ? 'मरीज ने कियोस्क स्क्रीन पर आपातकालीन सहायता बटन दबाया है।'
+                : 'Patient pressed emergency assistance button on kiosk screen.',
             triggerFacts: [],
             isAcknowledged: false,
             createdAt: new Date().toISOString(),
@@ -131,11 +131,11 @@ export const App: React.FC = () => {
         onToggleTheme={() => setIsLightMode(!isLightMode)}
       />
 
-      {/* Progress Tracker */}
+      {/* Progress Tracker with Dynamic Pixel Sizing */}
       <ProgressBar currentStep={currentStep} language={language} />
 
-      {/* Dynamic Screen Renderer */}
-      <main className="flex-1 flex flex-col">
+      {/* Dynamic Screen Viewport Container with safe internal scrolling */}
+      <main className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col justify-between px-3 sm:px-6 py-2 sm:py-4">
         {currentStep === 'LANGUAGE' && (
           <WelcomeScreen onSelectLanguage={handleSelectLanguage} />
         )}
@@ -169,7 +169,6 @@ export const App: React.FC = () => {
             language={language}
             onInterviewCompleted={() => setCurrentStep('DOCUMENTS')}
             onRedFlagTriggered={handleRedFlagTriggered}
-            isLightMode={isLightMode}
           />
         )}
 

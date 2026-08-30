@@ -39,17 +39,17 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, language 
   const currentIdx = STEPS.findIndex((s) => s.id === currentStep);
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-6 pt-6 pb-2">
-      <div className="flex items-center justify-between gap-2">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-1 shrink-0">
+      <div className="flex items-center justify-between gap-1.5 sm:gap-2">
         {STEPS.map((step, idx) => {
           const isPassed = currentIdx > idx;
           const isCurrent = currentStep === step.id;
 
           return (
-            <div key={step.id} className="flex-1 flex flex-col items-center">
-              {/* Minimalist Progress Segment Bar */}
+            <div key={step.id} className="flex-1 flex flex-col items-center min-w-0">
+              {/* Dynamic Responsive Progress Segment */}
               <div
-                className={`w-full h-1 rounded-full mb-2 transition-colors duration-200 ${
+                className={`w-full h-1 sm:h-1.5 rounded-full mb-1.5 transition-colors duration-200 ${
                   isPassed
                     ? 'bg-[#346538] dark:bg-[#6EE787]'
                     : isCurrent
@@ -58,7 +58,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, language 
                 }`}
               />
               <span
-                className={`text-[10px] font-mono uppercase tracking-wider transition-colors ${
+                className={`text-[9px] sm:text-[10px] font-mono uppercase tracking-wider truncate text-center max-w-full transition-colors ${
                   isCurrent
                     ? 'text-[#111111] dark:text-[#F4F4F6] font-bold'
                     : isPassed

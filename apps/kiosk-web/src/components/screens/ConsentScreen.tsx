@@ -52,15 +52,15 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full p-6">
+    <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full py-2 px-1 sm:px-4 justify-between">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 border-b border-[#EAEAEA] dark:border-[#232734] pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 border-b border-[#EAEAEA] dark:border-[#232734] pb-3 shrink-0">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-[#111111] dark:text-[#F4F4F6] flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#111111] dark:text-[#F4F4F6] flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-[#1F6C9F] dark:text-[#70B8FF]" />
             <span>{language === LanguageCode.HI ? 'सूचित डिजिटल सहमति' : 'Informed Digital Consent'}</span>
           </h2>
-          <p className="text-xs text-[#787774] dark:text-[#8E94A4] mt-1 font-mono tabular-nums">
+          <p className="text-xs text-[#787774] dark:text-[#8E94A4] mt-0.5 font-mono tabular-nums">
             {language === LanguageCode.HI
               ? `मरीज: ${patient.fullName} (${patient.age || 'N/A'} yrs / ${patient.gender})`
               : `Patient: ${patient.fullName} (${patient.age || 'N/A'} yrs / ${patient.gender})`}
@@ -69,16 +69,16 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
         <AudioPromptButton text={consentPrompt} language={language} size="md" />
       </div>
 
-      {/* Main Consent Document Bento */}
-      <div className="border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] rounded-xl p-6 mb-6 space-y-4">
+      {/* Main Consent Document Bento with dynamic internal flow */}
+      <div className="border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] rounded-xl p-4 sm:p-5 mb-4 space-y-3 shadow-xs">
         <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-[#555555] dark:text-[#8E94A4]">
-          <Lock className="w-4 h-4" />
+          <Lock className="w-3.5 h-3.5" />
           <span>{language === LanguageCode.HI ? 'डेटा सुरक्षा और उपयोग की शर्तें:' : 'Data Privacy & Clinical Use Terms:'}</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
           {/* Scope 1 */}
-          <div className="p-3.5 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] flex items-start gap-2.5">
+          <div className="p-3 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] flex items-start gap-2.5">
             <CheckCircle2 className="w-4 h-4 text-[#346538] dark:text-[#6EE787] mt-0.5 shrink-0" />
             <div>
               <h4 className="font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">
@@ -93,7 +93,7 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
           </div>
 
           {/* Scope 2 */}
-          <div className="p-3.5 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] flex items-start gap-2.5">
+          <div className="p-3 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] flex items-start gap-2.5">
             <FileText className="w-4 h-4 text-[#1F6C9F] dark:text-[#70B8FF] mt-0.5 shrink-0" />
             <div>
               <h4 className="font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">
@@ -108,7 +108,7 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
           </div>
 
           {/* Scope 3 */}
-          <div className="p-3.5 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] flex items-start gap-2.5">
+          <div className="p-3 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] flex items-start gap-2.5">
             <Sparkles className="w-4 h-4 text-[#956400] dark:text-[#FDE047] mt-0.5 shrink-0" />
             <div>
               <h4 className="font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">
@@ -123,7 +123,7 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
           </div>
 
           {/* Scope 4 */}
-          <div className="p-3.5 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] flex items-start gap-2.5">
+          <div className="p-3 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] flex items-start gap-2.5">
             <ShieldCheck className="w-4 h-4 text-[#1F6C9F] dark:text-[#70B8FF] mt-0.5 shrink-0" />
             <div>
               <h4 className="font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">
@@ -138,19 +138,19 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
           </div>
         </div>
 
-        <div className="p-3 bg-[#FBFBFA] dark:bg-[#10121A] border border-[#EAEAEA] dark:border-[#232734] rounded-lg text-[11px] text-[#787774] dark:text-[#8E94A4] leading-relaxed">
+        <div className="p-2.5 bg-[#FBFBFA] dark:bg-[#10121A] border border-[#EAEAEA] dark:border-[#232734] rounded-lg text-[10px] sm:text-[11px] text-[#787774] dark:text-[#8E94A4] leading-relaxed">
           {language === LanguageCode.HI
             ? 'सूचना: आप किसी भी समय अपनी सहमति वापस ले सकते हैं। आपका डेटा एन्क्रिप्टेड और सुरक्षित रखा जाता है।'
             : 'Notice: You may revoke consent at any time. All data is AES-256 encrypted and handled in compliance with DPDP Act & ABDM policies.'}
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
+      {/* Action Buttons with Comfortable Touch Height (>=48px) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto shrink-0">
         <button
           type="button"
           onClick={onConsentDenied}
-          className="py-3 px-4 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#666666] dark:text-[#8E94A4] font-medium text-xs hover:bg-[#F7F6F3] dark:hover:bg-[#1A1D27] transition-all"
+          className="py-3 px-4 min-h-[48px] rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#666666] dark:text-[#8E94A4] font-medium text-xs hover:bg-[#F7F6F3] dark:hover:bg-[#1A1D27] transition-all cursor-pointer"
         >
           <span>{language === LanguageCode.HI ? 'असहमत / रद्द करें' : 'Decline / Cancel'}</span>
         </button>
@@ -159,7 +159,7 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
           type="button"
           disabled={isSubmitting}
           onClick={handleAgree}
-          className="py-3 px-4 rounded-lg bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all"
+          className="py-3 px-4 min-h-[48px] rounded-lg bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer shadow-xs"
         >
           <span>{language === LanguageCode.HI ? 'हाँ, मैं सहमत हूँ (आगे बढ़ें)' : 'I Agree & Proceed'}</span>
           <ArrowRight className="w-4 h-4" />
