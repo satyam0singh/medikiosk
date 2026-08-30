@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HelpCircle, Mic, ArrowRight, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Mic, ArrowRight, CheckCircle, AlertTriangle } from 'lucide-react';
 import { ClinicalQuestion, LanguageCode, ProvenanceType, RedFlagAlert } from '@medikiosk/shared-types';
 import { AudioPromptButton } from '../AudioPromptButton';
 import { KioskApi } from '../../services/api';
@@ -95,7 +95,6 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
   language,
   onInterviewCompleted,
   onRedFlagTriggered,
-  isLightMode = false,
 }) => {
   const [currentQuestion, setCurrentQuestion] = useState<ClinicalQuestion | null>(FALLBACK_QUESTIONS[0]!);
   const [progress, setProgress] = useState(25);
@@ -211,9 +210,9 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
     return (
       <div className="flex-1 flex items-center justify-center p-12">
         <div className="text-center space-y-3">
-          <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className={`text-sm font-semibold ${isLightMode ? 'text-teal-700' : 'text-teal-300'}`}>
-            {language === LanguageCode.HI ? 'अगला प्रश्न लोड हो रहा है...' : 'Loading next clinical question...'}
+          <div className="w-8 h-8 border-2 border-[#111111] dark:border-[#F4F4F6] border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-xs text-[#787774] dark:text-[#8E94A4]">
+            {language === LanguageCode.HI ? 'लोड हो रहा है...' : 'Loading question...'}
           </p>
         </div>
       </div>
@@ -228,35 +227,23 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
     language === LanguageCode.HI ? currentQuestion.prompt?.hi || currentQuestion.prompt?.en : currentQuestion.prompt?.en;
 
   return (
-    <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-6">
-      {/* Progress Bar Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between text-xs font-bold mb-2">
-          <span className={isLightMode ? 'text-slate-600' : 'text-slate-400'}>
-            {language === LanguageCode.HI ? 'केस-टेकिंग प्रगति' : 'Clinical Intake Progress'}
-          </span>
-          <span className="font-mono tabular-nums text-teal-600 dark:text-teal-400 font-black">{progress}%</span>
-        </div>
-        <div className={`w-full h-2 rounded-full overflow-hidden ${isLightMode ? 'bg-slate-200' : 'bg-slate-800'}`}>
-          <div
-            className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+    <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full p-6">
+      {/* Progress Header */}
+      <div className="mb-6 flex items-center justify-between text-xs font-mono tabular-nums text-[#787774] dark:text-[#8E94A4]">
+        <span>
+          {language === LanguageCode.HI ? 'प्रगति' : 'Intake Progress'}
+        </span>
+        <span className="font-bold text-[#111111] dark:text-[#F4F4F6]">{progress}%</span>
       </div>
 
-      {/* Main Question Card */}
-      <div
-        className={`border rounded-3xl p-6 sm:p-8 shadow-2xl mb-8 space-y-6 transition-colors ${
-          isLightMode ? 'bg-white border-slate-200 shadow-slate-200/50' : 'bg-slate-900 border-slate-800'
-        }`}
-      >
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+      {/* Main Question Bento */}
+      <div className="border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] rounded-xl p-6 mb-6 space-y-5">
+        <div className="flex items-start justify-between gap-4 border-b border-[#EAEAEA] dark:border-[#232734] pb-4">
           <div className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-md">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#787774] dark:text-[#8E94A4]">
               {currentQuestion.section || 'HPI'} • {currentQuestion.code || 'Q_CP'}
             </span>
-            <h3 className={`text-xl sm:text-2xl font-black tracking-tight leading-snug ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
+            <h3 className="text-lg sm:text-xl font-bold tracking-tight text-[#111111] dark:text-[#F4F4F6] leading-snug">
               {prompt}
             </h3>
           </div>
@@ -265,7 +252,7 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
 
         {/* Option 1: Touch / Voice Multiple Choice */}
         {currentQuestion.inputType === 'VOICE_OR_TOUCH' && currentQuestion.options && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {currentQuestion.options.map((opt) => {
               const optLabel =
                 language === LanguageCode.HI ? opt.label?.hi || opt.label?.en : opt.label?.en;
@@ -276,29 +263,23 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
                   key={opt.id}
                   type="button"
                   onClick={() => setSelectedOption(opt.value)}
-                  className={`p-5 rounded-2xl border-2 text-left transition-all active:scale-[0.98] flex items-center justify-between group ${
+                  className={`p-4 rounded-lg border text-left transition-all active:scale-[0.98] flex items-center justify-between group ${
                     isSelected
-                      ? isLightMode
-                        ? 'bg-teal-50 border-teal-500 shadow-sm'
-                        : 'bg-teal-500/15 border-teal-400 shadow-md shadow-teal-500/10'
-                      : isLightMode
-                      ? 'bg-slate-50 border-slate-200 hover:border-teal-400'
-                      : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                      ? 'border-[#111111] dark:border-[#F4F4F6] bg-[#F7F6F3] dark:bg-[#1E222D]'
+                      : 'border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] hover:border-[#CCCCCC]'
                   }`}
                 >
-                  <span className={`text-sm font-bold ${isSelected ? 'text-teal-700 dark:text-teal-300' : isLightMode ? 'text-slate-800' : 'text-slate-200'}`}>
+                  <span className="text-xs font-medium text-[#111111] dark:text-[#F4F4F6]">
                     {optLabel}
                   </span>
                   <div
-                    className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${
+                    className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
                       isSelected
-                        ? 'bg-teal-500 border-teal-500 text-slate-950 font-bold'
-                        : isLightMode
-                        ? 'border-slate-300'
-                        : 'border-slate-700'
+                        ? 'bg-[#111111] border-[#111111] dark:bg-[#F4F4F6] dark:border-[#F4F4F6] text-[#FFFFFF] dark:text-[#111111]'
+                        : 'border-[#CCCCCC] dark:border-[#444444]'
                     }`}
                   >
-                    {isSelected && <CheckCircle className="w-4 h-4 stroke-[3]" />}
+                    {isSelected && <CheckCircle className="w-3 h-3 stroke-[3]" />}
                   </div>
                 </button>
               );
@@ -308,15 +289,15 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
 
         {/* Option 2: Numeric Scale (Pain 1-10) */}
         {currentQuestion.inputType === 'NUMERIC_SCALE' && (
-          <div className="space-y-6 py-2">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-400">
-              <span>1 - Mild Discomfort (हल्का)</span>
-              <span>5 - Moderate (मध्यम)</span>
-              <span className="text-rose-500">10 - Severe Emergency (अत्यधिक)</span>
+          <div className="space-y-4 py-1">
+            <div className="flex items-center justify-between text-[11px] font-mono text-[#787774] dark:text-[#8E94A4]">
+              <span>1 - Mild</span>
+              <span>5 - Moderate</span>
+              <span className="text-[#9F2F2D] dark:text-[#FCA5A5]">10 - Severe</span>
             </div>
 
-            {/* Numeric Quick Buttons (1 to 10) */}
-            <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+            {/* Numeric 1 to 10 Minimal Buttons */}
+            <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => {
                 const isCurrent = scaleValue === num;
                 const isSevere = num >= 7;
@@ -326,14 +307,12 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
                     key={num}
                     type="button"
                     onClick={() => setScaleValue(num)}
-                    className={`py-3.5 rounded-2xl font-black text-sm transition-all active:scale-95 border-2 ${
+                    className={`py-3 rounded-md font-mono text-xs tabular-nums transition-all active:scale-95 border ${
                       isCurrent
                         ? isSevere
-                          ? 'bg-rose-500 text-white border-rose-400 shadow-lg shadow-rose-500/20 scale-105'
-                          : 'bg-teal-500 text-slate-950 border-teal-400 shadow-lg shadow-teal-500/20 scale-105'
-                        : isLightMode
-                        ? 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
-                        : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                          ? 'bg-[#9F2F2D] dark:bg-[#F87171] text-[#FFFFFF] dark:text-[#111111] border-transparent font-bold'
+                          : 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] border-transparent font-bold'
+                        : 'border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] text-[#111111] dark:text-[#F4F4F6] hover:border-[#CCCCCC]'
                     }`}
                   >
                     {num}
@@ -342,23 +321,22 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
               })}
             </div>
 
-            {/* Slider with dynamic indicator */}
             <input
               type="range"
               min={1}
               max={10}
               value={scaleValue}
               onChange={(e) => setScaleValue(parseInt(e.target.value, 10))}
-              className="w-full accent-teal-500 cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
+              className="w-full accent-[#111111] dark:accent-[#F4F4F6] cursor-pointer h-1.5 bg-[#EAEAEA] dark:bg-[#232734] rounded-lg"
             />
 
             {scaleValue >= 7 && (
-              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-2.5 text-xs text-rose-600 dark:text-rose-400 font-bold">
-                <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0 animate-bounce" />
+              <div className="p-3 rounded-lg tag-pastel-red flex items-center gap-2 text-xs font-mono">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                 <span>
                   {language === LanguageCode.HI
                     ? 'चेतावनी: स्कोर 7+ होने पर आपातकालीन प्रोटोकॉल सक्रिय होगा।'
-                    : 'Warning: Pain score >= 7 automatically flags Critical Emergency protocol.'}
+                    : 'Notice: Pain score >= 7 flags Priority Clinical Triage.'}
                 </span>
               </div>
             )}
@@ -366,34 +344,34 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
         )}
       </div>
 
-      {/* Voice Recording Simulation Banner */}
+      {/* Voice Recording Simulation */}
       {isVoiceRecording && (
-        <div className="mb-6 p-4 rounded-2xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center gap-3 animate-pulse">
-          <div className="w-3 h-3 bg-teal-500 rounded-full animate-ping" />
-          <span className="text-xs font-bold text-teal-700 dark:text-teal-300">
-            {language === LanguageCode.HI ? 'सुन रहा हूँ... बोलिए' : 'Listening... speak clearly into kiosk microphone'}
+        <div className="mb-4 p-3 rounded-lg tag-pastel-blue flex items-center justify-center gap-2 font-mono text-xs">
+          <div className="w-2 h-2 bg-[#1F6C9F] dark:bg-[#70B8FF] rounded-full animate-ping" />
+          <span>
+            {language === LanguageCode.HI ? 'सुन रहा हूँ... बोलिए' : 'Listening into kiosk microphone...'}
           </span>
         </div>
       )}
 
-      {/* Footer Navigation Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 mt-auto">
+      {/* Action Footer */}
+      <div className="flex flex-col sm:flex-row gap-3 mt-auto">
         <button
           type="button"
           onClick={handleSimulateVoice}
-          className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 border border-slate-300 dark:border-slate-700 transition-all active:scale-[0.98]"
+          className="flex-1 py-3 px-4 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#666666] dark:text-[#8E94A4] font-medium text-xs flex items-center justify-center gap-2 transition-all active:scale-95"
         >
-          <Mic className="w-4 h-4 text-teal-500" />
-          <span>{language === LanguageCode.HI ? 'आवाज से उत्तर दें (माइक)' : 'Speak Answer (Mic)'}</span>
+          <Mic className="w-3.5 h-3.5" />
+          <span>{language === LanguageCode.HI ? 'आवाज से उत्तर दें' : 'Speak Answer'}</span>
         </button>
 
         <button
           type="button"
           onClick={() => handleSubmitAnswer()}
-          className="flex-1 py-4 bg-gradient-to-r from-teal-500 to-emerald-400 hover:from-teal-400 hover:to-emerald-300 text-slate-950 font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all active:scale-[0.98]"
+          className="flex-1 py-3 px-4 rounded-lg bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           <span>{language === LanguageCode.HI ? 'पुष्टि करें व आगे बढ़ें' : 'Confirm & Next'}</span>
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

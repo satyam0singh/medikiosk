@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Search, AlertCircle, Clock, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Users, Search, Clock, CheckCircle2 } from 'lucide-react';
 
 export interface QueueItem {
   encounterId: string;
@@ -38,23 +38,23 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
 
   return (
     <aside
-      className={`w-80 border-r flex flex-col shrink-0 h-[calc(100vh-61px)] transition-colors ${
-        isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-900/70 border-slate-800'
+      className={`w-72 border-r flex flex-col shrink-0 h-[calc(100vh-57px)] transition-colors ${
+        isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
       }`}
     >
       {/* Queue Header */}
-      <div className={`p-4 border-b space-y-3 ${isLightMode ? 'border-slate-200 bg-white' : 'border-slate-800 bg-slate-900/50'}`}>
+      <div className={`p-3.5 border-b space-y-2.5 ${isLightMode ? 'border-[#EAEAEA] bg-[#FFFFFF]' : 'border-[#232734] bg-[#141720]'}`}>
         <div className="flex items-center justify-between">
-          <div className={`flex items-center gap-2 font-black text-sm tracking-tight ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
-            <Users className="w-4 h-4 text-sky-500" />
-            <span>OPD Patient Queue</span>
+          <div className={`flex items-center gap-1.5 font-bold text-xs ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
+            <Users className="w-3.5 h-3.5 text-[#555555] dark:text-[#8E94A4]" />
+            <span>OPD Queue</span>
           </div>
           <span
-            className={`px-2.5 py-0.5 font-mono font-bold text-xs rounded-full tabular-nums ${
-              isLightMode ? 'bg-sky-100 text-sky-700 border border-sky-200' : 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
+            className={`px-2 py-0.5 font-mono text-[10px] rounded-full tabular-nums ${
+              isLightMode ? 'tag-pastel-blue' : 'tag-pastel-blue'
             }`}
           >
-            {queue.length} Queued
+            {queue.length} Patients
           </span>
         </div>
 
@@ -64,21 +64,21 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
             type="text"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            placeholder="Search patient / ABHA / symptom..."
-            className={`w-full border rounded-xl py-2 pl-9 pr-3 text-xs outline-none focus:border-sky-500 transition-colors ${
+            placeholder="Search patient / ABHA..."
+            className={`w-full border rounded-md py-1.5 pl-8 pr-2.5 text-xs font-medium outline-none transition-colors ${
               isLightMode
-                ? 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400'
-                : 'bg-slate-950 border-slate-800 text-slate-200 placeholder-slate-500'
+                ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#111111] placeholder-[#999999] focus:border-[#111111]'
+                : 'bg-[#1A1D27] border-[#2A2E3D] text-[#F4F4F6] placeholder-[#5D6373] focus:border-[#F4F4F6]'
             }`}
           />
-          <Search className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 ${isLightMode ? 'text-slate-400' : 'text-slate-500'}`} />
+          <Search className={`w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 ${isLightMode ? 'text-[#999999]' : 'text-[#5D6373]'}`} />
         </div>
       </div>
 
       {/* Queue List */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
         {filteredQueue.length === 0 ? (
-          <div className="p-8 text-center text-xs text-slate-400">
+          <div className="p-6 text-center text-xs text-[#888888]">
             No patients match filter
           </div>
         ) : (
@@ -90,64 +90,56 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
                 key={item.encounterId}
                 type="button"
                 onClick={() => onSelectEncounter(item.encounterId)}
-                className={`w-full p-3.5 rounded-2xl border text-left transition-all relative group ${
+                className={`w-full p-3 rounded-lg border text-left transition-all relative ${
                   isSelected
                     ? isLightMode
-                      ? 'bg-white border-sky-500 shadow-md shadow-sky-500/10 ring-2 ring-sky-500/20'
-                      : 'bg-sky-500/10 border-sky-500 shadow-lg shadow-sky-500/10 ring-1 ring-sky-500/40'
+                      ? 'bg-[#FFFFFF] border-[#111111] shadow-xs'
+                      : 'bg-[#1C202B] border-[#F4F4F6]'
                     : isLightMode
-                    ? 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
-                    : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                    ? 'bg-[#FFFFFF] border-[#EAEAEA] hover:border-[#CCCCCC]'
+                    : 'bg-[#141720] border-[#232734] hover:border-[#353A4D]'
                 }`}
               >
-                {/* Top Row: Name & Red Flag / Status */}
-                <div className="flex items-start justify-between gap-2 mb-1.5">
-                  <h4 className={`text-sm font-bold truncate ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
+                {/* Top Row: Name & Tag */}
+                <div className="flex items-start justify-between gap-1.5 mb-1">
+                  <h4 className={`text-xs font-bold truncate ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
                     {item.fullName}
                   </h4>
                   {item.hasRedFlag ? (
-                    <span className="px-2 py-0.5 bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-[10px] font-black rounded-md flex items-center gap-1 shrink-0 animate-pulse">
-                      <AlertCircle className="w-3 h-3" />
-                      <span>PRIORITY</span>
+                    <span className="tag-pastel-red px-1.5 py-0.2 rounded text-[9px] font-mono font-bold shrink-0">
+                      PRIORITY
                     </span>
                   ) : item.status === 'COMPLETED' ? (
-                    <span className="px-2 py-0.5 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-black rounded-md flex items-center gap-1 shrink-0">
-                      <CheckCircle2 className="w-3 h-3" />
-                      <span>VERIFIED</span>
+                    <span className="tag-pastel-green px-1.5 py-0.2 rounded text-[9px] font-mono font-bold shrink-0 flex items-center gap-0.5">
+                      <CheckCircle2 className="w-2.5 h-2.5" />
+                      <span>SIGNED</span>
                     </span>
                   ) : null}
                 </div>
 
                 {/* Sub row: Demographics */}
-                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-2 font-medium">
+                <div className="flex items-center gap-1.5 text-[11px] text-[#787774] dark:text-[#8E94A4] mb-1.5 font-mono tabular-nums">
                   <span>{item.gender}</span>
                   <span>•</span>
-                  <span className="font-mono tabular-nums">{item.age} yrs</span>
+                  <span>{item.age}y</span>
                   <span>•</span>
-                  <span className="font-mono text-[11px] truncate text-slate-400">{item.abhaId}</span>
+                  <span className="truncate">{item.abhaId}</span>
                 </div>
 
-                {/* Chief Complaint Badge */}
-                <div className="flex items-center justify-between">
+                {/* Chief Complaint & Time */}
+                <div className="flex items-center justify-between text-[10px]">
                   <span
-                    className={`text-[11px] font-semibold truncate max-w-[190px] px-2 py-0.5 rounded-md ${
-                      isLightMode ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
+                    className={`truncate max-w-[150px] px-1.5 py-0.5 rounded ${
+                      isLightMode ? 'bg-[#F4F4F2] text-[#444444]' : 'bg-[#1A1D27] text-[#9EA5B5]'
                     }`}
                   >
                     {item.chiefComplaint}
                   </span>
-                  <div className="flex items-center gap-1 text-[10px] text-slate-400 font-mono">
-                    <Clock className="w-3 h-3" />
+                  <div className="flex items-center gap-1 text-[#888888] font-mono tabular-nums">
+                    <Clock className="w-2.5 h-2.5" />
                     <span>{item.queueTime}</span>
                   </div>
                 </div>
-
-                {/* Active Indicator Chevron */}
-                {isSelected && (
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 text-sky-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ChevronRight className="w-4 h-4" />
-                  </div>
-                )}
               </button>
             );
           })

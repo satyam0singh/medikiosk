@@ -21,7 +21,7 @@ const QUICK_DIAGNOSES = [
   { code: 'I20.9', label: 'Angina Pectoris / Ischemic Heart Disease (I20.9)' },
   { code: 'I10', label: 'Essential / Primary Hypertension (I10)' },
   { code: 'R07.9', label: 'Chest Pain, Unspecified (R07.9)' },
-  { code: 'E11.9', label: 'Type 2 Diabetes Mellitus without complications (E11.9)' },
+  { code: 'E11.9', label: 'Type 2 Diabetes Mellitus (E11.9)' },
   { code: 'J06.9', label: 'Acute Upper Respiratory Infection (J06.9)' },
 ];
 
@@ -94,112 +94,114 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
 
   return (
     <div
-      className={`flex-1 flex flex-col h-[calc(100vh-61px)] overflow-y-auto p-6 space-y-6 transition-colors ${
-        isLightMode ? 'bg-slate-50/50' : 'bg-slate-950'
+      className={`flex-1 flex flex-col h-[calc(100vh-57px)] overflow-y-auto p-6 space-y-6 transition-colors ${
+        isLightMode ? 'bg-[#FBFBFA]' : 'bg-[#0D0F14]'
       }`}
     >
       {/* 1. Patient & Encounter Header Banner */}
       <div
-        className={`border rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-colors ${
-          isLightMode ? 'bg-white border-slate-200 shadow-slate-200/50' : 'bg-slate-900 border-slate-800'
+        className={`border rounded-xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 transition-colors ${
+          isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
         }`}
       >
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-600 via-sky-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg shadow-sky-500/20">
+        <div className="flex items-center gap-3.5">
+          <div
+            className={`w-12 h-12 rounded-lg border flex items-center justify-center font-serif text-lg font-bold ${
+              isLightMode ? 'bg-[#F7F6F3] border-[#EAEAEA] text-[#111111]' : 'bg-[#1E222D] border-[#2D3242] text-[#F4F4F6]'
+            }`}
+          >
             {patient.fullName.charAt(0)}
           </div>
           <div>
-            <div className="flex items-center gap-3">
-              <h2 className={`text-2xl font-black tracking-tight ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
+            <div className="flex items-center gap-2.5">
+              <h2 className={`text-lg font-bold tracking-tight ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
                 {patient.fullName}
               </h2>
               <span
-                className={`px-2.5 py-0.5 border text-xs font-black uppercase tracking-wider rounded-md ${
-                  isLightMode ? 'bg-sky-100 text-sky-700 border-sky-300' : 'bg-sky-500/20 text-sky-300 border-sky-500/30'
+                className={`px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-full ${
+                  isLightMode ? 'tag-pastel-blue' : 'tag-pastel-blue'
                 }`}
               >
                 {encounter.department || 'GENERAL MEDICINE'}
               </span>
               {isVerified && (
-                <span className="px-2.5 py-0.5 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-black rounded-md flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="tag-pastel-green px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-full flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
                   <span>VERIFIED</span>
                 </span>
               )}
             </div>
-            <p className={`text-xs mt-1.5 flex flex-wrap items-center gap-3 font-medium ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>
+            <p className={`text-xs mt-1 flex flex-wrap items-center gap-2 font-mono tabular-nums text-[#787774] dark:text-[#8E94A4]`}>
               <span>
-                {patient.gender} • <strong className="font-mono tabular-nums">{patient.age} yrs</strong>
+                {patient.gender} • <strong>{patient.age} yrs</strong>
               </span>
               <span>•</span>
               <span>
-                ABHA ID: <strong className="font-mono text-sky-600 dark:text-sky-400">{patient.abhaId || '91-4829-1029-4820'}</strong>
+                ABHA ID: <strong className="text-[#1F6C9F] dark:text-[#70B8FF]">{patient.abhaId || '91-4829-1029-4820'}</strong>
               </span>
               <span>•</span>
               <span>
-                MRN: <strong className="font-mono">{patient.hospitalPatientId || 'MRN-00482'}</strong>
+                MRN: <strong>{patient.hospitalPatientId || 'MRN-00482'}</strong>
               </span>
             </p>
           </div>
         </div>
 
         {/* Action Header Controls */}
-        <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex items-center gap-2 w-full md:w-auto">
           <button
             type="button"
             onClick={onOpenFhirExport}
-            className={`flex-1 md:flex-initial px-4 py-2.5 border rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 ${
+            className={`px-3.5 py-2 border rounded-md text-xs font-mono flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
               isLightMode
-                ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300 shadow-sm'
-                : 'bg-slate-800 hover:bg-slate-750 text-slate-200 border-slate-700'
+                ? 'bg-[#FBFBFA] hover:bg-[#F0F0EF] text-[#111111] border-[#EAEAEA]'
+                : 'bg-[#1A1D27] hover:bg-[#222634] text-[#F4F4F6] border-[#2A2E3D]'
             }`}
           >
-            <Download className="w-4 h-4 text-sky-500" />
-            <span>Export FHIR R4 / ABDM Bundle</span>
+            <Download className="w-3.5 h-3.5" />
+            <span>FHIR R4 / ABDM Export</span>
           </button>
         </div>
       </div>
 
-      {/* 2. Priority Red-Flag Banner (If Triggered) */}
+      {/* 2. Priority Red-Flag Banner */}
       {activeRedFlags.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {activeRedFlags.map((alert) => (
             <div
               key={alert.id}
-              className={`p-4 rounded-2xl border flex items-center justify-between gap-4 shadow-lg ${
-                isLightMode
-                  ? 'bg-rose-50 border-rose-300 text-rose-950'
-                  : 'bg-rose-950/40 border-rose-500/50 text-rose-200'
+              className={`p-4 rounded-xl border flex items-center justify-between gap-4 ${
+                isLightMode ? 'tag-pastel-red' : 'tag-pastel-red'
               }`}
             >
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-6 h-6 text-rose-500 shrink-0 mt-0.5 animate-bounce" />
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-black px-2 py-0.5 bg-rose-500 text-white rounded-md">
+                    <span className="text-[10px] font-mono uppercase font-bold px-1.5 py-0.2 bg-[#9F2F2D] text-white rounded">
                       {alert.severity}
                     </span>
-                    <h4 className={`text-sm font-bold ${isLightMode ? 'text-rose-900' : 'text-white'}`}>
-                      Deterministic Safety Rule Triggered: {alert.ruleId}
+                    <h4 className="text-xs font-bold font-mono">
+                      Rule Code: {alert.ruleId}
                     </h4>
                   </div>
-                  <p className="text-xs mt-1 font-medium">{alert.alertMessage}</p>
+                  <p className="text-xs mt-0.5">{alert.alertMessage}</p>
                 </div>
               </div>
 
               <div>
                 {alert.isAcknowledged ? (
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4" />
+                  <span className="text-[11px] font-mono text-[#346538] dark:text-[#6EE787] flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Acknowledged</span>
                   </span>
                 ) : (
                   <button
                     type="button"
                     onClick={() => handleAcknowledgeAlert(alert.id)}
-                    className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-all"
+                    className="px-3 py-1.5 bg-[#9F2F2D] text-white rounded-md text-xs font-mono uppercase tracking-wider active:scale-95 transition-all"
                   >
-                    Acknowledge Triage
+                    Acknowledge
                   </button>
                 )}
               </div>
@@ -209,16 +211,16 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
       )}
 
       {/* 3. Navigation Tabs */}
-      <div className={`flex items-center gap-2 border-b pb-3 ${isLightMode ? 'border-slate-200' : 'border-slate-800'}`}>
+      <div className={`flex items-center gap-1 border-b border-[#EAEAEA] dark:border-[#232734] pb-2`}>
         <button
           type="button"
           onClick={() => setActiveTab('BRIEFING')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
             activeTab === 'BRIEFING'
-              ? 'bg-sky-500 text-slate-950 shadow-md font-extrabold'
+              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
               : isLightMode
-              ? 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
-              : 'text-slate-400 hover:text-white bg-slate-900 border border-slate-800'
+              ? 'text-[#666666] hover:text-[#111111]'
+              : 'text-[#8E94A4] hover:text-[#FFFFFF]'
           }`}
         >
           Clinical Summary & Verification
@@ -226,241 +228,219 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('FACTS')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
             activeTab === 'FACTS'
-              ? 'bg-sky-500 text-slate-950 shadow-md font-extrabold'
+              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
               : isLightMode
-              ? 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
-              : 'text-slate-400 hover:text-white bg-slate-900 border border-slate-800'
+              ? 'text-[#666666] hover:text-[#111111]'
+              : 'text-[#8E94A4] hover:text-[#FFFFFF]'
           }`}
         >
-          Provenance & Fact Inspector ({facts.length})
+          Provenance & Facts ({facts.length})
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('TIMELINE')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
             activeTab === 'TIMELINE'
-              ? 'bg-sky-500 text-slate-950 shadow-md font-extrabold'
+              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
               : isLightMode
-              ? 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
-              : 'text-slate-400 hover:text-white bg-slate-900 border border-slate-800'
+              ? 'text-[#666666] hover:text-[#111111]'
+              : 'text-[#8E94A4] hover:text-[#FFFFFF]'
           }`}
         >
-          Longitudinal Timeline ({timeline.length})
+          Timeline ({timeline.length})
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('DOCUMENTS')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
             activeTab === 'DOCUMENTS'
-              ? 'bg-sky-500 text-slate-950 shadow-md font-extrabold'
+              ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
               : isLightMode
-              ? 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
-              : 'text-slate-400 hover:text-white bg-slate-900 border border-slate-800'
+              ? 'text-[#666666] hover:text-[#111111]'
+              : 'text-[#8E94A4] hover:text-[#FFFFFF]'
           }`}
         >
-          Scanned Documents & OCR ({documents.length})
+          Documents & OCR ({documents.length})
         </button>
       </div>
 
       {/* 4. Tab Contents */}
       {activeTab === 'BRIEFING' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Left 2 Cols: Clinical Narrative, Meds, Labs */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-5">
             {/* Structured HPI Narrative Card */}
             <div
-              className={`border rounded-3xl p-6 space-y-4 shadow-sm transition-colors ${
-                isLightMode ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+              className={`border rounded-xl p-5 space-y-3 transition-colors ${
+                isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
               }`}
             >
-              <div className={`flex items-center justify-between border-b pb-3 ${
-                isLightMode ? 'border-slate-100' : 'border-slate-800'
-              }`}>
-                <div className="flex items-center gap-2 text-sky-500 font-extrabold text-sm">
-                  <Activity className="w-4 h-4" />
+              <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+                <div className="flex items-center gap-2 font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">
+                  <Activity className="w-3.5 h-3.5" />
                   <span>History of Presenting Illness (HPI)</span>
                 </div>
-                <span className="text-xs text-slate-400 font-medium">Deterministic Structured Capture</span>
+                <span className="text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]">Structured Intake</span>
               </div>
               <p
-                className={`text-sm leading-relaxed p-4 rounded-2xl border font-medium ${
+                className={`text-xs leading-relaxed p-3.5 rounded-lg border font-medium ${
                   isLightMode
-                    ? 'bg-slate-50 border-slate-200 text-slate-800'
-                    : 'bg-slate-950 border-slate-800 text-slate-200'
+                    ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#222222]'
+                    : 'bg-[#10121A] border-[#232734] text-[#E0E2E8]'
                 }`}
               >
                 {summary?.hpiNarrative ||
                   `${patient.fullName}, a ${patient.age}-year-old ${patient.gender?.toLowerCase() || 'patient'}, presented to the OPD complaining of chest pain and burning heaviness since yesterday night with a severity score of 7/10. Active hypertension medication recorded.`}
               </p>
 
-              {/* Symptom Characteristic Tags */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-                <div className={`p-3.5 rounded-2xl border ${isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'}`}>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Primary Complaint</span>
-                  <span className={`text-xs font-bold ${isLightMode ? 'text-slate-800' : 'text-white'}`}>Chest Discomfort</span>
+              {/* Characteristic Tags */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-xs">
+                <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
+                  <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Complaint</span>
+                  <span className={`text-[11px] font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Chest Discomfort</span>
                 </div>
-                <div className={`p-3.5 rounded-2xl border ${isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'}`}>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Onset</span>
-                  <span className={`text-xs font-bold ${isLightMode ? 'text-slate-800' : 'text-white'}`}>Past 24-48 Hours</span>
+                <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
+                  <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Onset</span>
+                  <span className={`text-[11px] font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Past 24-48h</span>
                 </div>
-                <div className={`p-3.5 rounded-2xl border ${isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'}`}>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Severity Score</span>
-                  <span className="text-xs font-bold text-amber-500 tabular-nums">7 / 10 (High)</span>
+                <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
+                  <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Severity</span>
+                  <span className="text-[11px] font-bold text-[#9F2F2D] dark:text-[#FCA5A5] tabular-nums">7 / 10 (High)</span>
                 </div>
-                <div className={`p-3.5 rounded-2xl border ${isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'}`}>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Character</span>
-                  <span className={`text-xs font-bold ${isLightMode ? 'text-slate-800' : 'text-white'}`}>Burning / Heaviness</span>
+                <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
+                  <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Character</span>
+                  <span className={`text-[11px] font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Burning / Heaviness</span>
                 </div>
               </div>
             </div>
 
             {/* Active Medications & OCR Link */}
             <div
-              className={`border rounded-3xl p-6 space-y-4 shadow-sm transition-colors ${
-                isLightMode ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+              className={`border rounded-xl p-5 space-y-3 transition-colors ${
+                isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
               }`}
             >
-              <div className={`flex items-center justify-between border-b pb-3 ${
-                isLightMode ? 'border-slate-100' : 'border-slate-800'
-              }`}>
-                <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-extrabold text-sm">
-                  <Pill className="w-4 h-4" />
+              <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+                <div className="flex items-center gap-2 font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">
+                  <Pill className="w-3.5 h-3.5" />
                   <span>Current Medications (Prescription & OCR Verified)</span>
                 </div>
-                <span className="text-xs text-teal-600 dark:text-teal-400 font-bold">2 Active Drugs</span>
+                <span className="text-[10px] font-mono text-[#1F6C9F] dark:text-[#70B8FF]">2 Active Drugs</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div
-                  className={`p-4 rounded-2xl border flex items-start justify-between ${
-                    isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+                  className={`p-3 rounded-lg border flex items-start justify-between ${
+                    isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
                   }`}
                 >
                   <div>
-                    <h5 className={`text-xs font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Tab Amlodipine 5mg</h5>
-                    <p className={`text-[11px] mt-0.5 ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>Dose: 5mg • 1 Tab OD (Morning)</p>
-                    <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
-                      <span>OCR Confidence 92%</span>
+                    <h5 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Tab Amlodipine 5mg</h5>
+                    <p className={`text-[11px] text-[#787774] dark:text-[#8E94A4]`}>Dose: 5mg • 1 Tab OD (Morning)</p>
+                    <span className="mt-1.5 inline-flex items-center gap-1 text-[9px] font-mono font-bold tag-pastel-green px-1.5 py-0.2 rounded">
+                      <span>OCR 92%</span>
                     </span>
                   </div>
                   <span
-                    className={`text-[10px] font-bold px-2 py-1 rounded-md ${
-                      isLightMode ? 'bg-slate-200 text-slate-700' : 'bg-slate-800 text-slate-400'
+                    className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                      isLightMode ? 'bg-[#EAEAEA] text-[#555555]' : 'bg-[#232734] text-[#A0A6B5]'
                     }`}
                   >
-                    DOCUMENT_OCR
+                    OCR
                   </span>
                 </div>
 
                 <div
-                  className={`p-4 rounded-2xl border flex items-start justify-between ${
-                    isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+                  className={`p-3 rounded-lg border flex items-start justify-between ${
+                    isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
                   }`}
                 >
                   <div>
-                    <h5 className={`text-xs font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>Tab Telmisartan 40mg</h5>
-                    <p className={`text-[11px] mt-0.5 ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>Dose: 40mg • 1 Tab OD (Night)</p>
-                    <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
-                      <span>OCR Confidence 90%</span>
+                    <h5 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Tab Telmisartan 40mg</h5>
+                    <p className={`text-[11px] text-[#787774] dark:text-[#8E94A4]`}>Dose: 40mg • 1 Tab OD (Night)</p>
+                    <span className="mt-1.5 inline-flex items-center gap-1 text-[9px] font-mono font-bold tag-pastel-green px-1.5 py-0.2 rounded">
+                      <span>OCR 90%</span>
                     </span>
                   </div>
                   <span
-                    className={`text-[10px] font-bold px-2 py-1 rounded-md ${
-                      isLightMode ? 'bg-slate-200 text-slate-700' : 'bg-slate-800 text-slate-400'
+                    className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                      isLightMode ? 'bg-[#EAEAEA] text-[#555555]' : 'bg-[#232734] text-[#A0A6B5]'
                     }`}
                   >
-                    DOCUMENT_OCR
+                    OCR
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Suggested Investigations */}
+            {/* Diagnostic Orders */}
             <div
-              className={`border rounded-3xl p-6 space-y-3 shadow-sm transition-colors ${
-                isLightMode ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+              className={`border rounded-xl p-5 space-y-2.5 transition-colors ${
+                isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
               }`}
             >
-              <div className={`flex items-center gap-2 text-sky-500 font-extrabold text-sm border-b pb-3 ${
-                isLightMode ? 'border-slate-100' : 'border-slate-800'
-              }`}>
-                <FileCheck className="w-4 h-4" />
+              <div className={`flex items-center gap-2 font-bold text-xs text-[#111111] dark:text-[#F4F4F6] border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+                <FileCheck className="w-3.5 h-3.5" />
                 <span>Suggested Clinical Diagnostic Orders</span>
               </div>
-              <ul className={`space-y-2 text-xs ${isLightMode ? 'text-slate-700' : 'text-slate-300'}`}>
+              <ul className={`space-y-1.5 text-xs ${isLightMode ? 'text-[#333333]' : 'text-[#CCCCCC]'}`}>
                 <li
-                  className={`p-3 rounded-2xl border flex items-center justify-between ${
-                    isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+                  className={`p-2.5 rounded-lg border flex items-center justify-between ${
+                    isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
                   }`}
                 >
-                  <span className="font-medium">1. 12-Lead Standard Electrocardiogram (ECG)</span>
-                  <span className="text-[10px] font-black text-rose-500 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md">
-                    STAT / PRIORITY
+                  <span>1. 12-Lead Standard Electrocardiogram (ECG)</span>
+                  <span className="tag-pastel-red text-[9px] font-mono font-bold px-1.5 py-0.2 rounded">
+                    STAT
                   </span>
                 </li>
                 <li
-                  className={`p-3 rounded-2xl border flex items-center justify-between ${
-                    isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+                  className={`p-2.5 rounded-lg border flex items-center justify-between ${
+                    isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
                   }`}
                 >
-                  <span className="font-medium">2. Serum Troponin I / High-Sensitivity Cardiac Markers</span>
-                  <span className="text-[10px] font-black text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md">
+                  <span>2. Serum Troponin I / High-Sensitivity Cardiac Markers</span>
+                  <span className="tag-pastel-yellow text-[9px] font-mono font-bold px-1.5 py-0.2 rounded">
                     RECOMMENDED
-                  </span>
-                </li>
-                <li
-                  className={`p-3 rounded-2xl border flex items-center justify-between ${
-                    isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
-                  }`}
-                >
-                  <span className="font-medium">3. Comprehensive Lipid Panel & Fasting Blood Sugar</span>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                      isLightMode ? 'bg-slate-200 text-slate-700' : 'bg-slate-800 text-slate-400'
-                    }`}
-                  >
-                    ROUTINE
                   </span>
                 </li>
               </ul>
             </div>
           </div>
 
-          {/* Right Col: Physician Verification & Sign-Off Editor */}
-          <div className="space-y-6">
+          {/* Right Col: Physician Consultation Editor */}
+          <div className="space-y-5">
             <div
-              className={`border-2 rounded-3xl p-6 space-y-4 shadow-md transition-colors ${
-                isLightMode ? 'bg-white border-sky-300 shadow-sky-100' : 'bg-slate-900 border-sky-500/30'
+              className={`border rounded-xl p-5 space-y-3.5 transition-colors ${
+                isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
               }`}
             >
-              <div className={`flex items-center justify-between border-b pb-3 ${
-                isLightMode ? 'border-slate-100' : 'border-slate-800'
-              }`}>
-                <div className={`flex items-center gap-2 font-extrabold text-sm ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
-                  <UserCheck className="w-4 h-4 text-sky-500" />
-                  <span>Physician Verification Drawer</span>
+              <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+                <div className={`flex items-center gap-1.5 font-bold text-xs ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span>Physician Verification</span>
                 </div>
               </div>
 
               {/* Quick ICD-10 Chips */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
-                  Quick ICD-10 Presets
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] mb-1.5">
+                  ICD-10 Presets
                 </label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1">
                   {QUICK_DIAGNOSES.map((diag) => (
                     <button
                       key={diag.code}
                       type="button"
                       onClick={() => setProvisionalDiagnosis(diag.label)}
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all active:scale-95 ${
+                      className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-all active:scale-95 ${
                         provisionalDiagnosis === diag.label
-                          ? 'bg-sky-500 text-slate-950 border-sky-400'
+                          ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] border-transparent font-bold'
                           : isLightMode
-                          ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-                          : 'bg-slate-950 hover:bg-slate-800 text-slate-300 border-slate-800'
+                          ? 'bg-[#FBFBFA] text-[#555555] border-[#EAEAEA] hover:border-[#CCCCCC]'
+                          : 'bg-[#10121A] text-[#8E94A4] border-[#232734] hover:border-[#444444]'
                       }`}
                     >
                       {diag.code}
@@ -470,49 +450,49 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
               </div>
 
               <div>
-                <label className={`block text-xs font-bold mb-1.5 ${isLightMode ? 'text-slate-700' : 'text-slate-300'}`}>
+                <label className={`block text-[11px] font-medium mb-1 ${isLightMode ? 'text-[#555555]' : 'text-[#8E94A4]'}`}>
                   Provisional Diagnosis
                 </label>
                 <input
                   type="text"
                   value={provisionalDiagnosis}
                   onChange={(e) => setProvisionalDiagnosis(e.target.value)}
-                  className={`w-full border rounded-xl p-3 text-xs outline-none focus:border-sky-400 font-medium ${
+                  className={`w-full border rounded-md p-2.5 text-xs outline-none font-medium ${
                     isLightMode
-                      ? 'bg-slate-50 border-slate-300 text-slate-900'
-                      : 'bg-slate-950 border-slate-700 text-white'
+                      ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#111111] focus:border-[#111111]'
+                      : 'bg-[#10121A] border-[#232734] text-[#F4F4F6] focus:border-[#F4F4F6]'
                   }`}
                 />
               </div>
 
               <div>
-                <label className={`block text-xs font-bold mb-1.5 ${isLightMode ? 'text-slate-700' : 'text-slate-300'}`}>
-                  Physician Clinical Notes
+                <label className={`block text-[11px] font-medium mb-1 ${isLightMode ? 'text-[#555555]' : 'text-[#8E94A4]'}`}>
+                  Clinical Notes
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={clinicalNotes}
                   onChange={(e) => setClinicalNotes(e.target.value)}
-                  className={`w-full border rounded-xl p-3 text-xs outline-none focus:border-sky-400 font-medium ${
+                  className={`w-full border rounded-md p-2.5 text-xs outline-none font-medium ${
                     isLightMode
-                      ? 'bg-slate-50 border-slate-300 text-slate-800'
-                      : 'bg-slate-950 border-slate-700 text-slate-200'
+                      ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#111111] focus:border-[#111111]'
+                      : 'bg-[#10121A] border-[#232734] text-[#F4F4F6] focus:border-[#F4F4F6]'
                   }`}
                 />
               </div>
 
               <div>
-                <label className={`block text-xs font-bold mb-1.5 ${isLightMode ? 'text-slate-700' : 'text-slate-300'}`}>
-                  Treatment & Prescription Plan
+                <label className={`block text-[11px] font-medium mb-1 ${isLightMode ? 'text-[#555555]' : 'text-[#8E94A4]'}`}>
+                  Treatment Plan
                 </label>
                 <textarea
                   rows={3}
                   value={treatmentPlan}
                   onChange={(e) => setTreatmentPlan(e.target.value)}
-                  className={`w-full border rounded-xl p-3 text-xs outline-none focus:border-sky-400 font-medium ${
+                  className={`w-full border rounded-md p-2.5 text-xs outline-none font-medium ${
                     isLightMode
-                      ? 'bg-slate-50 border-slate-300 text-slate-800'
-                      : 'bg-slate-950 border-slate-700 text-slate-200'
+                      ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#111111] focus:border-[#111111]'
+                      : 'bg-[#10121A] border-[#232734] text-[#F4F4F6] focus:border-[#F4F4F6]'
                   }`}
                 />
               </div>
@@ -521,10 +501,10 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                 type="button"
                 disabled={isVerifying}
                 onClick={handleVerify}
-                className="w-full py-3.5 bg-gradient-to-r from-sky-500 to-teal-400 hover:from-sky-400 hover:to-teal-300 text-slate-950 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 active:scale-95 transition-all"
+                className="w-full py-3 bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-95 transition-all"
               >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{isVerified ? 'Update & Re-Verify Sign-Off' : 'Approve & Sign Clinical Summary'}</span>
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>{isVerified ? 'Update & Re-Verify Sign-Off' : 'Approve & Sign Summary'}</span>
               </button>
             </div>
           </div>
@@ -534,18 +514,16 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
       {/* 5. Facts Inspector Tab */}
       {activeTab === 'FACTS' && (
         <div
-          className={`border rounded-3xl p-6 space-y-4 shadow-sm ${
-            isLightMode ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+          className={`border rounded-xl p-5 space-y-3 ${
+            isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
           }`}
         >
-          <div className={`flex items-center justify-between border-b pb-3 ${
-            isLightMode ? 'border-slate-100' : 'border-slate-800'
-          }`}>
-            <h3 className={`text-sm font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
+          <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+            <h3 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
               Extracted Clinical Facts & Strict Provenance Audit
             </h3>
-            <span className={`text-xs ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>
-              All fields verified against DB constraints
+            <span className={`text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]`}>
+              DB Constraints Verified
             </span>
           </div>
 
@@ -553,49 +531,41 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
             <table className="w-full text-left text-xs">
               <thead
                 className={`border-b ${
-                  isLightMode ? 'bg-slate-50 text-slate-600 border-slate-200' : 'bg-slate-950 text-slate-400 border-slate-800'
+                  isLightMode ? 'bg-[#FBFBFA] text-[#666666] border-[#EAEAEA]' : 'bg-[#10121A] text-[#8E94A4] border-[#232734]'
                 }`}
               >
                 <tr>
-                  <th className="p-3">Clinical Field</th>
-                  <th className="p-3">Value</th>
-                  <th className="p-3">Provenance Source</th>
-                  <th className="p-3">Confidence</th>
-                  <th className="p-3">Status</th>
+                  <th className="p-2.5 font-mono">Field</th>
+                  <th className="p-2.5 font-mono">Value</th>
+                  <th className="p-2.5 font-mono">Source</th>
+                  <th className="p-2.5 font-mono">Confidence</th>
+                  <th className="p-2.5 font-mono">Status</th>
                 </tr>
               </thead>
               <tbody
-                className={`divide-y font-mono ${
-                  isLightMode ? 'divide-slate-200 text-slate-800' : 'divide-slate-800/60 text-slate-200'
+                className={`divide-y font-mono text-[11px] ${
+                  isLightMode ? 'divide-[#EAEAEA] text-[#222222]' : 'divide-[#232734] text-[#E0E2E8]'
                 }`}
               >
                 {facts.map((f: any) => (
-                  <tr key={f.id} className={isLightMode ? 'hover:bg-slate-50' : 'hover:bg-slate-800/40'}>
-                    <td className="p-3 font-semibold text-sky-600 dark:text-sky-400">{f.field}</td>
-                    <td className="p-3 font-sans">{typeof f.value === 'object' ? JSON.stringify(f.value) : String(f.value)}</td>
-                    <td className="p-3 font-sans">
-                      <span
-                        className={`px-2 py-0.5 rounded-md text-[11px] font-bold ${
-                          isLightMode ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
-                        }`}
-                      >
+                  <tr key={f.id} className={isLightMode ? 'hover:bg-[#FBFBFA]' : 'hover:bg-[#1A1D27]'}>
+                    <td className="p-2.5 font-bold text-[#1F6C9F] dark:text-[#70B8FF]">{f.field}</td>
+                    <td className="p-2.5 font-sans">{typeof f.value === 'object' ? JSON.stringify(f.value) : String(f.value)}</td>
+                    <td className="p-2.5">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#F0F0EF] dark:bg-[#1E222D]">
                         {f.sourceType}
                       </span>
                     </td>
-                    <td className="p-3 font-sans">
+                    <td className="p-2.5 tabular-nums">
                       <span
-                        className={`px-2 py-0.5 rounded-md text-[11px] font-bold tabular-nums ${
-                          f.confidence >= 0.85
-                            ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
-                            : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
+                        className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                          f.confidence >= 0.85 ? 'tag-pastel-green' : 'tag-pastel-yellow'
                         }`}
                       >
                         {(f.confidence * 100).toFixed(0)}%
                       </span>
                     </td>
-                    <td className="p-3 font-sans">
-                      <span className={isLightMode ? 'text-slate-500' : 'text-slate-400'}>{f.verificationStatus}</span>
-                    </td>
+                    <td className="p-2.5 text-[#787774] dark:text-[#8E94A4]">{f.verificationStatus}</td>
                   </tr>
                 ))}
               </tbody>
@@ -607,46 +577,44 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
       {/* 6. Timeline Tab */}
       {activeTab === 'TIMELINE' && (
         <div
-          className={`border rounded-3xl p-6 space-y-6 shadow-sm ${
-            isLightMode ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+          className={`border rounded-xl p-5 space-y-4 ${
+            isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
           }`}
         >
-          <div className={`flex items-center justify-between border-b pb-3 ${
-            isLightMode ? 'border-slate-100' : 'border-slate-800'
-          }`}>
-            <h3 className={`text-sm font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
-              Longitudinal Patient Medical Timeline
+          <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+            <h3 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
+              Longitudinal Patient Timeline
             </h3>
-            <span className={`text-xs ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>Chronological Event Stream</span>
+            <span className={`text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]`}>Chronological Stream</span>
           </div>
 
-          <div className={`relative border-l-2 ml-4 space-y-6 ${isLightMode ? 'border-slate-200' : 'border-slate-800'}`}>
+          <div className={`border-l-2 ml-3 space-y-4 ${isLightMode ? 'border-[#EAEAEA]' : 'border-[#232734]'}`}>
             {timeline.map((event: any) => (
-              <div key={event.id} className="relative pl-6">
+              <div key={event.id} className="relative pl-5">
                 <div
-                  className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-sky-500 border-2 ${
-                    isLightMode ? 'border-white' : 'border-slate-900'
+                  className={`absolute -left-[5px] top-1.5 w-2 h-2 rounded-full ${
+                    isLightMode ? 'bg-[#111111]' : 'bg-[#F4F4F6]'
                   }`}
                 />
                 <div
-                  className={`p-4 rounded-2xl border space-y-1.5 ${
-                    isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+                  className={`p-3 rounded-lg border space-y-1 ${
+                    isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-sky-600 dark:text-sky-400 font-mono tabular-nums">
+                    <span className="text-[11px] font-mono tabular-nums text-[#1F6C9F] dark:text-[#70B8FF]">
                       {event.event_date || 'Ongoing'}
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
-                        isLightMode ? 'bg-slate-200 text-slate-700' : 'bg-slate-800 text-slate-300'
+                      className={`text-[9px] font-mono px-1.5 py-0.2 rounded ${
+                        isLightMode ? 'bg-[#EAEAEA] text-[#555555]' : 'bg-[#232734] text-[#A0A6B5]'
                       }`}
                     >
                       {event.event_type}
                     </span>
                   </div>
-                  <h4 className={`text-sm font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{event.title}</h4>
-                  <p className={`text-xs ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>{event.description}</p>
+                  <h4 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>{event.title}</h4>
+                  <p className={`text-[11px] ${isLightMode ? 'text-[#666666]' : 'text-[#8E94A4]'}`}>{event.description}</p>
                 </div>
               </div>
             ))}
@@ -657,41 +625,38 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
       {/* 7. Documents Tab */}
       {activeTab === 'DOCUMENTS' && (
         <div
-          className={`border rounded-3xl p-6 space-y-4 shadow-sm ${
-            isLightMode ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+          className={`border rounded-xl p-5 space-y-3 ${
+            isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
           }`}
         >
-          <div className={`flex items-center justify-between border-b pb-3 ${
-            isLightMode ? 'border-slate-100' : 'border-slate-800'
-          }`}>
-            <h3 className={`text-sm font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
-              Scanned Prescriptions & Lab Reports (MinIO S3)
+          <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+            <h3 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
+              Scanned Prescriptions (MinIO S3)
             </h3>
-            <span className={`text-xs ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>OCR Entity Extraction Pipeline</span>
+            <span className={`text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]`}>OCR Extraction</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {documents.map((doc: any) => (
               <div
                 key={doc.id}
-                className={`p-4 rounded-2xl border space-y-3 ${
-                  isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+                className={`p-3.5 rounded-lg border space-y-2 ${
+                  isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-teal-600 dark:text-teal-400">{doc.document_type}</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded-md">
+                  <span className="text-xs font-bold font-mono text-[#1F6C9F] dark:text-[#70B8FF]">{doc.document_type}</span>
+                  <span className="tag-pastel-green text-[9px] font-mono font-bold px-1.5 py-0.2 rounded">
                     {doc.processing_state}
                   </span>
                 </div>
-                <h5 className={`text-sm font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>{doc.file_name}</h5>
-                <p className={`text-xs ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                  Size: <span className="font-mono tabular-nums">{(doc.file_size_bytes / 1024).toFixed(1)} KB</span> • Uploaded:{' '}
-                  {new Date(doc.uploaded_at).toLocaleDateString()}
+                <h5 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>{doc.file_name}</h5>
+                <p className={`text-[11px] text-[#787774] dark:text-[#8E94A4] font-mono tabular-nums`}>
+                  {(doc.file_size_bytes / 1024).toFixed(1)} KB • {new Date(doc.uploaded_at).toLocaleDateString()}
                 </p>
                 <div
-                  className={`p-3 rounded-xl text-xs font-mono ${
-                    isLightMode ? 'bg-white border border-slate-200 text-slate-700' : 'bg-slate-900 text-slate-300'
+                  className={`p-2 rounded text-[11px] font-mono ${
+                    isLightMode ? 'bg-[#FFFFFF] border border-[#EAEAEA] text-[#333333]' : 'bg-[#141720] text-[#CCCCCC]'
                   }`}
                 >
                   Extracted: Tab Amlodipine 5mg OD, Telmisartan 40mg OD

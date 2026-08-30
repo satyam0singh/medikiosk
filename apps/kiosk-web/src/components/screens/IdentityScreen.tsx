@@ -44,29 +44,6 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
     }
   };
 
-  const handleSelectDemoPatient = (demoPatient: Patient) => {
-    onPatientIdentified(demoPatient);
-  };
-
-  const handleQuickRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFullName.trim()) return;
-
-    try {
-      const patient = await KioskApi.createPatient({
-        fullName: newFullName,
-        gender: newGender,
-        age: parseInt(newAge, 10),
-        contactNumber: newPhone,
-        preferredLanguage: language,
-        hospitalPatientId: `MRN-${Date.now().toString().slice(-6)}`,
-      });
-      onPatientIdentified(patient);
-    } catch (err) {
-      alert(`Registration failed: ${(err as Error).message}`);
-    }
-  };
-
   const DEMO_PATIENTS: Patient[] = [
     {
       id: 'b0000000-0000-0000-0000-000000000001',
@@ -94,15 +71,34 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
     },
   ];
 
+  const handleQuickRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFullName.trim()) return;
+
+    try {
+      const patient = await KioskApi.createPatient({
+        fullName: newFullName,
+        gender: newGender,
+        age: parseInt(newAge, 10),
+        contactNumber: newPhone,
+        preferredLanguage: language,
+        hospitalPatientId: `MRN-${Date.now().toString().slice(-6)}`,
+      });
+      onPatientIdentified(patient);
+    } catch (err) {
+      alert(`Registration failed: ${(err as Error).message}`);
+    }
+  };
+
   return (
-    <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full p-6">
-      {/* Title & Prompt Header */}
+    <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full p-6">
+      {/* Title & Audio Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
+          <h2 className="text-2xl font-bold tracking-tight text-[#111111] dark:text-[#F4F4F6]">
             {language === LanguageCode.HI ? 'मरीज पहचान व सत्यापन' : 'Patient Identification'}
           </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+          <p className="text-xs text-[#787774] dark:text-[#8E94A4] mt-1">
             {language === LanguageCode.HI
               ? 'आभा संख्या, मोबाइल नंबर या त्वरित पंजीकरण द्वारा शुरू करें'
               : 'Search via ABHA ID, Mobile Number, or select a seeded record below'}
@@ -111,30 +107,30 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
         <AudioPromptButton text={promptText} language={language} size="md" />
       </div>
 
-      {/* 1-Tap Fast Demo Card (SIH Evaluator Convenience) */}
-      <div className="border border-teal-500/30 rounded-3xl p-6 bg-teal-500/10 mb-8 shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-          <h4 className="text-xs font-black uppercase tracking-wider text-teal-700 dark:text-teal-300">
-            {language === LanguageCode.HI ? 'त्वरित डेमो मरीज (1-टैप परीक्षण)' : '1-Tap Quick Demo (Seeded Clinical Test Cases)'}
+      {/* 1-Tap Seeded Demo Cases */}
+      <div className="p-4 rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#F7F6F3] dark:bg-[#141720] mb-6">
+        <div className="flex items-center gap-1.5 mb-3">
+          <Sparkles className="w-3.5 h-3.5 text-[#1F6C9F] dark:text-[#70B8FF]" />
+          <h4 className="text-[10px] font-mono uppercase tracking-wider text-[#555555] dark:text-[#9EA5B5]">
+            {language === LanguageCode.HI ? 'त्वरित डेमो मरीज (1-टैप परीक्षण)' : '1-Tap Seeded Clinical Cases'}
           </h4>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {DEMO_PATIENTS.map((p) => (
             <button
               key={p.id}
               type="button"
-              onClick={() => handleSelectDemoPatient(p)}
-              className="p-4 rounded-2xl border border-teal-500/30 bg-white dark:bg-slate-900 hover:border-teal-500 flex items-center justify-between text-left transition-all active:scale-[0.98] shadow-sm hover:shadow-md"
+              onClick={() => onPatientIdentified(p)}
+              className="p-3.5 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#1A1D27] hover:border-[#111111] dark:hover:border-[#F4F4F6] flex items-center justify-between text-left transition-all active:scale-[0.98]"
             >
               <div>
-                <h5 className="text-sm font-bold">{p.fullName}</h5>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {p.gender} • {p.age} yrs • <span className="font-mono text-teal-600 dark:text-teal-400">{p.abhaId}</span>
+                <h5 className="text-xs font-bold text-[#111111] dark:text-[#F4F4F6]">{p.fullName}</h5>
+                <p className="text-[11px] text-[#787774] dark:text-[#8E94A4] mt-0.5 font-mono tabular-nums">
+                  {p.gender} • {p.age} yrs • <span className="text-[#1F6C9F] dark:text-[#70B8FF]">{p.abhaId}</span>
                 </p>
               </div>
-              <div className="w-8 h-8 rounded-xl bg-teal-500 text-slate-950 flex items-center justify-center font-bold">
-                <ArrowRight className="w-4 h-4" />
+              <div className="w-7 h-7 rounded-md bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] flex items-center justify-center font-bold">
+                <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </button>
           ))}
@@ -143,8 +139,8 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
 
       {/* Search Input Box */}
       <div className="relative mb-6">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-          <Search className="w-5 h-5" />
+        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#888888]">
+          <Search className="w-4 h-4" />
         </div>
         <input
           type="text"
@@ -155,38 +151,36 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
               ? 'आभा संख्या (ABHA ID), मोबाइल या नाम दर्ज करें...'
               : 'Enter ABHA ID (e.g. 91-4829-1029-4820), Mobile, or Name...'
           }
-          className="w-full pl-12 pr-4 py-4 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-medium text-sm sm:text-base outline-none focus:border-teal-500 shadow-sm"
+          className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#111111] dark:text-[#F4F4F6] placeholder-[#999999] dark:placeholder-[#5D6373] text-xs font-medium outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6] transition-colors"
         />
         {isSearching && (
-          <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-            <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
+            <div className="w-4 h-4 border-2 border-[#111111] dark:border-[#F4F4F6] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </div>
 
       {/* Search Results */}
       {searchResults.length > 0 && (
-        <div className="space-y-3 mb-8">
-          <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            {language === LanguageCode.HI ? 'खोज परिणाम' : 'Search Results'}
-          </h4>
+        <div className="space-y-2 mb-6">
           {searchResults.map((patient) => (
             <div
               key={patient.id}
-              className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between shadow-sm"
+              className="p-3 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] flex items-center justify-between"
             >
               <div>
-                <h5 className="font-bold text-slate-900 dark:text-white">{patient.fullName}</h5>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {patient.gender} • {patient.age} yrs • ABHA: <span className="font-mono text-teal-600 dark:text-teal-400">{patient.abhaId || 'N/A'}</span>
+                <h5 className="font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">{patient.fullName}</h5>
+                <p className="text-[11px] text-[#787774] dark:text-[#8E94A4] font-mono tabular-nums">
+                  {patient.gender} • {patient.age} yrs • ABHA:{' '}
+                  <span className="text-[#1F6C9F] dark:text-[#70B8FF]">{patient.abhaId || 'N/A'}</span>
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => onPatientIdentified(patient)}
-                className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all"
+                className="px-3 py-1.5 bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md font-medium text-xs flex items-center gap-1 active:scale-95 transition-all"
               >
-                <UserCheck className="w-4 h-4" />
+                <UserCheck className="w-3.5 h-3.5" />
                 <span>{language === LanguageCode.HI ? 'चयन करें' : 'Select'}</span>
               </button>
             </div>
@@ -195,53 +189,60 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
       )}
 
       {/* Quick Registration Collapsible */}
-      <div className="mt-auto pt-4 border-t border-slate-200 dark:border-slate-800">
+      <div className="mt-auto pt-4 border-t border-[#EAEAEA] dark:border-[#232734]">
         <button
           type="button"
           onClick={() => setShowQuickRegister(!showQuickRegister)}
-          className="text-xs font-bold text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1.5"
+          className="text-xs font-mono uppercase tracking-wider text-[#555555] dark:text-[#8E94A4] hover:text-[#111111] dark:hover:text-[#FFFFFF] flex items-center gap-1.5"
         >
-          <UserPlus className="w-4 h-4" />
+          <UserPlus className="w-3.5 h-3.5" />
           <span>
             {showQuickRegister
-              ? (language === LanguageCode.HI ? 'पंजीकरण फॉर्म बंद करें' : 'Close Registration Form')
-              : (language === LanguageCode.HI ? 'नया मरीज त्वरित पंजीकरण करें (+)' : 'Register New Walk-in Patient (+)')}
+              ? language === LanguageCode.HI
+                ? 'फॉर्म बंद करें'
+                : 'Close Form'
+              : language === LanguageCode.HI
+              ? '+ नया मरीज त्वरित पंजीकरण'
+              : '+ Register Walk-in Patient'}
           </span>
         </button>
 
         {showQuickRegister && (
-          <form onSubmit={handleQuickRegister} className="mt-4 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4 shadow-md">
-            <h4 className="font-bold text-sm">
-              {language === LanguageCode.HI ? 'नया मरीज विवरण' : 'New Patient Fast Registration'}
+          <form
+            onSubmit={handleQuickRegister}
+            className="mt-4 p-5 rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] space-y-3"
+          >
+            <h4 className="font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">
+              {language === LanguageCode.HI ? 'नया मरीज विवरण' : 'Walk-in Patient Fast Registration'}
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Full Name (पूरा नाम)</label>
+                <label className="block text-[11px] font-medium text-[#787774] dark:text-[#8E94A4] mb-1">Full Name</label>
                 <input
                   type="text"
                   required
                   value={newFullName}
                   onChange={(e) => setNewFullName(e.target.value)}
                   placeholder="e.g. Amit Verma"
-                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-sm outline-none focus:border-teal-500"
+                  className="w-full p-2.5 rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] text-xs outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6]"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Age (आयु)</label>
+                <label className="block text-[11px] font-medium text-[#787774] dark:text-[#8E94A4] mb-1">Age</label>
                 <input
                   type="number"
                   required
                   value={newAge}
                   onChange={(e) => setNewAge(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-sm outline-none focus:border-teal-500"
+                  className="w-full p-2.5 rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] text-xs outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6]"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Gender (लिंग)</label>
+                <label className="block text-[11px] font-medium text-[#787774] dark:text-[#8E94A4] mb-1">Gender</label>
                 <select
                   value={newGender}
                   onChange={(e) => setNewGender(e.target.value as any)}
-                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-sm outline-none focus:border-teal-500"
+                  className="w-full p-2.5 rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] text-xs outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6]"
                 >
                   <option value="MALE">Male (पुरुष)</option>
                   <option value="FEMALE">Female (महिला)</option>
@@ -249,18 +250,18 @@ export const IdentityScreen: React.FC<IdentityScreenProps> = ({
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Mobile Number (मोबाइल)</label>
+                <label className="block text-[11px] font-medium text-[#787774] dark:text-[#8E94A4] mb-1">Mobile Number</label>
                 <input
                   type="text"
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-sm outline-none focus:border-teal-500"
+                  className="w-full p-2.5 rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] text-xs outline-none focus:border-[#111111] dark:focus:border-[#F4F4F6]"
                 />
               </div>
             </div>
             <button
               type="submit"
-              className="w-full py-3.5 bg-teal-500 hover:bg-teal-400 text-slate-950 rounded-xl font-bold text-sm shadow-md active:scale-95 transition-all"
+              className="w-full py-2.5 bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md font-medium text-xs active:scale-95 transition-all mt-2"
             >
               {language === LanguageCode.HI ? 'पंजीकृत करें और आगे बढ़ें' : 'Register & Continue'}
             </button>

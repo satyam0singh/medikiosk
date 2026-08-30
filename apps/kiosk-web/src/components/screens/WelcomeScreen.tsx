@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, HeartPulse, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, HeartPulse, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { LanguageCode } from '@medikiosk/shared-types';
 import { AudioPromptButton } from '../AudioPromptButton';
 
@@ -8,50 +8,50 @@ interface WelcomeScreenProps {
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectLanguage }) => {
-  const welcomeText = "Welcome to MediKiosk at All India Institute of Ayurveda. Please touch your preferred language to begin your OPD check-in.";
+  const welcomeText =
+    'Welcome to MediKiosk at All India Institute of Ayurveda. Please touch your preferred language to begin your OPD check-in.';
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-4xl mx-auto">
-      {/* Visual Hospital Badge */}
-      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-600 dark:text-teal-300 text-xs font-bold mb-6">
-        <Sparkles className="w-3.5 h-3.5" />
-        <span>Ministry of Ayush • OPD Case-Taking System</span>
+    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-3xl mx-auto">
+      {/* Category Eyebrow */}
+      <div className="mb-4">
+        <span className="tag-pastel-blue px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest">
+          Ministry of Ayush • OPD Case Intake
+        </span>
       </div>
 
-      <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight mb-3">
+      <h2 className="text-3xl sm:text-4xl font-serif tracking-tight leading-tight mb-3 text-[#111111] dark:text-[#F4F4F6]">
         स्वागतम् • Welcome to AIIA
       </h2>
-      <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mb-8 leading-relaxed font-medium">
+      <p className="text-sm text-[#666666] dark:text-[#8E94A4] max-w-xl mb-8 leading-relaxed">
         डॉक्टर से परामर्श से पहले अपनी स्वास्थ्य जानकारी और पुराने पर्चे यहाँ दर्ज करें।
         <br />
-        <span className="text-slate-500 dark:text-slate-400 text-sm">
+        <span className="text-xs text-[#888888] dark:text-[#687082]">
           Pre-consultation clinical intake and document structuring before your doctor visit.
         </span>
       </p>
 
-      {/* Audio Affordance */}
-      <div className="mb-10">
-        <AudioPromptButton text={welcomeText} language={LanguageCode.EN} size="lg" />
+      {/* Audio Button */}
+      <div className="mb-8">
+        <AudioPromptButton text={welcomeText} language={LanguageCode.EN} size="md" />
       </div>
 
-      {/* Language Touch Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl mb-10">
+      {/* Language Bento Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl mb-10">
         {/* Hindi Card */}
         <button
           type="button"
           onClick={() => onSelectLanguage(LanguageCode.HI)}
-          className="p-8 rounded-3xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 hover:border-teal-500 dark:hover:border-teal-400 hover:shadow-2xl hover:shadow-teal-500/10 flex flex-col items-center justify-center gap-4 text-center group transition-all duration-200 active:scale-[0.98]"
+          className="p-6 rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] hover:border-[#111111] dark:hover:border-[#F4F4F6] flex flex-col items-center text-center transition-all duration-150 active:scale-[0.98] group"
         >
-          <div className="w-20 h-20 rounded-3xl bg-teal-500/15 group-hover:bg-teal-500 flex items-center justify-center text-teal-600 dark:text-teal-300 group-hover:text-slate-950 transition-all shadow-md">
-            <span className="text-3xl font-extrabold font-serif">अ</span>
+          <div className="w-12 h-12 rounded-lg bg-[#F7F6F3] dark:bg-[#1E222D] border border-[#EAEAEA] dark:border-[#2D3242] flex items-center justify-center text-lg font-serif mb-3 text-[#111111] dark:text-[#F4F4F6]">
+            अ
           </div>
-          <div>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">हिंदी में शुरू करें</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">बोलकर या टच करके उत्तर दें</p>
-          </div>
-          <div className="w-full py-3 bg-teal-500/10 group-hover:bg-teal-500 text-teal-700 dark:text-teal-300 group-hover:text-slate-950 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-colors mt-2">
+          <h3 className="text-base font-bold text-[#111111] dark:text-[#F4F4F6] mb-1">हिंदी में शुरू करें</h3>
+          <p className="text-xs text-[#787774] dark:text-[#8E94A4] mb-4">बोलकर या टच करके उत्तर दें</p>
+          <div className="w-full py-2 bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-colors">
             <span>आगे बढ़ें</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </div>
         </button>
 
@@ -59,35 +59,33 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSelectLanguage }
         <button
           type="button"
           onClick={() => onSelectLanguage(LanguageCode.EN)}
-          className="p-8 rounded-3xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 hover:border-teal-500 dark:hover:border-teal-400 hover:shadow-2xl hover:shadow-teal-500/10 flex flex-col items-center justify-center gap-4 text-center group transition-all duration-200 active:scale-[0.98]"
+          className="p-6 rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] hover:border-[#111111] dark:hover:border-[#F4F4F6] flex flex-col items-center text-center transition-all duration-150 active:scale-[0.98] group"
         >
-          <div className="w-20 h-20 rounded-3xl bg-teal-500/15 group-hover:bg-teal-500 flex items-center justify-center text-teal-600 dark:text-teal-300 group-hover:text-slate-950 transition-all shadow-md">
-            <span className="text-3xl font-extrabold">A</span>
+          <div className="w-12 h-12 rounded-lg bg-[#F7F6F3] dark:bg-[#1E222D] border border-[#EAEAEA] dark:border-[#2D3242] flex items-center justify-center text-lg font-mono mb-3 text-[#111111] dark:text-[#F4F4F6]">
+            A
           </div>
-          <div>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Start in English</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Answer via voice or touch</p>
-          </div>
-          <div className="w-full py-3 bg-teal-500/10 group-hover:bg-teal-500 text-teal-700 dark:text-teal-300 group-hover:text-slate-950 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-colors mt-2">
+          <h3 className="text-base font-bold text-[#111111] dark:text-[#F4F4F6] mb-1">Start in English</h3>
+          <p className="text-xs text-[#787774] dark:text-[#8E94A4] mb-4">Answer via voice or touch</p>
+          <div className="w-full py-2 bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-colors">
             <span>Proceed</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </div>
         </button>
       </div>
 
-      {/* Safety & Compliance Badges */}
-      <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-800 pt-6 w-full">
-        <div className="flex items-center gap-1.5">
-          <ShieldCheck className="w-4 h-4 text-teal-500" />
-          <span>ABHA & ABDM Compliant</span>
+      {/* Safety Badges Footer */}
+      <div className="flex flex-wrap items-center justify-center gap-5 text-xs text-[#787774] dark:text-[#8E94A4] border-t border-[#EAEAEA] dark:border-[#232734] pt-5 w-full">
+        <div className="flex items-center gap-1.5 font-mono text-[11px]">
+          <ShieldCheck className="w-3.5 h-3.5 text-[#1F6C9F] dark:text-[#70B8FF]" />
+          <span>ABHA / ABDM Linked</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+        <div className="flex items-center gap-1.5 font-mono text-[11px]">
+          <CheckCircle2 className="w-3.5 h-3.5 text-[#346538] dark:text-[#6EE787]" />
           <span>Doctor Verification Mandatory</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <HeartPulse className="w-4 h-4 text-rose-500" />
-          <span>Deterministic Emergency Screening</span>
+        <div className="flex items-center gap-1.5 font-mono text-[11px]">
+          <HeartPulse className="w-3.5 h-3.5 text-[#9F2F2D] dark:text-[#FCA5A5]" />
+          <span>Deterministic Triage</span>
         </div>
       </div>
     </div>

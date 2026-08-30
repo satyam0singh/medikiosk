@@ -118,82 +118,99 @@ export const FhirExportModal: React.FC<FhirExportModalProps> = ({ encounterId, o
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className={`border rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden transition-colors ${
-        isLightMode ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-700'
-      }`}>
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+      <div
+        className={`border rounded-xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-xl overflow-hidden transition-colors ${
+          isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
+        }`}
+      >
         {/* Modal Header */}
-        <div className={`p-6 border-b flex items-center justify-between ${isLightMode ? 'border-slate-200 bg-slate-50' : 'border-slate-800 bg-slate-900'}`}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-600 dark:text-sky-400 flex items-center justify-center">
-              <FileCode className="w-6 h-6" />
+        <div
+          className={`p-4 border-b flex items-center justify-between ${
+            isLightMode ? 'border-[#EAEAEA] bg-[#FBFBFA]' : 'border-[#232734] bg-[#10121A]'
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <div
+              className={`w-8 h-8 rounded-md border flex items-center justify-center ${
+                isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA] text-[#111111]' : 'bg-[#1E222D] border-[#2D3242] text-[#F4F4F6]'
+              }`}
+            >
+              <FileCode className="w-4 h-4" />
             </div>
             <div>
-              <h3 className={`text-lg font-black ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
-                FHIR R4 Document Bundle • ABDM Compliant
+              <h3 className={`text-sm font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
+                FHIR R4 Document Bundle • ABDM
               </h3>
-              <p className={`text-xs ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                Standardized interoperable clinical payload for ABDM PHR linkage
+              <p className={`text-[11px] font-mono ${isLightMode ? 'text-[#787774]' : 'text-[#8E94A4]'}`}>
+                StructureDefinition/DocumentBundle
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-colors ${
+            className={`w-7 h-7 rounded-md border flex items-center justify-center transition-colors ${
               isLightMode
-                ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700'
+                ? 'bg-[#FFFFFF] hover:bg-[#F0F0EF] text-[#666666] border-[#EAEAEA]'
+                : 'bg-[#1E222D] hover:bg-[#282D3D] text-[#8E94A4] border-[#2D3242]'
             }`}
           >
-            <X className="w-5 h-5" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Modal Content / JSON Viewer */}
-        <div className={`flex-1 overflow-y-auto p-6 font-mono text-xs ${
-          isLightMode ? 'bg-slate-100 text-slate-900' : 'bg-slate-950 text-slate-300'
-        }`}>
+        <div
+          className={`flex-1 overflow-y-auto p-5 font-mono text-xs ${
+            isLightMode ? 'bg-[#FBFBFA] text-[#222222]' : 'bg-[#0D0F14] text-[#D4D8E2]'
+          }`}
+        >
           {isLoading ? (
             <div className="flex items-center justify-center p-12">
-              <div className="w-8 h-8 border-3 border-sky-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-[#111111] dark:border-[#F4F4F6] border-t-transparent rounded-full animate-spin" />
             </div>
           ) : fhirBundle ? (
-            <pre className="overflow-x-auto whitespace-pre-wrap selection:bg-sky-500 selection:text-white">
+            <pre className="overflow-x-auto whitespace-pre-wrap selection:bg-[#111111] selection:text-white">
               {JSON.stringify(fhirBundle, null, 2)}
             </pre>
           ) : (
-            <p className="text-rose-500">Failed to load FHIR bundle.</p>
+            <p className="text-[#9F2F2D]">Failed to load FHIR bundle.</p>
           )}
         </div>
 
         {/* Modal Footer */}
-        <div className={`p-4 border-t flex items-center justify-between ${
-          isLightMode ? 'bg-slate-50 border-slate-200' : 'bg-slate-900/80 border-slate-800'
-        }`}>
-          <div className={`flex items-center gap-2 text-xs ${isLightMode ? 'text-slate-600' : 'text-slate-400'}`}>
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span>Profile: nrces.in/ndhm/fhir/r4/StructureDefinition/DocumentBundle</span>
+        <div
+          className={`p-3 border-t flex items-center justify-between ${
+            isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
+          }`}
+        >
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#787774] dark:text-[#8E94A4]">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#346538] dark:text-[#6EE787]" />
+            <span>Profile: nrces.in/ndhm/fhir/r4/DocumentBundle</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handleCopy}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1 transition-all border ${
                 isLightMode
-                  ? 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300'
-                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
+                  ? 'bg-[#FFFFFF] hover:bg-[#F0F0EF] text-[#111111] border-[#EAEAEA]'
+                  : 'bg-[#1E222D] hover:bg-[#282D3D] text-[#F4F4F6] border-[#2D3242]'
               }`}
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+              {copied ? <Check className="w-3 h-3 text-[#346538] dark:text-[#6EE787]" /> : <Copy className="w-3 h-3" />}
               <span>{copied ? 'Copied' : 'Copy JSON'}</span>
             </button>
 
             <button
+              type="button"
               onClick={handleDownload}
-              className="px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+              className="px-3.5 py-1.5 bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1 active:scale-95 transition-all"
             >
-              <Download className="w-4 h-4" />
-              <span>Download FHIR Bundle (.json)</span>
+              <Download className="w-3 h-3" />
+              <span>Download (.json)</span>
             </button>
           </div>
         </div>

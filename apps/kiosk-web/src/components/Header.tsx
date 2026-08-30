@@ -30,42 +30,56 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   return (
-    <header className={`border-b px-6 py-3.5 flex items-center justify-between sticky top-0 z-50 transition-all duration-200 ${
-      isLightMode
-        ? 'bg-white/95 backdrop-blur-md border-slate-200 shadow-sm shadow-slate-100'
-        : 'bg-slate-900/90 backdrop-blur-md border-slate-800/80 shadow-lg shadow-black/20'
-    }`}>
-      {/* Hospital & MediKiosk Brand */}
-      <div className="flex items-center gap-4">
-        <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-teal-500 via-emerald-400 to-cyan-400 flex items-center justify-center shadow-lg shadow-teal-500/20 text-slate-950 font-black">
-          <HeartPulse className="w-6 h-6 stroke-[2.5]" />
+    <header
+      className={`border-b px-6 py-3 flex items-center justify-between sticky top-0 z-50 transition-colors ${
+        isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
+      }`}
+    >
+      {/* Brand & Clinic Context */}
+      <div className="flex items-center gap-3.5">
+        <div
+          className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm border ${
+            isLightMode ? 'bg-[#F7F6F3] border-[#EAEAEA] text-[#111111]' : 'bg-[#1E222D] border-[#2D3242] text-[#F4F4F6]'
+          }`}
+        >
+          <HeartPulse className="w-4 h-4 stroke-[2]" />
         </div>
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className={`text-xl font-extrabold tracking-tight ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
+            <h1 className={`text-base font-bold tracking-tight ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
               MediKiosk
             </h1>
-            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/30 rounded-md">
-              PATIENT INTAKE
+            <span
+              className={`text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                isLightMode ? 'tag-pastel-blue' : 'tag-pastel-blue'
+              }`}
+            >
+              OPD Intake
             </span>
-            <div className="hidden md:flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+            <div
+              className={`hidden md:flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                isLightMode ? 'tag-pastel-green' : 'tag-pastel-green'
+              }`}
+            >
               <ShieldCheck className="w-3 h-3" />
-              <span>ABDM Verified</span>
+              <span>ABDM Linked</span>
             </div>
           </div>
-          <p className={`text-xs font-medium ${isLightMode ? 'text-slate-500' : 'text-slate-400'}`}>
-            All India Institute of Ayurveda (AIIA) • Digital OPD Kiosk #01
+          <p className={`text-[11px] ${isLightMode ? 'text-[#787774]' : 'text-[#8E94A4]'}`}>
+            All India Institute of Ayurveda (AIIA) • Kiosk #01
           </p>
         </div>
       </div>
 
       {/* Right Controls: Clock, Theme, Language, Emergency */}
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-2.5 sm:gap-3">
         {/* Real-time Clock */}
-        <div className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold ${
-          isLightMode ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-slate-950 border-slate-800 text-slate-300'
-        }`}>
-          <Clock className="w-3.5 h-3.5 text-teal-500" />
+        <div
+          className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono tabular-nums border ${
+            isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#555555]' : 'bg-[#10121A] border-[#232734] text-[#A0A6B5]'
+          }`}
+        >
+          <Clock className="w-3.5 h-3.5" />
           <span>{time || '10:30 AM'}</span>
         </div>
 
@@ -74,49 +88,64 @@ export const Header: React.FC<HeaderProps> = ({
           type="button"
           onClick={onToggleTheme}
           aria-label="Toggle Theme"
-          className={`p-2.5 rounded-xl border transition-all active:scale-95 ${
+          className={`p-2 rounded-md border transition-all active:scale-95 ${
             isLightMode
-              ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-amber-600'
-              : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-amber-300'
+              ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#666666] hover:bg-[#F0F0EF]'
+              : 'bg-[#1A1D27] border-[#2A2E3D] text-[#C4C9D6] hover:bg-[#222634]'
           }`}
         >
-          {isLightMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {isLightMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
         </button>
 
         {/* Language Switcher */}
-        <div className={`flex items-center rounded-xl p-1 border ${
-          isLightMode ? 'bg-slate-100 border-slate-200' : 'bg-slate-950 border-slate-800'
-        }`}>
+        <div
+          className={`flex items-center rounded-md p-0.5 border ${
+            isLightMode ? 'bg-[#F7F6F3] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
+          }`}
+        >
           <button
+            type="button"
             onClick={() => onToggleLanguage(LanguageCode.EN)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+            className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-all ${
               currentLanguage === LanguageCode.EN
-                ? 'bg-teal-500 text-slate-950 shadow-sm'
-                : isLightMode ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-white'
+                ? isLightMode
+                  ? 'bg-[#FFFFFF] text-[#111111] shadow-xs'
+                  : 'bg-[#282D3D] text-[#FFFFFF]'
+                : isLightMode
+                ? 'text-[#777777] hover:text-[#111111]'
+                : 'text-[#888888] hover:text-[#FFFFFF]'
             }`}
           >
-            <Globe className="w-3.5 h-3.5" /> English
+            <Globe className="w-3 h-3" /> EN
           </button>
           <button
+            type="button"
             onClick={() => onToggleLanguage(LanguageCode.HI)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+            className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1 transition-all ${
               currentLanguage === LanguageCode.HI
-                ? 'bg-teal-500 text-slate-950 shadow-sm'
-                : isLightMode ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-white'
+                ? isLightMode
+                  ? 'bg-[#FFFFFF] text-[#111111] shadow-xs'
+                  : 'bg-[#282D3D] text-[#FFFFFF]'
+                : isLightMode
+                ? 'text-[#777777] hover:text-[#111111]'
+                : 'text-[#888888] hover:text-[#FFFFFF]'
             }`}
           >
-            <Globe className="w-3.5 h-3.5" /> हिंदी
+            <Globe className="w-3 h-3" /> हिंदी
           </button>
         </div>
 
-        {/* Emergency Triage Assistance Button */}
+        {/* Emergency Triage Alert Button */}
         <button
+          type="button"
           onClick={onEmergencyClick}
-          className="bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-400 border border-rose-500/40 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 active:scale-95 transition-all shadow-sm"
+          className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all active:scale-95 ${
+            isLightMode ? 'tag-pastel-red' : 'tag-pastel-red'
+          }`}
         >
-          <AlertTriangle className="w-4 h-4 text-rose-500 animate-pulse" />
-          <span className="hidden sm:inline font-black uppercase tracking-wider">
-            {currentLanguage === LanguageCode.HI ? 'आपातकाल (Emergency)' : 'Emergency'}
+          <AlertTriangle className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline uppercase tracking-wider font-mono text-[10px]">
+            {currentLanguage === LanguageCode.HI ? 'आपातकाल' : 'Emergency'}
           </span>
         </button>
       </div>
