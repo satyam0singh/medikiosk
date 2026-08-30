@@ -7,6 +7,7 @@ import {
   Download,
   UserCheck,
   FileCheck,
+  ArrowLeft,
 } from 'lucide-react';
 import {
   Patient,
@@ -39,6 +40,7 @@ interface ClinicalBriefingViewProps {
   };
   onRefresh: () => void;
   onOpenFhirExport: () => void;
+  onBackToQueue?: () => void;
   isLightMode?: boolean;
 }
 
@@ -46,6 +48,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
   briefing,
   onRefresh,
   onOpenFhirExport,
+  onBackToQueue,
   isLightMode = false,
 }) => {
   const { encounter, patient, activeRedFlags, facts, timeline, documents, summary } = briefing;
@@ -94,53 +97,70 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
 
   return (
     <div
-      className={`flex-1 flex flex-col h-[calc(100vh-57px)] overflow-y-auto p-6 space-y-6 transition-colors ${
+      className={`flex-1 flex flex-col h-full overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6 transition-colors ${
         isLightMode ? 'bg-[#FBFBFA]' : 'bg-[#0D0F14]'
       }`}
     >
-      {/* 1. Patient & Encounter Header Banner */}
+      {/* Mobile Back to Queue Bar */}
+      {onBackToQueue && (
+        <div className="md:hidden flex items-center justify-between pb-1">
+          <button
+            type="button"
+            onClick={onBackToQueue}
+            className="flex items-center gap-1.5 text-xs font-semibold py-1.5 px-2.5 rounded-md border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#111111] dark:text-[#F4F4F6] active:scale-95 cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Queue</span>
+          </button>
+          <span className="text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]">
+            Encounter #{encounter.id.slice(-6)}
+          </span>
+        </div>
+      )}
+
+      {/* 1. Patient & Encounter Header Banner with Dynamic Clamping */}
       <div
-        className={`border rounded-xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 transition-colors ${
+        className={`border rounded-xl p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-5 transition-colors shadow-xs ${
           isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
         }`}
       >
-        <div className="flex items-center gap-3.5">
+        <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
           <div
-            className={`w-12 h-12 rounded-lg border flex items-center justify-center font-serif text-lg font-bold ${
+            className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg border flex items-center justify-center font-serif text-base sm:text-lg font-bold shrink-0 ${
               isLightMode ? 'bg-[#F7F6F3] border-[#EAEAEA] text-[#111111]' : 'bg-[#1E222D] border-[#2D3242] text-[#F4F4F6]'
             }`}
           >
             {patient.fullName.charAt(0)}
           </div>
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h2 className={`text-lg font-bold tracking-tight ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
+              <h2 className={`text-base sm:text-lg font-bold tracking-tight truncate ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
                 {patient.fullName}
               </h2>
               <span
-                className={`px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-full ${
+                className={`px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-mono uppercase tracking-wider rounded-full shrink-0 ${
                   isLightMode ? 'tag-pastel-blue' : 'tag-pastel-blue'
                 }`}
               >
                 {encounter.department || 'GENERAL MEDICINE'}
               </span>
               {isVerified && (
-                <span className="tag-pastel-green px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-full flex items-center gap-1">
+                <span className="tag-pastel-green px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-mono uppercase tracking-wider rounded-full flex items-center gap-1 shrink-0">
                   <CheckCircle2 className="w-3 h-3" />
                   <span>VERIFIED</span>
                 </span>
               )}
             </div>
-            <p className={`text-xs mt-1 flex flex-wrap items-center gap-2 font-mono tabular-nums text-[#787774] dark:text-[#8E94A4]`}>
+            <p className={`text-[11px] sm:text-xs mt-0.5 flex flex-wrap items-center gap-1.5 sm:gap-2 font-mono tabular-nums text-[#787774] dark:text-[#8E94A4]`}>
               <span>
-                {patient.gender} • <strong>{patient.age} yrs</strong>
+                {patient.gender} • <strong>{patient.age}y</strong>
               </span>
               <span>•</span>
-              <span>
-                ABHA ID: <strong className="text-[#1F6C9F] dark:text-[#70B8FF]">{patient.abhaId || '91-4829-1029-4820'}</strong>
+              <span className="truncate">
+                ABHA: <strong className="text-[#1F6C9F] dark:text-[#70B8FF]">{patient.abhaId || '91-4829-1029-4820'}</strong>
               </span>
-              <span>•</span>
-              <span>
+              <span className="hidden sm:inline">•</span>
+              <span className="hidden sm:inline">
                 MRN: <strong>{patient.hospitalPatientId || 'MRN-00482'}</strong>
               </span>
             </p>
@@ -148,11 +168,11 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         </div>
 
         {/* Action Header Controls */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="w-full sm:w-auto shrink-0">
           <button
             type="button"
             onClick={onOpenFhirExport}
-            className={`px-3.5 py-2 border rounded-md text-xs font-mono flex items-center justify-center gap-1.5 transition-all active:scale-95 ${
+            className={`w-full sm:w-auto px-3.5 py-2 min-h-[38px] border rounded-md text-xs font-mono flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
               isLightMode
                 ? 'bg-[#FBFBFA] hover:bg-[#F0F0EF] text-[#111111] border-[#EAEAEA]'
                 : 'bg-[#1A1D27] hover:bg-[#222634] text-[#F4F4F6] border-[#2A2E3D]'
@@ -170,26 +190,26 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
           {activeRedFlags.map((alert) => (
             <div
               key={alert.id}
-              className={`p-4 rounded-xl border flex items-center justify-between gap-4 ${
+              className={`p-3.5 sm:p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
                 isLightMode ? 'tag-pastel-red' : 'tag-pastel-red'
               }`}
             >
-              <div className="flex items-start gap-2.5">
-                <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-                <div>
+              <div className="flex items-start gap-2.5 min-w-0">
+                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 mt-0.5" />
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono uppercase font-bold px-1.5 py-0.2 bg-[#9F2F2D] text-white rounded">
+                    <span className="text-[9px] sm:text-[10px] font-mono uppercase font-bold px-1.5 py-0.2 bg-[#9F2F2D] text-white rounded">
                       {alert.severity}
                     </span>
-                    <h4 className="text-xs font-bold font-mono">
-                      Rule Code: {alert.ruleId}
+                    <h4 className="text-xs font-bold font-mono truncate">
+                      Rule: {alert.ruleId}
                     </h4>
                   </div>
-                  <p className="text-xs mt-0.5">{alert.alertMessage}</p>
+                  <p className="text-xs mt-0.5 leading-relaxed">{alert.alertMessage}</p>
                 </div>
               </div>
 
-              <div>
+              <div className="w-full sm:w-auto shrink-0 mt-1 sm:mt-0">
                 {alert.isAcknowledged ? (
                   <span className="text-[11px] font-mono text-[#346538] dark:text-[#6EE787] flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -199,7 +219,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                   <button
                     type="button"
                     onClick={() => handleAcknowledgeAlert(alert.id)}
-                    className="px-3 py-1.5 bg-[#9F2F2D] text-white rounded-md text-xs font-mono uppercase tracking-wider active:scale-95 transition-all"
+                    className="w-full sm:w-auto px-3 py-1.5 min-h-[36px] bg-[#9F2F2D] text-white rounded-md text-xs font-mono uppercase tracking-wider active:scale-95 transition-all cursor-pointer"
                   >
                     Acknowledge
                   </button>
@@ -210,12 +230,12 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         </div>
       )}
 
-      {/* 3. Navigation Tabs */}
-      <div className={`flex items-center gap-1 border-b border-[#EAEAEA] dark:border-[#232734] pb-2`}>
+      {/* 3. Navigation Tabs with Horizontal Scroll for Mobile */}
+      <div className="flex items-center gap-1 border-b border-[#EAEAEA] dark:border-[#232734] pb-2 overflow-x-auto whitespace-nowrap">
         <button
           type="button"
           onClick={() => setActiveTab('BRIEFING')}
-          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+          className={`px-3 py-1.5 min-h-[36px] rounded-md text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'BRIEFING'
               ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
               : isLightMode
@@ -228,7 +248,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('FACTS')}
-          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+          className={`px-3 py-1.5 min-h-[36px] rounded-md text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'FACTS'
               ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
               : isLightMode
@@ -241,7 +261,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('TIMELINE')}
-          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+          className={`px-3 py-1.5 min-h-[36px] rounded-md text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'TIMELINE'
               ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
               : isLightMode
@@ -254,7 +274,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('DOCUMENTS')}
-          className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+          className={`px-3 py-1.5 min-h-[36px] rounded-md text-xs font-medium transition-all shrink-0 cursor-pointer ${
             activeTab === 'DOCUMENTS'
               ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold'
               : isLightMode
@@ -268,16 +288,16 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
 
       {/* 4. Tab Contents */}
       {activeTab === 'BRIEFING' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Left 2 Cols: Clinical Narrative, Meds, Labs */}
-          <div className="lg:col-span-2 space-y-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+          {/* Left 2 Cols on Desktop / Top on Mobile: Clinical Narrative, Meds, Labs */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-5">
             {/* Structured HPI Narrative Card */}
             <div
-              className={`border rounded-xl p-5 space-y-3 transition-colors ${
+              className={`border rounded-xl p-4 sm:p-5 space-y-3 transition-colors shadow-xs ${
                 isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
               }`}
             >
-              <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+              <div className="flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5">
                 <div className="flex items-center gap-2 font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">
                   <Activity className="w-3.5 h-3.5" />
                   <span>History of Presenting Illness (HPI)</span>
@@ -299,33 +319,33 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-xs">
                 <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
                   <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Complaint</span>
-                  <span className={`text-[11px] font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Chest Discomfort</span>
+                  <span className={`text-[11px] font-bold truncate block ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Chest Discomfort</span>
                 </div>
                 <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
                   <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Onset</span>
-                  <span className={`text-[11px] font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Past 24-48h</span>
+                  <span className={`text-[11px] font-bold truncate block ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Past 24-48h</span>
                 </div>
                 <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
                   <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Severity</span>
-                  <span className="text-[11px] font-bold text-[#9F2F2D] dark:text-[#FCA5A5] tabular-nums">7 / 10 (High)</span>
+                  <span className="text-[11px] font-bold text-[#9F2F2D] dark:text-[#FCA5A5] tabular-nums block">7 / 10 (High)</span>
                 </div>
                 <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
                   <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Character</span>
-                  <span className={`text-[11px] font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Burning / Heaviness</span>
+                  <span className={`text-[11px] font-bold truncate block ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Burning</span>
                 </div>
               </div>
             </div>
 
             {/* Active Medications & OCR Link */}
             <div
-              className={`border rounded-xl p-5 space-y-3 transition-colors ${
+              className={`border rounded-xl p-4 sm:p-5 space-y-3 transition-colors shadow-xs ${
                 isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
               }`}
             >
-              <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+              <div className="flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5">
                 <div className="flex items-center gap-2 font-bold text-xs text-[#111111] dark:text-[#F4F4F6]">
                   <Pill className="w-3.5 h-3.5" />
-                  <span>Current Medications (Prescription & OCR Verified)</span>
+                  <span>Current Medications (Prescription & OCR)</span>
                 </div>
                 <span className="text-[10px] font-mono text-[#1F6C9F] dark:text-[#70B8FF]">2 Active Drugs</span>
               </div>
@@ -338,7 +358,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                 >
                   <div>
                     <h5 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Tab Amlodipine 5mg</h5>
-                    <p className={`text-[11px] text-[#787774] dark:text-[#8E94A4]`}>Dose: 5mg • 1 Tab OD (Morning)</p>
+                    <p className="text-[11px] text-[#787774] dark:text-[#8E94A4]">Dose: 5mg • 1 Tab OD (Morning)</p>
                     <span className="mt-1.5 inline-flex items-center gap-1 text-[9px] font-mono font-bold tag-pastel-green px-1.5 py-0.2 rounded">
                       <span>OCR 92%</span>
                     </span>
@@ -359,7 +379,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                 >
                   <div>
                     <h5 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Tab Telmisartan 40mg</h5>
-                    <p className={`text-[11px] text-[#787774] dark:text-[#8E94A4]`}>Dose: 40mg • 1 Tab OD (Night)</p>
+                    <p className="text-[11px] text-[#787774] dark:text-[#8E94A4]">Dose: 40mg • 1 Tab OD (Night)</p>
                     <span className="mt-1.5 inline-flex items-center gap-1 text-[9px] font-mono font-bold tag-pastel-green px-1.5 py-0.2 rounded">
                       <span>OCR 90%</span>
                     </span>
@@ -377,32 +397,32 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
 
             {/* Diagnostic Orders */}
             <div
-              className={`border rounded-xl p-5 space-y-2.5 transition-colors ${
+              className={`border rounded-xl p-4 sm:p-5 space-y-2.5 transition-colors shadow-xs ${
                 isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
               }`}
             >
-              <div className={`flex items-center gap-2 font-bold text-xs text-[#111111] dark:text-[#F4F4F6] border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+              <div className="flex items-center gap-2 font-bold text-xs text-[#111111] dark:text-[#F4F4F6] border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5">
                 <FileCheck className="w-3.5 h-3.5" />
                 <span>Suggested Clinical Diagnostic Orders</span>
               </div>
               <ul className={`space-y-1.5 text-xs ${isLightMode ? 'text-[#333333]' : 'text-[#CCCCCC]'}`}>
                 <li
-                  className={`p-2.5 rounded-lg border flex items-center justify-between ${
+                  className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${
                     isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
                   }`}
                 >
-                  <span>1. 12-Lead Standard Electrocardiogram (ECG)</span>
-                  <span className="tag-pastel-red text-[9px] font-mono font-bold px-1.5 py-0.2 rounded">
+                  <span className="truncate">1. 12-Lead Electrocardiogram (ECG)</span>
+                  <span className="tag-pastel-red text-[9px] font-mono font-bold px-1.5 py-0.2 rounded shrink-0">
                     STAT
                   </span>
                 </li>
                 <li
-                  className={`p-2.5 rounded-lg border flex items-center justify-between ${
+                  className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${
                     isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
                   }`}
                 >
-                  <span>2. Serum Troponin I / High-Sensitivity Cardiac Markers</span>
-                  <span className="tag-pastel-yellow text-[9px] font-mono font-bold px-1.5 py-0.2 rounded">
+                  <span className="truncate">2. Serum Troponin I / High-Sensitivity</span>
+                  <span className="tag-pastel-yellow text-[9px] font-mono font-bold px-1.5 py-0.2 rounded shrink-0">
                     RECOMMENDED
                   </span>
                 </li>
@@ -410,32 +430,32 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
             </div>
           </div>
 
-          {/* Right Col: Physician Consultation Editor */}
-          <div className="space-y-5">
+          {/* Right Col on Desktop / Bottom on Mobile: Physician Consultation Editor */}
+          <div className="space-y-4 sm:space-y-5">
             <div
-              className={`border rounded-xl p-5 space-y-3.5 transition-colors ${
+              className={`border rounded-xl p-4 sm:p-5 space-y-3.5 transition-colors shadow-xs ${
                 isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
               }`}
             >
-              <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+              <div className="flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5">
                 <div className={`flex items-center gap-1.5 font-bold text-xs ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
                   <UserCheck className="w-3.5 h-3.5" />
                   <span>Physician Verification</span>
                 </div>
               </div>
 
-              {/* Quick ICD-10 Chips */}
+              {/* Quick ICD-10 Chips with Flexible Wrapping */}
               <div>
                 <label className="block text-[10px] font-mono uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] mb-1.5">
                   ICD-10 Presets
                 </label>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {QUICK_DIAGNOSES.map((diag) => (
                     <button
                       key={diag.code}
                       type="button"
                       onClick={() => setProvisionalDiagnosis(diag.label)}
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-all active:scale-95 ${
+                      className={`text-[10px] font-mono px-2 py-1 min-h-[30px] rounded border transition-all active:scale-95 cursor-pointer ${
                         provisionalDiagnosis === diag.label
                           ? 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] border-transparent font-bold'
                           : isLightMode
@@ -457,7 +477,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                   type="text"
                   value={provisionalDiagnosis}
                   onChange={(e) => setProvisionalDiagnosis(e.target.value)}
-                  className={`w-full border rounded-md p-2.5 text-xs outline-none font-medium ${
+                  className={`w-full min-h-[40px] border rounded-md p-2.5 text-xs outline-none font-medium ${
                     isLightMode
                       ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#111111] focus:border-[#111111]'
                       : 'bg-[#10121A] border-[#232734] text-[#F4F4F6] focus:border-[#F4F4F6]'
@@ -501,7 +521,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                 type="button"
                 disabled={isVerifying}
                 onClick={handleVerify}
-                className="w-full py-3 bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-95 transition-all"
+                className="w-full py-3 min-h-[48px] bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] rounded-md font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer shadow-xs"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>{isVerified ? 'Update & Re-Verify Sign-Off' : 'Approve & Sign Summary'}</span>
@@ -514,21 +534,21 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
       {/* 5. Facts Inspector Tab */}
       {activeTab === 'FACTS' && (
         <div
-          className={`border rounded-xl p-5 space-y-3 ${
+          className={`border rounded-xl p-4 sm:p-5 space-y-3 ${
             isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
           }`}
         >
-          <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+          <div className="flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5">
             <h3 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
               Extracted Clinical Facts & Strict Provenance Audit
             </h3>
-            <span className={`text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]`}>
+            <span className="text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]">
               DB Constraints Verified
             </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[500px]">
               <thead
                 className={`border-b ${
                   isLightMode ? 'bg-[#FBFBFA] text-[#666666] border-[#EAEAEA]' : 'bg-[#10121A] text-[#8E94A4] border-[#232734]'
@@ -577,20 +597,20 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
       {/* 6. Timeline Tab */}
       {activeTab === 'TIMELINE' && (
         <div
-          className={`border rounded-xl p-5 space-y-4 ${
+          className={`border rounded-xl p-4 sm:p-5 space-y-4 ${
             isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
           }`}
         >
-          <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+          <div className="flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5">
             <h3 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
               Longitudinal Patient Timeline
             </h3>
-            <span className={`text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]`}>Chronological Stream</span>
+            <span className="text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]">Chronological Stream</span>
           </div>
 
-          <div className={`border-l-2 ml-3 space-y-4 ${isLightMode ? 'border-[#EAEAEA]' : 'border-[#232734]'}`}>
+          <div className={`border-l-2 ml-2 sm:ml-3 space-y-4 ${isLightMode ? 'border-[#EAEAEA]' : 'border-[#232734]'}`}>
             {timeline.map((event: any) => (
-              <div key={event.id} className="relative pl-5">
+              <div key={event.id} className="relative pl-4 sm:pl-5">
                 <div
                   className={`absolute -left-[5px] top-1.5 w-2 h-2 rounded-full ${
                     isLightMode ? 'bg-[#111111]' : 'bg-[#F4F4F6]'
@@ -601,12 +621,12 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                     isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="text-[11px] font-mono tabular-nums text-[#1F6C9F] dark:text-[#70B8FF]">
                       {event.event_date || 'Ongoing'}
                     </span>
                     <span
-                      className={`text-[9px] font-mono px-1.5 py-0.2 rounded ${
+                      className={`text-[9px] font-mono px-1.5 py-0.2 rounded shrink-0 ${
                         isLightMode ? 'bg-[#EAEAEA] text-[#555555]' : 'bg-[#232734] text-[#A0A6B5]'
                       }`}
                     >
@@ -625,15 +645,15 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
       {/* 7. Documents Tab */}
       {activeTab === 'DOCUMENTS' && (
         <div
-          className={`border rounded-xl p-5 space-y-3 ${
+          className={`border rounded-xl p-4 sm:p-5 space-y-3 ${
             isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
           }`}
         >
-          <div className={`flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5`}>
+          <div className="flex items-center justify-between border-b border-[#EAEAEA] dark:border-[#232734] pb-2.5">
             <h3 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
               Scanned Prescriptions (MinIO S3)
             </h3>
-            <span className={`text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]`}>OCR Extraction</span>
+            <span className="text-[10px] font-mono text-[#787774] dark:text-[#8E94A4]">OCR Extraction</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -644,14 +664,14 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                   isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold font-mono text-[#1F6C9F] dark:text-[#70B8FF]">{doc.document_type}</span>
-                  <span className="tag-pastel-green text-[9px] font-mono font-bold px-1.5 py-0.2 rounded">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold font-mono text-[#1F6C9F] dark:text-[#70B8FF] truncate">{doc.document_type}</span>
+                  <span className="tag-pastel-green text-[9px] font-mono font-bold px-1.5 py-0.2 rounded shrink-0">
                     {doc.processing_state}
                   </span>
                 </div>
-                <h5 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>{doc.file_name}</h5>
-                <p className={`text-[11px] text-[#787774] dark:text-[#8E94A4] font-mono tabular-nums`}>
+                <h5 className={`text-xs font-bold truncate ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>{doc.file_name}</h5>
+                <p className="text-[11px] text-[#787774] dark:text-[#8E94A4] font-mono tabular-nums">
                   {(doc.file_size_bytes / 1024).toFixed(1)} KB • {new Date(doc.uploaded_at).toLocaleDateString()}
                 </p>
                 <div

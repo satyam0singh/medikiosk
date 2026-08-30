@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Search, Clock, CheckCircle2 } from 'lucide-react';
+import { Users, Search, Clock, CheckCircle2, ChevronRight } from 'lucide-react';
 
 export interface QueueItem {
   encounterId: string;
@@ -38,16 +38,16 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
 
   return (
     <aside
-      className={`w-72 border-r flex flex-col shrink-0 h-[calc(100vh-57px)] transition-colors ${
+      className={`w-full md:w-72 lg:w-80 border-r flex flex-col shrink-0 h-full transition-colors ${
         isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
       }`}
     >
       {/* Queue Header */}
-      <div className={`p-3.5 border-b space-y-2.5 ${isLightMode ? 'border-[#EAEAEA] bg-[#FFFFFF]' : 'border-[#232734] bg-[#141720]'}`}>
+      <div className={`p-3 sm:p-3.5 border-b space-y-2 shrink-0 ${isLightMode ? 'border-[#EAEAEA] bg-[#FFFFFF]' : 'border-[#232734] bg-[#141720]'}`}>
         <div className="flex items-center justify-between">
           <div className={`flex items-center gap-1.5 font-bold text-xs ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
             <Users className="w-3.5 h-3.5 text-[#555555] dark:text-[#8E94A4]" />
-            <span>OPD Queue</span>
+            <span>OPD Patient Queue</span>
           </div>
           <span
             className={`px-2 py-0.5 font-mono text-[10px] rounded-full tabular-nums ${
@@ -65,7 +65,7 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder="Search patient / ABHA..."
-            className={`w-full border rounded-md py-1.5 pl-8 pr-2.5 text-xs font-medium outline-none transition-colors ${
+            className={`w-full min-h-[38px] border rounded-md py-1.5 pl-8 pr-2.5 text-xs font-medium outline-none transition-colors ${
               isLightMode
                 ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#111111] placeholder-[#999999] focus:border-[#111111]'
                 : 'bg-[#1A1D27] border-[#2A2E3D] text-[#F4F4F6] placeholder-[#5D6373] focus:border-[#F4F4F6]'
@@ -76,7 +76,7 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
       </div>
 
       {/* Queue List */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+      <div className="flex-1 overflow-y-auto p-2 space-y-2">
         {filteredQueue.length === 0 ? (
           <div className="p-6 text-center text-xs text-[#888888]">
             No patients match filter
@@ -90,7 +90,7 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
                 key={item.encounterId}
                 type="button"
                 onClick={() => onSelectEncounter(item.encounterId)}
-                className={`w-full p-3 rounded-lg border text-left transition-all relative ${
+                className={`w-full p-3 sm:p-3.5 rounded-lg border text-left transition-all min-h-[68px] cursor-pointer relative ${
                   isSelected
                     ? isLightMode
                       ? 'bg-[#FFFFFF] border-[#111111] shadow-xs'
@@ -105,20 +105,23 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
                   <h4 className={`text-xs font-bold truncate ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
                     {item.fullName}
                   </h4>
-                  {item.hasRedFlag ? (
-                    <span className="tag-pastel-red px-1.5 py-0.2 rounded text-[9px] font-mono font-bold shrink-0">
-                      PRIORITY
-                    </span>
-                  ) : item.status === 'COMPLETED' ? (
-                    <span className="tag-pastel-green px-1.5 py-0.2 rounded text-[9px] font-mono font-bold shrink-0 flex items-center gap-0.5">
-                      <CheckCircle2 className="w-2.5 h-2.5" />
-                      <span>SIGNED</span>
-                    </span>
-                  ) : null}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {item.hasRedFlag ? (
+                      <span className="tag-pastel-red px-1.5 py-0.2 rounded text-[9px] font-mono font-bold">
+                        PRIORITY
+                      </span>
+                    ) : item.status === 'COMPLETED' ? (
+                      <span className="tag-pastel-green px-1.5 py-0.2 rounded text-[9px] font-mono font-bold flex items-center gap-0.5">
+                        <CheckCircle2 className="w-2.5 h-2.5" />
+                        <span>SIGNED</span>
+                      </span>
+                    ) : null}
+                    <ChevronRight className="w-3.5 h-3.5 text-[#888888] md:hidden" />
+                  </div>
                 </div>
 
                 {/* Sub row: Demographics */}
-                <div className="flex items-center gap-1.5 text-[11px] text-[#787774] dark:text-[#8E94A4] mb-1.5 font-mono tabular-nums">
+                <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#787774] dark:text-[#8E94A4] mb-1 font-mono tabular-nums">
                   <span>{item.gender}</span>
                   <span>•</span>
                   <span>{item.age}y</span>
@@ -129,7 +132,7 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
                 {/* Chief Complaint & Time */}
                 <div className="flex items-center justify-between text-[10px]">
                   <span
-                    className={`truncate max-w-[150px] px-1.5 py-0.5 rounded ${
+                    className={`truncate max-w-[170px] px-1.5 py-0.5 rounded ${
                       isLightMode ? 'bg-[#F4F4F2] text-[#444444]' : 'bg-[#1A1D27] text-[#9EA5B5]'
                     }`}
                   >
