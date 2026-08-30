@@ -13,6 +13,7 @@ import {
   Encounter,
   ControlledClinicalSummary,
   RedFlagAlert,
+  DoctorSpecialist,
 } from '@medikiosk/shared-types';
 import { DoctorApi } from '../services/api';
 
@@ -23,6 +24,16 @@ const QUICK_DIAGNOSES = [
   { code: 'R07.9', label: 'Chest Pain, Unspecified (R07.9)' },
   { code: 'E11.9', label: 'Type 2 Diabetes Mellitus (E11.9)' },
   { code: 'J06.9', label: 'Acute Upper Respiratory Infection (J06.9)' },
+];
+
+const DEPARTMENTS_LIST = [
+  'General Medicine',
+  'Kayachikitsa / AYUSH',
+  'Cardiology',
+  'Orthopedics',
+  'Pulmonology',
+  'Gastroenterology',
+  'Emergency Triage',
 ];
 
 interface ClinicalBriefingViewProps {
@@ -37,14 +48,15 @@ interface ClinicalBriefingViewProps {
     documents: any[];
     summary: ControlledClinicalSummary | null;
   };
+  specialists?: DoctorSpecialist[];
   onRefresh: () => void;
   onOpenFhirExport: () => void;
-  onBackToQueue?: () => void;
   isLightMode?: boolean;
 }
 
 export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
   briefing,
+  specialists: _specialists = [],
   onRefresh,
   onOpenFhirExport,
   isLightMode = false,
@@ -60,9 +72,11 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
     '1. Tab Pantoprazole 40mg OD before breakfast x 14 days\n2. Continue Tab Amlodipine 5mg OD\n3. 12-Lead ECG & Serum Troponin I Stat'
   );
   const [clinicalNotes, setClinicalNotes] = useState(
-    'Patient examined in OPD Room 4. Normal heart sounds, no peripheral edema. ECG scheduled to rule out acute ischemia.'
+    'Patient examined in OPD. Normal heart sounds, no peripheral edema. ECG scheduled to rule out acute ischemia.'
   );
   const [verificationSuccess, setVerificationSuccess] = useState(false);
+  const [selectedReassignDept, setSelectedReassignDept] = useState(encounter.department || 'General Medicine');
+  const [isReassigning, setIsReassigning] = useState(false);
 
   const isVerified = summary?.isPhysicianVerified || encounter.status === 'COMPLETED' || verificationSuccess;
 
@@ -93,6 +107,19 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
     }
   };
 
+  const handleReassignDepartment = async (dept: string) => {
+    setSelectedReassignDept(dept);
+    setIsReassigning(true);
+    try {
+      await DoctorApi.reassignEncounter(encounter.id, dept);
+      onRefresh();
+    } catch (err) {
+      console.error('Reassign failed:', err);
+    } finally {
+      setIsReassigning(false);
+    }
+  };
+
   return (
     <div
       className={`flex-1 flex flex-col h-full overflow-y-auto p-3 sm:p-5 lg:p-6 gap-4 sm:gap-5 transition-colors ${
@@ -101,11 +128,11 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
     >
       {/* 1. Patient & Encounter Header Banner */}
       <div
-        className={`border rounded-xl p-3.5 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shrink-0 transition-colors shadow-xs ${
+        className={`border rounded-xl p-3.5 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 sm:gap-4 shrink-0 transition-colors shadow-xs ${
           isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA]' : 'bg-[#141720] border-[#232734]'
         }`}
       >
-        <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
+        <div className="flex items-center gap-3 min-w-0 w-full lg:w-auto">
           <div
             className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg border flex items-center justify-center font-serif text-base sm:text-lg font-bold shrink-0 ${
               isLightMode ? 'bg-[#F7F6F3] border-[#EAEAEA] text-[#111111]' : 'bg-[#1E222D] border-[#2D3242] text-[#F4F4F6]'
@@ -120,7 +147,7 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
               </h2>
               <span
                 className={`px-2 py-0.5 text-[9px] sm:text-[10px] font-mono uppercase tracking-wider rounded-full shrink-0 ${
-                  isLightMode ? 'tag-pastel-blue' : 'tag-pastel-blue'
+                  encounter.department?.includes('AYUSH') ? 'tag-pastel-yellow' : 'tag-pastel-blue'
                 }`}
               >
                 {encounter.department || 'GENERAL MEDICINE'}
@@ -148,19 +175,42 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
           </div>
         </div>
 
-        {/* Action Header Controls */}
-        <div className="w-full sm:w-auto shrink-0">
+        {/* Action Header Controls & Specialist Reassignment */}
+        <div className="w-full lg:w-auto flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0">
+          {/* Dynamic Specialist Routing Dropdown */}
+          <div className="flex items-center gap-1.5 text-xs font-medium w-full sm:w-auto">
+            <span className="text-[10px] font-mono uppercase text-[#787774] dark:text-[#8E94A4] shrink-0 hidden sm:inline">
+              Route:
+            </span>
+            <select
+              value={selectedReassignDept}
+              disabled={isReassigning}
+              onChange={(e) => handleReassignDepartment(e.target.value)}
+              className={`py-1.5 px-2.5 rounded-md border text-xs font-medium outline-none transition-colors cursor-pointer w-full sm:w-auto ${
+                isLightMode
+                  ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#111111]'
+                  : 'bg-[#1A1D27] border-[#2A2E3D] text-[#F4F4F6]'
+              }`}
+            >
+              {DEPARTMENTS_LIST.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <button
             type="button"
             onClick={onOpenFhirExport}
-            className={`w-full sm:w-auto px-3.5 py-2 min-h-[38px] border rounded-md text-xs font-mono flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+            className={`w-full sm:w-auto px-3.5 py-2 min-h-[36px] border rounded-md text-xs font-mono flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
               isLightMode
                 ? 'bg-[#FBFBFA] hover:bg-[#F0F0EF] text-[#111111] border-[#EAEAEA]'
                 : 'bg-[#1A1D27] hover:bg-[#222634] text-[#F4F4F6] border-[#2A2E3D]'
             }`}
           >
             <Download className="w-3.5 h-3.5" />
-            <span>FHIR R4 / ABDM Export</span>
+            <span>FHIR R4 Export</span>
           </button>
         </div>
       </div>
@@ -293,14 +343,16 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                 }`}
               >
                 {summary?.hpiNarrative ||
-                  `${patient.fullName}, a ${patient.age}-year-old ${patient.gender?.toLowerCase() || 'patient'}, presented to the OPD complaining of chest pain and burning heaviness since yesterday night with a severity score of 7/10. Active hypertension medication recorded.`}
+                  `${patient.fullName}, a ${patient.age}-year-old ${patient.gender?.toLowerCase() || 'patient'}, presented to the OPD complaining of ${encounter.chiefComplaintSummary || 'chest discomfort and burning heaviness'} with a severity score of 7/10. Active hypertension medication recorded.`}
               </p>
 
               {/* Characteristic Tags */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-xs">
                 <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
                   <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Complaint</span>
-                  <span className={`text-[11px] font-bold truncate block ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Chest Discomfort</span>
+                  <span className={`text-[11px] font-bold truncate block ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
+                    {encounter.chiefComplaintSummary || 'Chest Discomfort'}
+                  </span>
                 </div>
                 <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
                   <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Onset</span>
@@ -311,8 +363,10 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                   <span className="text-[11px] font-bold text-[#9F2F2D] dark:text-[#FCA5A5] tabular-nums block">7 / 10 (High)</span>
                 </div>
                 <div className={`p-2.5 rounded-md border ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
-                  <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Character</span>
-                  <span className={`text-[11px] font-bold truncate block ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Burning</span>
+                  <span className="text-[9px] uppercase tracking-wider text-[#787774] dark:text-[#8E94A4] block">Department</span>
+                  <span className={`text-[11px] font-bold truncate block ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
+                    {encounter.department || 'General Med'}
+                  </span>
                 </div>
               </div>
             </div>

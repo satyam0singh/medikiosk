@@ -90,6 +90,78 @@ export class EncountersService {
     return res.rows.map(this.mapRowToEncounter);
   }
 
+  public static async getQueue(department?: string, search?: string): Promise<any[]> {
+    let sql = `
+      SELECT e.id AS "encounterId", e.patient_id AS "patientId", e.department, e.status, e.chief_complaint_summary AS "chiefComplaint",
+             e.started_at AS "startedAt", e.physician_id AS "physicianId",
+             p.full_name AS "fullName", p.age, p.gender, p.abha_id AS "abhaId",
+             COALESCE(rf.alert_count, 0) > 0 AS "hasRedFlag",
+             COALESCE(u.full_name, 'Unassigned') AS "assignedDoctorName"
+      FROM encounters e
+      JOIN patients p ON e.patient_id = p.id
+      LEFT JOIN users u ON e.physician_id = u.id
+      LEFT JOIN (
+        SELECT encounter_id, COUNT(*) AS alert_count
+        FROM red_flag_events
+        WHERE severity = 'CRITICAL_EMERGENCY' AND is_acknowledged = FALSE
+        GROUP BY encounter_id
+      ) rf ON e.id = rf.encounter_id
+      WHERE e.status NOT IN ('COMPLETED', 'CANCELLED')
+    `;
+
+    const params: any[] = [];
+    if (department && department !== 'ALL') {
+      params.push(`%${department}%`);
+      sql += ` AND e.department ILIKE $${params.length}`;
+    }
+
+    if (search && search.trim()) {
+      params.push(`%${search.trim()}%`);
+      sql += ` AND (p.full_name ILIKE $${params.length} OR p.abha_id ILIKE $${params.length} OR e.chief_complaint_summary ILIKE $${params.length})`;
+    }
+
+    sql += ` ORDER BY "hasRedFlag" DESC, e.started_at ASC`;
+
+    const res = await query(sql, params);
+    return res.rows.map((row) => ({
+      encounterId: row.encounterId,
+      patientId: row.patientId,
+      fullName: row.fullName,
+      age: row.age,
+      gender: row.gender,
+      abhaId: row.abhaId || 'N/A',
+      chiefComplaint: row.chiefComplaint || 'General Consultation',
+      hasRedFlag: row.hasRedFlag,
+      status: row.status,
+      department: row.department,
+      assignedDoctorName: row.assignedDoctorName,
+      queueTime: new Date(row.startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }));
+  }
+
+  public static async reassign(
+    encounterId: string,
+    department: string,
+    physicianId?: string
+  ): Promise<Encounter> {
+    const res = await query(
+      `UPDATE encounters
+       SET department = $1,
+           physician_id = COALESCE($2, physician_id),
+           updated_at = NOW()
+       WHERE id = $3
+       RETURNING id, patient_id, physician_id, status, department, encounter_type,
+                 chief_complaint_summary, started_at, completed_at, created_at, updated_at`,
+      [department, physicianId || null, encounterId]
+    );
+
+    if (res.rows.length === 0) {
+      throw new AppError(`Encounter not found with id ${encounterId}`, 404, 'ENCOUNTER_NOT_FOUND');
+    }
+
+    return this.mapRowToEncounter(res.rows[0]);
+  }
+
   public static async getClinicalBriefing(encounterId: string): Promise<{
     encounter: Encounter;
     patient: any;

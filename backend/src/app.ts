@@ -17,6 +17,7 @@ import { timelineRoutes } from './modules/timeline/timeline.routes';
 import { summaryRoutes } from './modules/summaries/summaries.routes';
 import { fhirRoutes } from './modules/fhir/fhir.routes';
 import { ayushRoutes } from './modules/ayush/ayush.routes';
+import { doctorRoutes } from './modules/doctors/doctors.routes';
 
 export function createApp(): Express {
   const app = express();
@@ -61,6 +62,7 @@ export function createApp(): Express {
   apiV1Router.use('/summaries', summaryRoutes);
   apiV1Router.use('/fhir', fhirRoutes);
   apiV1Router.use('/ayush', ayushRoutes);
+  apiV1Router.use('/doctors', doctorRoutes);
 
   app.use(env.API_PREFIX, apiV1Router);
 

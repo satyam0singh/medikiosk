@@ -139,6 +139,26 @@ export interface User {
   updatedAt: string;
 }
 
+export interface DoctorSpecialist {
+  id: string;
+  email: string;
+  fullName: string;
+  role: UserRole;
+  department: string;
+  specialtyTitle: string;
+  roomNumber: string;
+  isActive: boolean;
+  avatarUrl?: string;
+  availableSlotCount?: number;
+}
+
+export interface QueueFilter {
+  department?: string;
+  physicianId?: string;
+  status?: EncounterStatus;
+  search?: string;
+}
+
 export interface Patient {
   id: string;
   abhaId?: string;

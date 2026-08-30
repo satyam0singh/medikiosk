@@ -92,6 +92,46 @@ export class EncountersController {
     }
   }
 
+  public static async getQueue(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const department = req.query.department as string | undefined;
+      const search = req.query.search as string | undefined;
+      const queue = await EncountersService.getQueue(department, search);
+
+      const response: ApiResponse = {
+        success: true,
+        data: queue,
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+        },
+      };
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public static async reassign(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const encounterId = req.params.id as string;
+      const { department, physicianId } = req.body;
+      const encounter = await EncountersService.reassign(encounterId, department, physicianId);
+
+      const response: ApiResponse = {
+        success: true,
+        data: encounter,
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+        },
+      };
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public static async getClinicalBriefing(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const briefing = await EncountersService.getClinicalBriefing(req.params.id as string);
