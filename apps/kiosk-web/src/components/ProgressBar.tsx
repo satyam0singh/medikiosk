@@ -11,7 +11,8 @@ export type KioskStep =
   | 'INTERVIEW'
   | 'RED_FLAG'
   | 'DOCUMENTS'
-  | 'COMPLETED';
+  | 'COMPLETED'
+  | 'COMPLETION';
 
 interface ProgressBarProps {
   currentStep: KioskStep;
@@ -19,7 +20,7 @@ interface ProgressBarProps {
 }
 
 interface StepItem {
-  id: KioskStep;
+  id: KioskStep | 'COMPLETION';
   translationKey: 'step_identify' | 'step_consent' | 'step_complaint' | 'step_questions' | 'step_records' | 'step_token';
   icon: React.ComponentType<{ className?: string }>;
 }
@@ -30,14 +31,15 @@ const STEPS: StepItem[] = [
   { id: 'COMPLAINT', translationKey: 'step_complaint', icon: Stethoscope },
   { id: 'INTERVIEW', translationKey: 'step_questions', icon: HelpCircle },
   { id: 'DOCUMENTS', translationKey: 'step_records', icon: Upload },
-  { id: 'COMPLETED', translationKey: 'step_token', icon: CheckCircle2 },
+  { id: 'COMPLETION', translationKey: 'step_token', icon: CheckCircle2 },
 ];
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, language }) => {
   if (currentStep === 'LANGUAGE') return null;
 
   const t = getTranslation(language);
-  const currentIdx = STEPS.findIndex((s) => s.id === currentStep);
+  const normalizedStep = currentStep === 'COMPLETED' ? 'COMPLETION' : currentStep;
+  const currentIdx = STEPS.findIndex((s) => s.id === normalizedStep);
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-3 sm:pt-4 pb-1 shrink-0">

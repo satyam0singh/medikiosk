@@ -5,7 +5,7 @@ import { DependencyHealthStatus } from '@medikiosk/shared-types';
 
 export const minioClient = new Minio.Client({
   endPoint: env.MINIO_ENDPOINT,
-  port: env.MINIO_PORT,
+  port: env.MINIO_PORT && env.MINIO_PORT !== 9000 ? env.MINIO_PORT : env.MINIO_USE_SSL ? 443 : env.MINIO_PORT || 9000,
   useSSL: env.MINIO_USE_SSL,
   accessKey: env.MINIO_ACCESS_KEY,
   secretKey: env.MINIO_SECRET_KEY,

@@ -7,108 +7,138 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================================================
--- 1. Enumerations
+-- 1. Enumerations (Idempotent for Supabase & Cloud PostgreSQL)
 -- ============================================================================
 
-CREATE TYPE user_role_type AS ENUM (
-    'PATIENT',
-    'PHYSICIAN',
-    'TRIAGE',
-    'AYUSH_PRACTITIONER',
-    'ADMIN',
-    'IT_ADMIN'
-);
+DO $$ BEGIN
+    CREATE TYPE user_role_type AS ENUM (
+        'PATIENT',
+        'PHYSICIAN',
+        'TRIAGE',
+        'AYUSH_PRACTITIONER',
+        'ADMIN',
+        'IT_ADMIN'
+    );
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE provenance_type AS ENUM (
-    'PATIENT_REPORTED',
-    'DOCUMENT_OCR',
-    'AI_EXTRACTED',
-    'SYSTEM_RULE',
-    'PHYSICIAN_VERIFIED'
-);
+DO $$ BEGIN
+    CREATE TYPE provenance_type AS ENUM (
+        'PATIENT_REPORTED',
+        'DOCUMENT_OCR',
+        'AI_EXTRACTED',
+        'SYSTEM_RULE',
+        'PHYSICIAN_VERIFIED'
+    );
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE verification_status_type AS ENUM (
-    'PENDING',
-    'VERIFIED',
-    'REJECTED',
-    'MODIFIED'
-);
+DO $$ BEGIN
+    CREATE TYPE verification_status_type AS ENUM (
+        'PENDING',
+        'VERIFIED',
+        'REJECTED',
+        'MODIFIED'
+    );
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE encounter_status_type AS ENUM (
-    'CREATED',
-    'IN_PROGRESS',
-    'AWAITING_PHYSICIAN',
-    'VERIFIED',
-    'EXPORTED',
-    'COMPLETED',
-    'CANCELLED'
-);
+DO $$ BEGIN
+    CREATE TYPE encounter_status_type AS ENUM (
+        'CREATED',
+        'IN_PROGRESS',
+        'AWAITING_PHYSICIAN',
+        'VERIFIED',
+        'EXPORTED',
+        'COMPLETED',
+        'CANCELLED'
+    );
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE session_state_type AS ENUM (
-    'CREATED',
-    'IDENTIFICATION',
-    'CONSENT_PENDING',
-    'CONSENTED',
-    'LANGUAGE_SELECTED',
-    'HISTORY_ACTIVE',
-    'SAFETY_REVIEW',
-    'DOCUMENT_CAPTURE',
-    'DOCUMENT_PROCESSING',
-    'VALIDATION',
-    'SUMMARY_GENERATION',
-    'PHYSICIAN_REVIEW',
-    'VERIFIED',
-    'EXPORTED',
-    'COMPLETED',
-    'FAILED'
-);
+DO $$ BEGIN
+    CREATE TYPE session_state_type AS ENUM (
+        'CREATED',
+        'IDENTIFICATION',
+        'CONSENT_PENDING',
+        'CONSENTED',
+        'LANGUAGE_SELECTED',
+        'HISTORY_ACTIVE',
+        'SAFETY_REVIEW',
+        'DOCUMENT_CAPTURE',
+        'DOCUMENT_PROCESSING',
+        'VALIDATION',
+        'SUMMARY_GENERATION',
+        'PHYSICIAN_REVIEW',
+        'VERIFIED',
+        'EXPORTED',
+        'COMPLETED',
+        'FAILED'
+    );
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE consent_status_type AS ENUM (
-    'PENDING',
-    'GRANTED',
-    'REVOKED',
-    'EXPIRED'
-);
+DO $$ BEGIN
+    CREATE TYPE consent_status_type AS ENUM (
+        'PENDING',
+        'GRANTED',
+        'REVOKED',
+        'EXPIRED'
+    );
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE document_type_enum AS ENUM (
-    'PRESCRIPTION',
-    'LAB_REPORT',
-    'DISCHARGE_SUMMARY',
-    'RADIOLOGY_REPORT',
-    'OTHER'
-);
+DO $$ BEGIN
+    CREATE TYPE document_type_enum AS ENUM (
+        'PRESCRIPTION',
+        'LAB_REPORT',
+        'DISCHARGE_SUMMARY',
+        'RADIOLOGY_REPORT',
+        'OTHER'
+    );
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE document_processing_state_type AS ENUM (
-    'UPLOADED',
-    'VALIDATED',
-    'PROCESSING',
-    'OCR_COMPLETE',
-    'EXTRACTION_COMPLETE',
-    'COMPLETED',
-    'LOW_CONFIDENCE',
-    'REVIEW_REQUIRED',
-    'FAILED'
-);
+DO $$ BEGIN
+    CREATE TYPE document_processing_state_type AS ENUM (
+        'UPLOADED',
+        'VALIDATED',
+        'PROCESSING',
+        'OCR_COMPLETE',
+        'EXTRACTION_COMPLETE',
+        'COMPLETED',
+        'LOW_CONFIDENCE',
+        'REVIEW_REQUIRED',
+        'FAILED'
+    );
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE red_flag_severity_type AS ENUM (
-    'CRITICAL_EMERGENCY',
-    'PRIORITY_URGENT',
-    'WARNING',
-    'INFO'
-);
+DO $$ BEGIN
+    CREATE TYPE red_flag_severity_type AS ENUM (
+        'CRITICAL_EMERGENCY',
+        'PRIORITY_URGENT',
+        'WARNING',
+        'INFO'
+    );
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TYPE timeline_event_type AS ENUM (
-    'CHIEF_COMPLAINT',
-    'SYMPTOM_ONSET',
-    'MEDICATION_STARTED',
-    'MEDICATION_STOPPED',
-    'LAB_INVESTIGATION',
-    'HOSPITALIZATION',
-    'SURGERY',
-    'DIAGNOSIS',
-    'ALLERGY_REACTION',
-    'CONSULTATION'
-);
+DO $$ BEGIN
+    CREATE TYPE timeline_event_type AS ENUM (
+        'CHIEF_COMPLAINT',
+        'SYMPTOM_ONSET',
+        'MEDICATION_STARTED',
+        'MEDICATION_STOPPED',
+        'LAB_INVESTIGATION',
+        'HOSPITALIZATION',
+        'SURGERY',
+        'DIAGNOSIS',
+        'ALLERGY_REACTION',
+        'CONSULTATION'
+    );
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
 -- ============================================================================
 -- 2. Users & Roles
@@ -153,9 +183,9 @@ CREATE TABLE IF NOT EXISTS patients (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_patients_abha ON patients(abha_id);
-CREATE INDEX idx_patients_mrn ON patients(hospital_patient_id);
-CREATE INDEX idx_patients_contact ON patients(contact_number);
+CREATE INDEX IF NOT EXISTS idx_patients_abha ON patients(abha_id);
+CREATE INDEX IF NOT EXISTS idx_patients_mrn ON patients(hospital_patient_id);
+CREATE INDEX IF NOT EXISTS idx_patients_contact ON patients(contact_number);
 
 CREATE TABLE IF NOT EXISTS consents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -171,7 +201,7 @@ CREATE TABLE IF NOT EXISTS consents (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_consents_patient ON consents(patient_id);
+CREATE INDEX IF NOT EXISTS idx_consents_patient ON consents(patient_id);
 
 -- ============================================================================
 -- 4. Encounters & Clinical Sessions
@@ -191,9 +221,9 @@ CREATE TABLE IF NOT EXISTS encounters (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_encounters_patient ON encounters(patient_id);
-CREATE INDEX idx_encounters_physician ON encounters(physician_id);
-CREATE INDEX idx_encounters_status ON encounters(status);
+CREATE INDEX IF NOT EXISTS idx_encounters_patient ON encounters(patient_id);
+CREATE INDEX IF NOT EXISTS idx_encounters_physician ON encounters(physician_id);
+CREATE INDEX IF NOT EXISTS idx_encounters_status ON encounters(status);
 
 CREATE TABLE IF NOT EXISTS clinical_sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -207,8 +237,8 @@ CREATE TABLE IF NOT EXISTS clinical_sessions (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_sessions_encounter ON clinical_sessions(encounter_id);
-CREATE INDEX idx_sessions_state ON clinical_sessions(current_state);
+CREATE INDEX IF NOT EXISTS idx_sessions_encounter ON clinical_sessions(encounter_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_state ON clinical_sessions(current_state);
 
 -- ============================================================================
 -- 5. Questions & Answers
@@ -240,8 +270,8 @@ CREATE TABLE IF NOT EXISTS session_answers (
     captured_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_answers_session ON session_answers(session_id);
-CREATE INDEX idx_answers_question ON session_answers(question_id);
+CREATE INDEX IF NOT EXISTS idx_answers_session ON session_answers(session_id);
+CREATE INDEX IF NOT EXISTS idx_answers_question ON session_answers(question_id);
 
 -- ============================================================================
 -- 6. Clinical Facts & Medical Details (Source of Truth)
@@ -266,10 +296,10 @@ CREATE TABLE IF NOT EXISTS clinical_facts (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_facts_patient ON clinical_facts(patient_id);
-CREATE INDEX idx_facts_encounter ON clinical_facts(encounter_id);
-CREATE INDEX idx_facts_field ON clinical_facts(field);
-CREATE INDEX idx_facts_status ON clinical_facts(verification_status);
+CREATE INDEX IF NOT EXISTS idx_facts_patient ON clinical_facts(patient_id);
+CREATE INDEX IF NOT EXISTS idx_facts_encounter ON clinical_facts(encounter_id);
+CREATE INDEX IF NOT EXISTS idx_facts_field ON clinical_facts(field);
+CREATE INDEX IF NOT EXISTS idx_facts_status ON clinical_facts(verification_status);
 
 CREATE TABLE IF NOT EXISTS symptoms (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -357,9 +387,9 @@ CREATE TABLE IF NOT EXISTS documents (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_docs_patient ON documents(patient_id);
-CREATE INDEX idx_docs_encounter ON documents(encounter_id);
-CREATE INDEX idx_docs_state ON documents(processing_state);
+CREATE INDEX IF NOT EXISTS idx_docs_patient ON documents(patient_id);
+CREATE INDEX IF NOT EXISTS idx_docs_encounter ON documents(encounter_id);
+CREATE INDEX IF NOT EXISTS idx_docs_state ON documents(processing_state);
 
 CREATE TABLE IF NOT EXISTS document_extractions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -403,8 +433,8 @@ CREATE TABLE IF NOT EXISTS red_flag_events (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_redflags_encounter ON red_flag_events(encounter_id);
-CREATE INDEX idx_redflags_ack ON red_flag_events(is_acknowledged);
+CREATE INDEX IF NOT EXISTS idx_redflags_encounter ON red_flag_events(encounter_id);
+CREATE INDEX IF NOT EXISTS idx_redflags_ack ON red_flag_events(is_acknowledged);
 
 -- ============================================================================
 -- 9. Timeline Events
@@ -430,8 +460,8 @@ CREATE TABLE IF NOT EXISTS timeline_events (
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_timeline_patient ON timeline_events(patient_id);
-CREATE INDEX idx_timeline_date ON timeline_events(event_date);
+CREATE INDEX IF NOT EXISTS idx_timeline_patient ON timeline_events(patient_id);
+CREATE INDEX IF NOT EXISTS idx_timeline_date ON timeline_events(event_date);
 
 -- ============================================================================
 -- 10. Clinical Summaries, Physician Reviews & FHIR Exports
@@ -454,7 +484,7 @@ CREATE TABLE IF NOT EXISTS clinical_summaries (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_summaries_encounter ON clinical_summaries(encounter_id);
+CREATE INDEX IF NOT EXISTS idx_summaries_encounter ON clinical_summaries(encounter_id);
 
 CREATE TABLE IF NOT EXISTS physician_reviews (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -496,7 +526,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_audit_timestamp ON audit_logs(timestamp);
-CREATE INDEX idx_audit_patient ON audit_logs(patient_id);
-CREATE INDEX idx_audit_encounter ON audit_logs(encounter_id);
-CREATE INDEX idx_audit_actor ON audit_logs(actor_id);
+CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_patient ON audit_logs(patient_id);
+CREATE INDEX IF NOT EXISTS idx_audit_encounter ON audit_logs(encounter_id);
+CREATE INDEX IF NOT EXISTS idx_audit_actor ON audit_logs(actor_id);

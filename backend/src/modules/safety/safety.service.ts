@@ -111,27 +111,31 @@ export class SafetyService {
     });
   }
 
-  public static async listAlerts(isAcknowledged?: boolean): Promise<RedFlagAlert[]> {
+  public static async listAlerts(isAcknowledged?: boolean): Promise<any[]> {
     let sql = `
-      SELECT id, encounter_id, patient_id, rule_id, severity, alert_message,
-             trigger_facts, is_acknowledged, acknowledged_by_user_id,
-             acknowledged_at, created_at
-      FROM red_flag_events
+      SELECT rf.id, rf.encounter_id, rf.patient_id, rf.rule_id, rf.severity, rf.alert_message,
+             rf.trigger_facts, rf.is_acknowledged, rf.acknowledged_by_user_id,
+             rf.acknowledged_at, rf.created_at,
+             p.full_name AS "patientName", p.gender AS "patientGender", p.abha_id AS "patientAbha",
+             e.department, e.chief_complaint_summary AS "chiefComplaint"
+      FROM red_flag_events rf
+      LEFT JOIN patients p ON rf.patient_id = p.id
+      LEFT JOIN encounters e ON rf.encounter_id = e.id
     `;
     const params: unknown[] = [];
 
     if (typeof isAcknowledged === 'boolean') {
-      sql += ' WHERE is_acknowledged = $1';
+      sql += ' WHERE rf.is_acknowledged = $1';
       params.push(isAcknowledged);
     }
 
-    sql += ' ORDER BY created_at DESC LIMIT 50';
+    sql += ' ORDER BY rf.created_at DESC LIMIT 50';
 
     const res = await query(sql, params);
-    return res.rows.map(this.mapRowToAlert);
+    return res.rows.map((r) => this.mapRowToAlert(r));
   }
 
-  public static async acknowledgeAlert(alertId: string, userId: string): Promise<RedFlagAlert> {
+  public static async acknowledgeAlert(alertId: string, userId?: string): Promise<any> {
     const res = await query(
       `UPDATE red_flag_events
        SET is_acknowledged = TRUE,
@@ -141,7 +145,7 @@ export class SafetyService {
        RETURNING id, encounter_id, patient_id, rule_id, severity, alert_message,
                  trigger_facts, is_acknowledged, acknowledged_by_user_id,
                  acknowledged_at, created_at`,
-      [userId, alertId]
+      [userId || null, alertId]
     );
 
     if (res.rows.length === 0) {
@@ -151,19 +155,24 @@ export class SafetyService {
     return this.mapRowToAlert(res.rows[0]);
   }
 
-  private static mapRowToAlert(r: any): RedFlagAlert {
+  private static mapRowToAlert(r: any): any {
     return {
       id: r.id,
       encounterId: r.encounter_id,
       patientId: r.patient_id,
+      patientName: r.patientName || 'Emergency Patient',
+      patientGender: r.patientGender || 'MALE',
+      patientAbha: r.patientAbha || 'N/A',
+      department: r.department || 'Cardiology',
       ruleId: r.rule_id,
       severity: r.severity as RedFlagSeverity,
       alertMessage: r.alert_message,
       triggerFacts: typeof r.trigger_facts === 'string' ? JSON.parse(r.trigger_facts) : r.trigger_facts,
       isAcknowledged: r.is_acknowledged,
+      status: r.is_acknowledged ? 'ACKNOWLEDGED' : 'ACTIVE',
       acknowledgedByUserId: r.acknowledged_by_user_id,
-      acknowledgedAt: r.acknowledged_at ? r.acknowledged_at.toISOString() : undefined,
-      createdAt: r.created_at.toISOString(),
+      acknowledgedAt: r.acknowledged_at ? (r.acknowledged_at instanceof Date ? r.acknowledged_at.toISOString() : r.acknowledged_at) : undefined,
+      createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : r.created_at,
     };
   }
 }

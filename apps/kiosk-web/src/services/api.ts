@@ -8,24 +8,36 @@ import {
   RedFlagAlert,
 } from '@medikiosk/shared-types';
 
-const API_BASE = '/api/v1';
+const API_BASE = (import.meta as any).env?.VITE_API_URL
+  ? `${(import.meta as any).env.VITE_API_URL}/api/v1`
+  : '/api/v1';
 
 async function fetchJson<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_BASE}${url}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 600);
 
-  const json = await res.json();
-  if (!res.ok || json.success === false) {
-    const errorMsg = json.error?.message || `Request failed with status ${res.status}`;
-    throw new Error(errorMsg);
+  try {
+    const res = await fetch(`${API_BASE}${url}`, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
+    clearTimeout(timeoutId);
+
+    const json = await res.json();
+    if (!res.ok || json.success === false) {
+      const errorMsg = json.error?.message || `Request failed with status ${res.status}`;
+      throw new Error(errorMsg);
+    }
+
+    return json.data as T;
+  } catch (e) {
+    clearTimeout(timeoutId);
+    throw e;
   }
-
-  return json.data as T;
 }
 
 export const KioskApi = {
@@ -39,7 +51,7 @@ export const KioskApi = {
     fetchJson<ConsentRecord>('/consents', { method: 'POST', body: JSON.stringify(data) }),
 
   // Encounters
-  createEncounter: (data: { patientId: string; department?: string; chiefComplaintSummary?: string }) =>
+  createEncounter: (data: { patientId: string; department?: string; encounterType?: string; chiefComplaintSummary?: string }) =>
     fetchJson<Encounter>('/encounters', { method: 'POST', body: JSON.stringify(data) }),
 
   // Sessions

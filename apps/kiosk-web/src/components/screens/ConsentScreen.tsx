@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, CheckCircle2, Lock, FileText, ArrowRight, Sparkles } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Lock, FileText, ArrowRight, Sparkles, ArrowLeft } from 'lucide-react';
 import { Patient, LanguageCode, ConsentStatus } from '@medikiosk/shared-types';
 import { AudioPromptButton } from '../AudioPromptButton';
 import { KioskApi } from '../../services/api';
@@ -10,6 +10,7 @@ interface ConsentScreenProps {
   language: LanguageCode;
   onConsentGranted: (consentRecord: any) => void;
   onConsentDenied: () => void;
+  onBack?: () => void;
 }
 
 export const ConsentScreen: React.FC<ConsentScreenProps> = ({
@@ -17,6 +18,7 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
   language,
   onConsentGranted,
   onConsentDenied,
+  onBack,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const t = getTranslation(language);
@@ -50,16 +52,29 @@ export const ConsentScreen: React.FC<ConsentScreenProps> = ({
 
   return (
     <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full py-2 px-1 sm:px-4 justify-between">
-      {/* Header */}
+      {/* Header with Back Button */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 border-b border-[#EAEAEA] dark:border-[#232734] pb-3 shrink-0">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#111111] dark:text-[#F4F4F6] flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-[#1F6C9F] dark:text-[#70B8FF]" />
-            <span>{t.consent_title}</span>
-          </h2>
-          <p className="text-xs text-[#787774] dark:text-[#8E94A4] mt-0.5 font-mono tabular-nums">
-            {t.full_name}: {patient.fullName} ({patient.age || 'N/A'} yrs / {patient.gender === 'MALE' ? t.male : t.female})
-          </p>
+        <div className="flex items-center gap-2.5">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              title={language === LanguageCode.HI ? 'वापस जाएं' : 'Go Back'}
+              className="p-2 rounded-xl border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#111111] dark:text-[#F4F4F6] hover:bg-[#F7F6F3] dark:hover:bg-[#1A1D27] active:scale-95 transition-all cursor-pointer shrink-0 shadow-xs flex items-center gap-1 text-xs font-semibold"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">{language === LanguageCode.HI ? 'वापस' : 'Back'}</span>
+            </button>
+          )}
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#111111] dark:text-[#F4F4F6] flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-[#1F6C9F] dark:text-[#70B8FF]" />
+              <span>{t.consent_title}</span>
+            </h2>
+            <p className="text-xs text-[#787774] dark:text-[#8E94A4] mt-0.5 font-mono tabular-nums">
+              {t.full_name}: {patient.fullName} ({patient.age || 'N/A'} yrs / {patient.gender === 'MALE' ? t.male : t.female})
+            </p>
+          </div>
         </div>
         <AudioPromptButton text={t.audio_consent} language={language} size="md" />
       </div>

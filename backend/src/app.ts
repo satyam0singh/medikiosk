@@ -57,6 +57,8 @@ export function createApp(): Express {
   apiV1Router.use('/sessions', sessionRoutes);
   apiV1Router.use('/questions', questionRoutes);
   apiV1Router.use('/alerts', safetyRoutes);
+  apiV1Router.use('/safety', safetyRoutes);
+  apiV1Router.use('/triage', safetyRoutes);
   apiV1Router.use('/documents', documentRoutes);
   apiV1Router.use('/timeline', timelineRoutes);
   apiV1Router.use('/summaries', summaryRoutes);

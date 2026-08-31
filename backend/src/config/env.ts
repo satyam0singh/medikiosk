@@ -13,7 +13,7 @@ const EnvSchema = z.object({
   CORS_ORIGINS: z.string().default('http://localhost:3000,http://localhost:3001,http://localhost:5173'),
 
   // PostgreSQL
-  DB_HOST: z.string().default('localhost'),
+  DB_HOST: z.string().default('127.0.0.1'),
   DB_PORT: z.coerce.number().default(5432),
   DB_NAME: z.string().default('medikiosk_db'),
   DB_USER: z.string().default('medikiosk_user'),
@@ -24,7 +24,7 @@ const EnvSchema = z.object({
   DATABASE_URL: z.string().optional(),
 
   // Redis
-  REDIS_HOST: z.string().default('localhost'),
+  REDIS_HOST: z.string().default('127.0.0.1'),
   REDIS_PORT: z.coerce.number().default(6379),
   REDIS_PASSWORD: z.string().optional().default(''),
   REDIS_DB: z.coerce.number().default(0),
@@ -32,7 +32,7 @@ const EnvSchema = z.object({
   SESSION_TTL_SECONDS: z.coerce.number().default(86400),
 
   // MinIO
-  MINIO_ENDPOINT: z.string().default('localhost'),
+  MINIO_ENDPOINT: z.string().default('127.0.0.1'),
   MINIO_PORT: z.coerce.number().default(9000),
   MINIO_USE_SSL: z.preprocess((val) => val === 'true' || val === true, z.boolean()).default(false),
   MINIO_ACCESS_KEY: z.string().default('medikiosk_minio_admin'),

@@ -128,60 +128,34 @@ VALUES
         'hi',
         '{"city": "New Delhi", "state": "Delhi", "pincode": "110076", "line1": "Sarita Vihar"}'
     )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (abha_id) DO UPDATE SET
+    hospital_patient_id = EXCLUDED.hospital_patient_id;
 
--- 6. Synthetic Encounter for Ramesh Kumar
-INSERT INTO encounters (id, patient_id, physician_id, status, department, encounter_type, chief_complaint_summary, started_at)
-VALUES
-    (
-        'c0000000-0000-0000-0000-000000000001',
-        'b0000000-0000-0000-0000-000000000001',
-        'a0000000-0000-0000-0000-000000000001',
-        'AWAITING_PHYSICIAN',
-        'General Medicine',
-        'OPD_GENERAL',
-        'Retro-sternal chest burning since yesterday night with exertion discomfort',
-        NOW() - INTERVAL '20 minutes'
-    )
-ON CONFLICT (id) DO NOTHING;
+-- 6. Synthetic Encounter, Consent & Facts with Dynamic FK Resolution
+DO $$
+DECLARE
+    v_patient_id UUID;
+    v_physician_id UUID := 'a0000000-0000-0000-0000-000000000001';
+    v_encounter_id UUID := 'c0000000-0000-0000-0000-000000000001';
+BEGIN
+    SELECT id INTO v_patient_id FROM patients WHERE abha_id = '91-4829-1029-4820' LIMIT 1;
+    
+    IF v_patient_id IS NOT NULL THEN
+        -- Encounter
+        INSERT INTO encounters (id, patient_id, physician_id, status, department, encounter_type, chief_complaint_summary, started_at)
+        VALUES (v_encounter_id, v_patient_id, v_physician_id, 'AWAITING_PHYSICIAN', 'General Medicine', 'OPD_GENERAL', 'Retro-sternal chest burning since yesterday night with exertion discomfort', NOW() - INTERVAL '20 minutes')
+        ON CONFLICT (id) DO NOTHING;
 
--- 7. Consent Record for Ramesh Kumar
-INSERT INTO consents (id, patient_id, status, scope, version, captured_via, granted_at)
-VALUES
-    (
-        'd0000000-0000-0000-0000-000000000001',
-        'b0000000-0000-0000-0000-000000000001',
-        'GRANTED',
-        '["CLINICAL_INTAKE", "DOCUMENT_OCR", "AI_STRUCTURING", "ABDM_SHARING"]',
-        'v1.0',
-        'TOUCH_SCREEN',
-        NOW() - INTERVAL '18 minutes'
-    )
-ON CONFLICT (id) DO NOTHING;
+        -- Consent
+        INSERT INTO consents (id, patient_id, status, scope, version, captured_via, granted_at)
+        VALUES ('d0000000-0000-0000-0000-000000000001', v_patient_id, 'GRANTED', '["CLINICAL_INTAKE", "DOCUMENT_OCR", "AI_STRUCTURING", "ABDM_SHARING"]', 'v1.0', 'TOUCH_SCREEN', NOW() - INTERVAL '18 minutes')
+        ON CONFLICT (id) DO NOTHING;
 
--- 8. Clinical Facts for Ramesh Kumar with Provenance
-INSERT INTO clinical_facts (id, patient_id, encounter_id, field, value, normalized_value, source_type, confidence, verification_status)
-VALUES
-    (
-        'e0000000-0000-0000-0000-000000000001',
-        'b0000000-0000-0000-0000-000000000001',
-        'c0000000-0000-0000-0000-000000000001',
-        'symptom.chest_pain',
-        '{"character": "burning", "onset": "yesterday night", "severity": 6}',
-        '{"standard_code": "SNOMED_29857009", "name": "Chest pain"}',
-        'PATIENT_REPORTED',
-        0.950,
-        'PENDING'
-    ),
-    (
-        'e0000000-0000-0000-0000-000000000002',
-        'b0000000-0000-0000-0000-000000000001',
-        'c0000000-0000-0000-0000-000000000001',
-        'medication.amlodipine',
-        '{"drugName": "Amlodipine 5mg", "frequency": "OD", "duration": "6 months"}',
-        '{"rxnorm": "17767", "name": "Amlodipine"}',
-        'DOCUMENT_OCR',
-        0.910,
-        'PENDING'
-    )
-ON CONFLICT (id) DO NOTHING;
+        -- Clinical Facts
+        INSERT INTO clinical_facts (id, patient_id, encounter_id, field, value, normalized_value, source_type, confidence, verification_status)
+        VALUES
+            ('e0000000-0000-0000-0000-000000000001', v_patient_id, v_encounter_id, 'symptom.chest_pain', '{"character": "burning", "onset": "yesterday night", "severity": 6}', '{"standard_code": "SNOMED_29857009", "name": "Chest pain"}', 'PATIENT_REPORTED', 0.950, 'PENDING'),
+            ('e0000000-0000-0000-0000-000000000002', v_patient_id, v_encounter_id, 'medication.amlodipine', '{"drugName": "Amlodipine 5mg", "frequency": "OD", "duration": "6 months"}', '{"rxnorm": "17767", "name": "Amlodipine"}', 'DOCUMENT_OCR', 0.910, 'PENDING')
+        ON CONFLICT (id) DO NOTHING;
+    END IF;
+END $$;

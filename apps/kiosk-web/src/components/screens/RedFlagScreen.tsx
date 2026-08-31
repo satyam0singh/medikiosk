@@ -1,18 +1,23 @@
 import React from 'react';
-import { AlertOctagon, HeartPulse, UserCheck, ArrowRight, PhoneCall } from 'lucide-react';
+import { AlertOctagon, HeartPulse, UserCheck, ArrowRight, PhoneCall, ArrowLeft } from 'lucide-react';
 import { LanguageCode, RedFlagAlert } from '@medikiosk/shared-types';
 import { AudioPromptButton } from '../AudioPromptButton';
 
 interface RedFlagScreenProps {
   alert: RedFlagAlert;
   language: LanguageCode;
-  onProceedAnyway: () => void;
+  onAcknowledge?: () => void;
+  onRestart?: () => void;
+  onProceedAnyway?: () => void;
+  onBack?: () => void;
 }
 
 export const RedFlagScreen: React.FC<RedFlagScreenProps> = ({
   alert,
   language,
+  onAcknowledge,
   onProceedAnyway,
+  onBack,
 }) => {
   const alertText =
     language === LanguageCode.HI
@@ -64,22 +69,33 @@ export const RedFlagScreen: React.FC<RedFlagScreenProps> = ({
       </div>
 
       {/* Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="py-3.5 px-4 bg-[#FFFFFF] dark:bg-[#141720] hover:bg-[#F7F6F3] dark:hover:bg-[#1A1D27] text-[#111111] dark:text-[#F4F4F6] border border-[#EAEAEA] dark:border-[#232734] font-bold text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-xs"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>{language === LanguageCode.HI ? 'वापस जाएं' : 'Go Back'}</span>
+          </button>
+        )}
+
         <button
           type="button"
           onClick={() => window.print()}
-          className="py-4 bg-rose-600 hover:bg-rose-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 active:scale-95 transition-all"
+          className="py-3.5 px-4 bg-rose-600 hover:bg-rose-500 text-white font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 active:scale-95 transition-all cursor-pointer"
         >
           <UserCheck className="w-4 h-4" />
-          <span>{language === LanguageCode.HI ? 'इमरजेंसी पर्ची प्रिंट करें' : 'Print Priority Slip'}</span>
+          <span>{language === LanguageCode.HI ? 'इमरजेंसी पर्ची' : 'Priority Slip'}</span>
         </button>
 
         <button
           type="button"
-          onClick={onProceedAnyway}
-          className="py-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95"
+          onClick={onAcknowledge || onProceedAnyway}
+          className="py-3.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 font-bold text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
         >
-          <span>{language === LanguageCode.HI ? 'दस्तावेज अपलोड पर आगे बढ़ें' : 'Continue Intake'}</span>
+          <span>{language === LanguageCode.HI ? 'आगे बढ़ें' : 'Continue'}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

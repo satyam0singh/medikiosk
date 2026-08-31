@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   UserPlus,
   ChevronDown,
+  LogOut,
 } from 'lucide-react';
 import { RedFlagAlert, DoctorSpecialist } from '@medikiosk/shared-types';
 
@@ -20,6 +21,9 @@ interface DoctorHeaderProps {
   onOpenAddPatient: () => void;
   isLightMode: boolean;
   onToggleTheme: () => void;
+  onNavigateToTriage?: () => void;
+  onNavigateToAdmin?: () => void;
+  onLogout?: () => void;
 }
 
 export const DoctorHeader: React.FC<DoctorHeaderProps> = ({
@@ -30,6 +34,9 @@ export const DoctorHeader: React.FC<DoctorHeaderProps> = ({
   onOpenAddPatient,
   isLightMode,
   onToggleTheme,
+  onNavigateToTriage,
+  onNavigateToAdmin,
+  onLogout,
 }) => {
   const unacknowledgedCount = alerts.filter((a) => !a.isAcknowledged).length;
   const [time, setTime] = useState<string>('');
@@ -88,6 +95,35 @@ export const DoctorHeader: React.FC<DoctorHeaderProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        {/* Workspace Quick Switchers */}
+        {onNavigateToTriage && (
+          <button
+            type="button"
+            onClick={onNavigateToTriage}
+            className={`hidden lg:inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono border transition-all cursor-pointer ${
+              isLightMode
+                ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#70B8FF] hover:bg-[#F0F0EF]'
+                : 'bg-[#181C28] border-[#2B3142] text-[#70B8FF] hover:bg-[#22283A]'
+            }`}
+          >
+            <span>Triage</span>
+          </button>
+        )}
+
+        {onNavigateToAdmin && (
+          <button
+            type="button"
+            onClick={onNavigateToAdmin}
+            className={`hidden lg:inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono border transition-all cursor-pointer ${
+              isLightMode
+                ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#A78BFA] hover:bg-[#F0F0EF]'
+                : 'bg-[#181C28] border-[#2B3142] text-[#C4B5FD] hover:bg-[#22283A]'
+            }`}
+          >
+            <span>Admin</span>
+          </button>
+        )}
+
         {/* Quick Add Patient Button */}
         <button
           type="button"
@@ -100,20 +136,19 @@ export const DoctorHeader: React.FC<DoctorHeaderProps> = ({
         >
           <UserPlus className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">+ Walk-In Patient</span>
-          <span className="sm:hidden">+ Patient</span>
         </button>
 
         {/* Real-time Clock */}
         <div
-          className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono tabular-nums border ${
+          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-mono tabular-nums border ${
             isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#555555]' : 'bg-[#10121A] border-[#232734] text-[#A0A6B5]'
           }`}
         >
           <Clock className="w-3.5 h-3.5" />
-          <span>{time || '10:30 AM'}</span>
+          <span>{time || '10:30:00 AM'}</span>
         </div>
 
-        {/* Theme Toggle */}
+        {/* Light / Dark Mode Toggle */}
         <button
           type="button"
           onClick={onToggleTheme}
@@ -127,50 +162,65 @@ export const DoctorHeader: React.FC<DoctorHeaderProps> = ({
           {isLightMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
         </button>
 
-        {/* Priority Emergency Alerts Button */}
+        {/* Alerts Pill */}
         <button
           type="button"
           onClick={onOpenAlerts}
-          className={`px-2 sm:px-2.5 py-1.5 min-h-[36px] rounded-md text-xs font-mono tabular-nums flex items-center gap-1 sm:gap-1.5 transition-all active:scale-95 border cursor-pointer ${
+          className={`px-2.5 py-1.5 min-h-[36px] rounded-md text-xs font-mono flex items-center gap-1.5 border transition-all active:scale-95 cursor-pointer ${
             unacknowledgedCount > 0
-              ? 'tag-pastel-red font-bold'
+              ? 'bg-red-500/10 border-red-500/30 text-red-500 dark:text-red-400 font-bold'
               : isLightMode
-              ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#666666]'
-              : 'bg-[#1A1D27] border-[#2A2E3D] text-[#C4C9D6]'
+              ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#787774] hover:bg-[#F0F0EF]'
+              : 'bg-[#1A1D27] border-[#2A2E3D] text-[#8E94A4] hover:bg-[#222634]'
           }`}
         >
-          <Bell className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">{unacknowledgedCount} Alerts</span>
-          <span className="sm:hidden">{unacknowledgedCount}</span>
+          <Bell className={`w-3.5 h-3.5 ${unacknowledgedCount > 0 ? 'animate-bounce' : ''}`} />
+          <span>{unacknowledgedCount} Alerts</span>
         </button>
 
-        {/* Active Specialist Profile & Switcher Trigger */}
+        {/* Doctor Switcher Menu Pill */}
         <button
           type="button"
           onClick={onOpenSpecialists}
-          className={`flex items-center gap-1.5 sm:gap-2 p-1 sm:px-2 sm:py-1 rounded-md border text-left transition-all active:scale-95 cursor-pointer ${
+          className={`px-2.5 py-1 min-h-[36px] rounded-md border flex items-center gap-2 transition-all active:scale-95 cursor-pointer text-left ${
             isLightMode
-              ? 'bg-[#FBFBFA] border-[#EAEAEA] hover:border-[#CCCCCC]'
-              : 'bg-[#1A1D27] border-[#2A2E3D] hover:border-[#3E4558]'
+              ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#111111] hover:bg-[#F0F0EF]'
+              : 'bg-[#1A1D27] border-[#2A2E3D] text-[#F4F4F6] hover:bg-[#222634]'
           }`}
         >
           <div
-            className={`w-7 h-7 rounded-md border flex items-center justify-center font-bold text-xs shrink-0 ${
-              isLightMode ? 'bg-[#FFFFFF] border-[#EAEAEA] text-[#111111]' : 'bg-[#1E222D] border-[#2D3242] text-[#F4F4F6]'
+            className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 border ${
+              activeDoctor.department.includes('AYUSH')
+                ? 'bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                : 'bg-blue-500/15 border-blue-500/30 text-blue-600 dark:text-blue-400'
             }`}
           >
-            <User className="w-3.5 h-3.5" />
+            <User className="w-3 h-3" />
           </div>
-          <div className="text-left hidden md:block max-w-[130px]">
-            <h4 className={`text-xs font-bold leading-tight truncate ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
-              {activeDoctor.fullName}
-            </h4>
-            <p className={`text-[10px] truncate ${isLightMode ? 'text-[#787774]' : 'text-[#8E94A4]'}`}>
+          <div className="hidden lg:block min-w-0 pr-1">
+            <span className="block text-xs font-bold leading-none truncate">{activeDoctor.fullName}</span>
+            <span className="text-[9px] text-[#888888] font-mono leading-none truncate">
               {activeDoctor.specialtyTitle}
-            </p>
+            </span>
           </div>
-          <ChevronDown className="w-3.5 h-3.5 text-[#888888] shrink-0" />
+          <ChevronDown className="w-3 h-3 text-[#888888]" />
         </button>
+
+        {/* Logout Button */}
+        {onLogout && (
+          <button
+            type="button"
+            onClick={onLogout}
+            title="Sign Out"
+            className={`p-2 min-h-[36px] min-w-[36px] flex items-center justify-center rounded-md border transition-all active:scale-95 cursor-pointer ${
+              isLightMode
+                ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#666666] hover:text-red-500'
+                : 'bg-[#1A1D27] border-[#2A2E3D] text-[#C4C9D6] hover:text-red-400'
+            }`}
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
     </header>
   );

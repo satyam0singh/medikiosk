@@ -37,18 +37,52 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
     const encId = `e-${Date.now().toString().slice(-8)}`;
 
     const fallbackQueueItem = {
+      id: `pat-${Date.now().toString().slice(-6)}`,
       encounterId: encId,
       patientId: `p-${Date.now().toString().slice(-8)}`,
       fullName: fullName.trim(),
       age: parseInt(age, 10),
       gender,
+      phone: contactNumber,
       abhaId: generatedAbha,
+      intakeDate: 'Aug 31, 2026',
+      intakeTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       chiefComplaint: chiefComplaintSummary.trim() || 'General Clinical Consultation',
+      symptomLocation: department.includes('AYUSH') ? 'Joints / General' : department.includes('Cardio') ? 'Chest' : 'General',
+      medicalHistory: ['General Clinical Consultation', 'NKDA'],
       hasRedFlag: chiefComplaintSummary.toLowerCase().includes('chest') || chiefComplaintSummary.toLowerCase().includes('severe'),
-      status: 'IN_PROGRESS',
+      readiness: chiefComplaintSummary.toLowerCase().includes('chest') ? 'CRITICAL' : 'Ready for review',
+      status: 'CHECKED_IN',
+      flagsCount: chiefComplaintSummary.toLowerCase().includes('chest') ? 1 : 0,
       department,
+      assignedDoctor: assignedDoctorId || 'Dr. Rajesh Sharma',
       queueTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
+
+    // Save to chronological journey store (ABHA & Phone)
+    try {
+      const phoneClean = contactNumber.replace(/\s+/g, '');
+      const journeyEntry = {
+        encounterId: encId,
+        date: 'Aug 31, 2026',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date().toISOString(),
+        department,
+        doctor: assignedDoctorId || 'Dr. Rajesh Sharma',
+        chiefComplaint: chiefComplaintSummary.trim() || 'General Clinical Consultation',
+        symptomLocation: department.includes('AYUSH') ? 'Joints / General' : 'General',
+        severity: chiefComplaintSummary.toLowerCase().includes('severe') ? 'High (7/10)' : 'Moderate (4/10)',
+        medicalHistory: ['Walk-in registration'],
+        medications: [],
+        consentSigned: true,
+        consentTimestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'CHECKED_IN',
+      };
+      const existingAbha = JSON.parse(localStorage.getItem(`medikiosk_journey_${generatedAbha}`) || '[]');
+      localStorage.setItem(`medikiosk_journey_${generatedAbha}`, JSON.stringify([journeyEntry, ...existingAbha]));
+      const existingPhone = JSON.parse(localStorage.getItem(`medikiosk_journey_${phoneClean}`) || '[]');
+      localStorage.setItem(`medikiosk_journey_${phoneClean}`, JSON.stringify([journeyEntry, ...existingPhone]));
+    } catch {}
 
     try {
       const patient = await DoctorApi.createWalkInPatient({

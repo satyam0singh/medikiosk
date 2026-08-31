@@ -5,17 +5,29 @@ import { env } from '../config/env';
 import { logger } from '../middleware/logger';
 import { DependencyHealthStatus } from '@medikiosk/shared-types';
 
-export const dbPool = new Pool({
-  host: env.DB_HOST,
-  port: env.DB_PORT,
-  database: env.DB_NAME,
-  user: env.DB_USER,
-  password: env.DB_PASSWORD,
-  min: env.DB_POOL_MIN,
-  max: env.DB_POOL_MAX,
-  idleTimeoutMillis: env.DB_IDLE_TIMEOUT_MS,
-  connectionTimeoutMillis: 5000,
-});
+export const dbPool = env.DATABASE_URL
+  ? new Pool({
+      connectionString: env.DATABASE_URL,
+      ssl:
+        env.DATABASE_URL.includes('localhost') || env.DATABASE_URL.includes('127.0.0.1')
+          ? false
+          : { rejectUnauthorized: false },
+      min: env.DB_POOL_MIN,
+      max: env.DB_POOL_MAX,
+      idleTimeoutMillis: env.DB_IDLE_TIMEOUT_MS,
+      connectionTimeoutMillis: 10000,
+    })
+  : new Pool({
+      host: env.DB_HOST,
+      port: env.DB_PORT,
+      database: env.DB_NAME,
+      user: env.DB_USER,
+      password: env.DB_PASSWORD,
+      min: env.DB_POOL_MIN,
+      max: env.DB_POOL_MAX,
+      idleTimeoutMillis: env.DB_IDLE_TIMEOUT_MS,
+      connectionTimeoutMillis: 10000,
+    });
 
 dbPool.on('error', (err) => {
   logger.error('Unexpected error on idle PostgreSQL client pool', { error: err.message });
@@ -81,8 +93,17 @@ export async function checkDatabaseHealth(): Promise<DependencyHealthStatus> {
 
 export async function runMigrations(): Promise<void> {
   logger.info('Starting database migration checks...');
-  const migrationsDir = path.resolve(__dirname, '../../../infrastructure/postgres/migrations');
-  const seedsDir = path.resolve(__dirname, '../../../infrastructure/postgres/seeds');
+  let migrationsDir = path.resolve(__dirname, '../../../infrastructure/postgres/migrations');
+  let seedsDir = path.resolve(__dirname, '../../../infrastructure/postgres/seeds');
+
+  if (!fs.existsSync(migrationsDir)) {
+    migrationsDir = path.resolve(process.cwd(), 'infrastructure/postgres/migrations');
+    seedsDir = path.resolve(process.cwd(), 'infrastructure/postgres/seeds');
+  }
+  if (!fs.existsSync(migrationsDir)) {
+    migrationsDir = path.resolve(__dirname, '../../infrastructure/postgres/migrations');
+    seedsDir = path.resolve(__dirname, '../../infrastructure/postgres/seeds');
+  }
 
   try {
     // 1. Check if migrations directory exists

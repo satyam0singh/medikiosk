@@ -1,208 +1,153 @@
-import React, { useState } from 'react';
-import { Mic, ArrowRight, CheckCircle, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mic, ArrowRight, CheckCircle, ArrowLeft } from 'lucide-react';
 import { ClinicalQuestion, LanguageCode, ProvenanceType, RedFlagAlert, INDIC_LANGUAGES } from '@medikiosk/shared-types';
 import { AudioPromptButton } from '../AudioPromptButton';
 import { KioskApi } from '../../services/api';
+import { getQuestionsForComplaint, getLocalizedText } from '../../utils/clinicalQuestions';
+import { getTranslation } from '../../utils/translations';
 
-const makeBilingual = (en: string, hi: string): any => ({
-  en,
-  hi,
-  hinglish: en,
-  mr: en,
-  ta: en,
-  te: en,
-  bn: en,
-});
-
-const FALLBACK_QUESTIONS: ClinicalQuestion[] = [
-  {
-    id: 'q_chest_onset',
-    code: 'Q_CP_001',
-    section: 'HPI',
-    prompt: makeBilingual(
-      'When did this chest pain or discomfort start?',
-      'सीने में यह दर्द या परेशानी कब से शुरू हुई?'
-    ),
-    inputType: 'VOICE_OR_TOUCH',
-    options: [
-      { id: 'opt_1', value: 'few_hours_ago', label: makeBilingual('A few hours ago', 'कुछ घंटे पहले') },
-      { id: 'opt_2', value: 'yesterday_night', label: makeBilingual('Yesterday night', 'कल रात से') },
-      { id: 'opt_3', value: 'few_days_ago', label: makeBilingual('A few days ago', 'कुछ दिनों से') },
-      { id: 'opt_4', value: 'weeks_or_more', label: makeBilingual('More than a week ago', 'एक सप्ताह से अधिक') },
-    ],
-    targetField: 'hpi.onset',
-    isRequired: true,
-  },
-  {
-    id: 'q_pain_severity',
-    code: 'Q_CP_002',
-    section: 'HPI',
-    prompt: makeBilingual(
-      'On a scale from 1 (mild) to 10 (severe), how intense is the pain right now?',
-      '1 (हल्का) से 10 (अत्यधिक) के पैमाने पर, दर्द कितना तीव्र है?'
-    ),
-    inputType: 'NUMERIC_SCALE',
-    targetField: 'hpi.pain_severity',
-    isRequired: true,
-  },
-  {
-    id: 'q_chest_character',
-    code: 'Q_CP_003',
-    section: 'HPI',
-    prompt: makeBilingual(
-      'How would you describe the feeling in your chest?',
-      'सीने में किस प्रकार का दर्द या अनुभव हो रहा है?'
-    ),
-    inputType: 'VOICE_OR_TOUCH',
-    options: [
-      { id: 'opt_burning', value: 'burning', label: makeBilingual('Burning / Heaviness (जलन या भारीपन)', 'जलन या भारीपन') },
-      { id: 'opt_pressure', value: 'pressure', label: makeBilingual('Tight Squeezing Pressure (दबाव या जकड़न)', 'दबाव या जकड़न') },
-      { id: 'opt_sharp', value: 'sharp', label: makeBilingual('Sharp Stabbing Pain (सुई जैसा चुभने वाला दर्द)', 'सुई जैसा चुभने वाला दर्द') },
-    ],
-    targetField: 'hpi.chest_character',
-    isRequired: true,
-  },
-  {
-    id: 'q_prior_medications',
-    code: 'Q_MED_001',
-    section: 'MEDICATIONS',
-    prompt: makeBilingual(
-      'Are you currently taking any regular medicines for BP, Sugar, or other conditions?',
-      'क्या आप बीपी, शुगर या किसी अन्य बीमारी की नियमित दवा ले रहे हैं?'
-    ),
-    inputType: 'VOICE_OR_TOUCH',
-    options: [
-      { id: 'opt_bp', value: 'bp_medicines', label: makeBilingual('Blood Pressure Medicines (बीपी की दवा)', 'बीपी की दवा') },
-      { id: 'opt_diabetes', value: 'diabetes_medicines', label: makeBilingual('Diabetes / Sugar Medicines (शुगर की दवा)', 'शुगर की दवा') },
-      { id: 'opt_heart', value: 'heart_medicines', label: makeBilingual('Heart / Cholesterol Medicines (हार्ट/कोलेस्ट्रॉल)', 'हार्ट/कोलेस्ट्रॉल की दवा') },
-      { id: 'opt_none', value: 'no_medicines', label: makeBilingual('No regular medicines (कोई नियमित दवा नहीं)', 'कोई नियमित दवा नहीं') },
-    ],
-    targetField: 'medications.history',
-    isRequired: false,
-  },
-];
+import { evaluateTriageEmergencyWithGroq } from '../../utils/groqTriageJudge';
 
 interface InterviewScreenProps {
   sessionId: string;
   language: LanguageCode;
+  complaintKey?: string;
   onInterviewCompleted: () => void;
   onRedFlagTriggered: (alert: RedFlagAlert) => void;
+  onBack?: () => void;
 }
 
 export const InterviewScreen: React.FC<InterviewScreenProps> = ({
   sessionId,
   language,
+  complaintKey = 'chest_pain',
   onInterviewCompleted,
   onRedFlagTriggered,
+  onBack,
 }) => {
-  const [currentQuestion, setCurrentQuestion] = useState<ClinicalQuestion | null>(FALLBACK_QUESTIONS[0]!);
-  const [progress, setProgress] = useState(25);
-  const [isLoading, setIsLoading] = useState(false);
+  const protocolQuestions = getQuestionsForComplaint(complaintKey);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState<ClinicalQuestion>(protocolQuestions[0]);
+  const [progress, setProgress] = useState(Math.round((1 / protocolQuestions.length) * 100));
+  const [isLoading] = useState(false);
+  const [isEvaluatingTriage, setIsEvaluatingTriage] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [scaleValue, setScaleValue] = useState<number>(7);
   const [isVoiceRecording, setIsVoiceRecording] = useState(false);
-  const [fallbackIndex, setFallbackIndex] = useState(0);
+  const [collectedAnswers, setCollectedAnswers] = useState<
+    Array<{ questionId: string; prompt: string; answerValue: string; answerLabel: string }>
+  >([]);
 
-  const fetchNextQuestion = async () => {
-    setIsLoading(true);
-    setSelectedOption(null);
-    try {
-      const data = await KioskApi.getNextQuestion(sessionId);
-      if (data.isComplete) {
-        onInterviewCompleted();
-      } else if (data.question) {
-        setCurrentQuestion(data.question);
-        setProgress(data.progressPercentage);
-      } else {
-        const nextIdx = fallbackIndex + 1;
-        if (nextIdx < FALLBACK_QUESTIONS.length) {
-          setFallbackIndex(nextIdx);
-          setCurrentQuestion(FALLBACK_QUESTIONS[nextIdx]!);
-          setProgress(Math.round(((nextIdx + 1) / FALLBACK_QUESTIONS.length) * 100));
-        } else {
-          onInterviewCompleted();
-        }
-      }
-    } catch (err) {
-      console.warn('Using local question flow fallback:', err);
-      const nextIdx = fallbackIndex + 1;
-      if (nextIdx < FALLBACK_QUESTIONS.length) {
-        setFallbackIndex(nextIdx);
-        setCurrentQuestion(FALLBACK_QUESTIONS[nextIdx]!);
-        setProgress(Math.round(((nextIdx + 1) / FALLBACK_QUESTIONS.length) * 100));
-      } else {
-        onInterviewCompleted();
-      }
-    } finally {
-      setIsLoading(false);
+  const t = getTranslation(language);
+
+  // Step back to previous question or previous kiosk screen
+  const handleStepBack = () => {
+    const qs = getQuestionsForComplaint(complaintKey);
+    if (questionIndex > 0) {
+      const prevIdx = questionIndex - 1;
+      setQuestionIndex(prevIdx);
+      setCurrentQuestion(qs[prevIdx]);
+      setCollectedAnswers((prev) => prev.slice(0, -1));
+      setSelectedOption(null);
+    } else if (onBack) {
+      onBack();
     }
   };
 
-  const handleSubmitAnswer = async (valueToSubmit?: string) => {
-    if (!currentQuestion) return;
-
-    const val = valueToSubmit || selectedOption || (currentQuestion.inputType === 'NUMERIC_SCALE' ? String(scaleValue) : 'yes');
-
-    if (currentQuestion.id === 'q_pain_severity' && scaleValue >= 7) {
-      onRedFlagTriggered({
-        id: 'rf-alert-chest-severe',
-        encounterId: sessionId,
-        patientId: 'patient',
-        ruleId: 'rf_chest_pain_severe',
-        severity: 'CRITICAL_EMERGENCY' as any,
-        alertMessage:
-          language === LanguageCode.HI
-            ? 'सीने में तीव्र दर्द (तीव्रता स्कोर 7+) का पता चला है। तत्काल आपातकालीन सहायता टीम को सूचित किया गया है।'
-            : 'Severe acute chest discomfort (Score >= 7) detected. Immediate triage and physician notification required.',
-        triggerFacts: [{ field: 'hpi.pain_severity', value: scaleValue, sourceType: ProvenanceType.PATIENT_REPORTED }],
-        isAcknowledged: false,
-        createdAt: new Date().toISOString(),
-      });
-      return;
+  // Sync current question when complaint or index changes
+  useEffect(() => {
+    const qs = getQuestionsForComplaint(complaintKey);
+    if (qs[questionIndex]) {
+      setCurrentQuestion(qs[questionIndex]);
+      setProgress(Math.round(((questionIndex + 1) / qs.length) * 100));
     }
+  }, [complaintKey, questionIndex]);
 
-    try {
-      const res = await KioskApi.recordAnswer(sessionId, {
-        questionId: currentQuestion.id,
-        selectedOptions: [val],
-        confidence: 0.95,
-        sourceType: ProvenanceType.PATIENT_REPORTED,
-      });
+  const handleSubmitAnswer = async (valueToSubmit?: string) => {
+    const qs = getQuestionsForComplaint(complaintKey);
+    const q = qs[questionIndex] || currentQuestion;
+    if (!q) return;
 
-      if (res.triggeredAlerts && res.triggeredAlerts.length > 0) {
-        const emergencyAlert = res.triggeredAlerts.find((a) => a.severity === 'CRITICAL_EMERGENCY');
-        if (emergencyAlert) {
-          onRedFlagTriggered(emergencyAlert);
+    const val = valueToSubmit || selectedOption || q.options?.[0]?.value || 'confirmed';
+    const optObj = q.options?.find((o) => o.value === val);
+    const optLabel = optObj ? getLocalizedText(optObj.label as any, language) : val;
+    const promptText = getLocalizedText(q.prompt as any, language);
+
+    const newAnswer = {
+      questionId: q.id,
+      prompt: promptText,
+      answerValue: val,
+      answerLabel: optLabel,
+    };
+
+    const updatedAnswers = [...collectedAnswers, newAnswer];
+    setCollectedAnswers(updatedAnswers);
+
+    // Asynchronously record answer without blocking UI
+    KioskApi.recordAnswer(sessionId, {
+      questionId: q.id,
+      selectedOptions: [val],
+      confidence: 0.95,
+      sourceType: ProvenanceType.PATIENT_REPORTED,
+    }).catch((err) => console.warn('Record answer local fallback:', err));
+
+    const nextIdx = questionIndex + 1;
+    if (nextIdx < qs.length) {
+      setQuestionIndex(nextIdx);
+      setCurrentQuestion(qs[nextIdx]);
+      setSelectedOption(null);
+    } else {
+      // Finished all questions -> Run AI Clinical Emergency Triage Judge!
+      setIsEvaluatingTriage(true);
+      try {
+        const decision = await evaluateTriageEmergencyWithGroq(complaintKey, updatedAnswers);
+        setIsEvaluatingTriage(false);
+
+        if (decision.isEmergency) {
+          const redFlagAlert: RedFlagAlert = {
+            id: `rf-alert-${Date.now()}`,
+            encounterId: sessionId,
+            patientId: 'patient-intake',
+            ruleId: decision.redFlagRule,
+            severity: 'CRITICAL_EMERGENCY' as any,
+            alertMessage:
+              language === LanguageCode.HI
+                ? `आपातकालीन संकेत: ${decision.clinicalRationale}`
+                : `Critical Emergency Detected: ${decision.clinicalRationale}`,
+            triggerFacts: decision.triggerFacts.map((f) => ({
+              field: f.field,
+              value: f.value,
+              sourceType: ProvenanceType.PATIENT_REPORTED,
+            })),
+            isAcknowledged: false,
+            createdAt: new Date().toISOString(),
+          };
+
+          try {
+            const bc = new BroadcastChannel('medikiosk_triage_alerts');
+            bc.postMessage({ type: 'NEW_SAFETY_ALERT', alert: redFlagAlert });
+            setTimeout(() => bc.close(), 500);
+          } catch {}
+
+          onRedFlagTriggered(redFlagAlert);
           return;
         }
+      } catch (e) {
+        console.error('Triage decision error:', e);
+      } finally {
+        setIsEvaluatingTriage(false);
       }
 
-      if (res.isCompleted) {
-        onInterviewCompleted();
-      } else {
-        await fetchNextQuestion();
-      }
-    } catch (err) {
-      console.warn('Record answer fallback progression:', err);
-      const nextIdx = fallbackIndex + 1;
-      if (nextIdx < FALLBACK_QUESTIONS.length) {
-        setFallbackIndex(nextIdx);
-        setCurrentQuestion(FALLBACK_QUESTIONS[nextIdx]!);
-        setProgress(Math.round(((nextIdx + 1) / FALLBACK_QUESTIONS.length) * 100));
-      } else {
-        onInterviewCompleted();
-      }
+      onInterviewCompleted();
     }
   };
 
   const langInfo = INDIC_LANGUAGES.find((l) => l.code === language);
-  const speechTag = langInfo?.speechTag || (language === LanguageCode.HI ? 'hi-IN' : 'en-IN');
+  const speechTag = langInfo?.speechTag || 'hi-IN';
 
   const handleStartVoice = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      // Fallback simulation if browser does not support SpeechRecognition API
       setIsVoiceRecording(true);
       setTimeout(() => {
         setIsVoiceRecording(false);
@@ -227,17 +172,18 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
         const transcript = event.results[0][0].transcript;
         console.log(`ASR (${speechTag}) transcript:`, transcript);
 
-        // Match against options or fallback
-        const matched = currentQuestion?.options?.find(
-          (o) =>
-            o.label?.en?.toLowerCase().includes(transcript.toLowerCase()) ||
-            o.label?.hi?.toLowerCase().includes(transcript.toLowerCase())
-        );
+        const matched = currentQuestion?.options?.find((o) => {
+          const lbl = getLocalizedText(o.label as any, language);
+          return (
+            lbl.toLowerCase().includes(transcript.toLowerCase()) ||
+            o.value.toLowerCase().includes(transcript.toLowerCase())
+          );
+        });
 
         if (matched) {
           handleSubmitAnswer(matched.value);
         } else {
-          const defaultOpt = currentQuestion?.options?.[0]?.value || 'few_hours_ago';
+          const defaultOpt = currentQuestion?.options?.[0]?.value || 'confirmed';
           handleSubmitAnswer(defaultOpt);
         }
       };
@@ -245,7 +191,7 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
       recognition.onerror = (event: any) => {
         console.warn('Speech recognition error, falling back:', event.error);
         setIsVoiceRecording(false);
-        const defaultOpt = currentQuestion?.options?.[0]?.value || 'few_hours_ago';
+        const defaultOpt = currentQuestion?.options?.[0]?.value || 'confirmed';
         handleSubmitAnswer(defaultOpt);
       };
 
@@ -259,7 +205,7 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
       setIsVoiceRecording(true);
       setTimeout(() => {
         setIsVoiceRecording(false);
-        const defaultOpt = currentQuestion?.options?.[0]?.value || 'few_hours_ago';
+        const defaultOpt = currentQuestion?.options?.[0]?.value || 'confirmed';
         handleSubmitAnswer(defaultOpt);
       }, 1200);
     }
@@ -282,16 +228,24 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
     return null;
   }
 
-  const prompt =
-    language === LanguageCode.HI ? currentQuestion.prompt?.hi || currentQuestion.prompt?.en : currentQuestion.prompt?.en;
+  const promptText = getLocalizedText(currentQuestion.prompt as any, language);
 
   return (
     <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full py-2 px-1 sm:px-4 justify-between">
-      {/* Progress Header */}
+      {/* Progress Header with Back / Previous Button */}
       <div className="mb-3 flex items-center justify-between text-xs font-mono tabular-nums text-[#787774] dark:text-[#8E94A4] shrink-0">
-        <span>
-          {language === LanguageCode.HI ? 'प्रगति' : 'Intake Progress'}
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleStepBack}
+            title={language === LanguageCode.HI ? 'पिछला सवाल / वापस' : 'Previous / Go Back'}
+            className="p-1.5 px-2.5 rounded-lg border border-[#EAEAEA] dark:border-[#232734] bg-[#FFFFFF] dark:bg-[#141720] text-[#111111] dark:text-[#F4F4F6] hover:bg-[#F7F6F3] dark:hover:bg-[#1A1D27] active:scale-95 transition-all cursor-pointer shadow-xs flex items-center gap-1 text-xs font-semibold"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>{questionIndex > 0 ? (language === LanguageCode.HI ? 'पिछला' : 'Prev') : (language === LanguageCode.HI ? 'वापस' : 'Back')}</span>
+          </button>
+          <span>{t.intake_progress}</span>
+        </div>
         <span className="font-bold text-[#111111] dark:text-[#F4F4F6]">{progress}%</span>
       </div>
 
@@ -300,21 +254,20 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
         <div className="flex items-start justify-between gap-3 border-b border-[#EAEAEA] dark:border-[#232734] pb-3">
           <div className="space-y-1 min-w-0 pr-2">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#787774] dark:text-[#8E94A4]">
-              {currentQuestion.section || 'HPI'} • {currentQuestion.code || 'Q_CP'}
+              {currentQuestion.section || 'HPI'} • {currentQuestion.code || 'Q'}
             </span>
             <h3 className="text-base sm:text-lg font-bold tracking-tight text-[#111111] dark:text-[#F4F4F6] leading-snug">
-              {prompt}
+              {promptText}
             </h3>
           </div>
-          <AudioPromptButton text={prompt || ''} language={language} size="md" />
+          <AudioPromptButton text={promptText || ''} language={language} size="md" />
         </div>
 
         {/* Option 1: Touch / Voice Multiple Choice */}
         {currentQuestion.inputType === 'VOICE_OR_TOUCH' && currentQuestion.options && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {currentQuestion.options.map((opt) => {
-              const optLabel =
-                language === LanguageCode.HI ? opt.label?.hi || opt.label?.en : opt.label?.en;
+              const optLabel = getLocalizedText(opt.label as any, language);
               const isSelected = selectedOption === opt.value;
 
               return (
@@ -346,59 +299,15 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
           </div>
         )}
 
-        {/* Option 2: Dynamic Numeric Scale (Pain 1-10) with Flexible Wrapping */}
-        {currentQuestion.inputType === 'NUMERIC_SCALE' && (
-          <div className="space-y-3 py-1">
-            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-[#787774] dark:text-[#8E94A4]">
-              <span>1 - Mild</span>
-              <span>5 - Moderate</span>
-              <span className="text-[#9F2F2D] dark:text-[#FCA5A5]">10 - Severe</span>
-            </div>
-
-            {/* Dynamic Numeric 1 to 10 Buttons that fit any screen without overflow */}
-            <div className="flex flex-wrap sm:grid sm:grid-cols-10 gap-1.5">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => {
-                const isCurrent = scaleValue === num;
-                const isSevere = num >= 7;
-
-                return (
-                  <button
-                    key={num}
-                    type="button"
-                    onClick={() => setScaleValue(num)}
-                    className={`flex-1 min-w-[28px] sm:min-w-0 py-2 sm:py-2.5 rounded-md font-mono text-xs tabular-nums transition-all active:scale-95 border cursor-pointer ${
-                      isCurrent
-                        ? isSevere
-                          ? 'bg-[#9F2F2D] dark:bg-[#F87171] text-[#FFFFFF] dark:text-[#111111] border-transparent font-bold'
-                          : 'bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] border-transparent font-bold'
-                        : 'border-[#EAEAEA] dark:border-[#232734] bg-[#FBFBFA] dark:bg-[#10121A] text-[#111111] dark:text-[#F4F4F6] hover:border-[#CCCCCC]'
-                    }`}
-                  >
-                    {num}
-                  </button>
-                );
-              })}
-            </div>
-
-            <input
-              type="range"
-              min={1}
-              max={10}
-              value={scaleValue}
-              onChange={(e) => setScaleValue(parseInt(e.target.value, 10))}
-              className="w-full accent-[#111111] dark:accent-[#F4F4F6] cursor-pointer h-1.5 bg-[#EAEAEA] dark:bg-[#232734] rounded-lg"
-            />
-
-            {scaleValue >= 7 && (
-              <div className="p-2.5 rounded-lg tag-pastel-red flex items-center gap-2 text-xs font-mono">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                <span>
-                  {language === LanguageCode.HI
-                    ? 'चेतावनी: स्कोर 7+ होने पर आपातकालीन प्रोटोकॉल सक्रिय होगा।'
-                    : 'Notice: Pain score >= 7 flags Priority Clinical Triage.'}
-                </span>
-              </div>
-            )}
+        {/* AI Evaluating Indicator */}
+        {isEvaluatingTriage && (
+          <div className="p-3 rounded-lg border border-[#1F6C9F]/30 bg-[#1F6C9F]/10 flex items-center gap-2.5 text-xs text-[#1F6C9F] dark:text-[#70B8FF] animate-pulse">
+            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0" />
+            <span className="font-mono">
+              {language === LanguageCode.HI
+                ? 'क्लिनिकल एआई आपातकालीन विश्लेषण जारी है...'
+                : 'Clinical AI Triage Engine analyzing symptom presentation...'}
+            </span>
           </div>
         )}
       </div>
@@ -408,12 +317,12 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
         <div className="mb-3 p-2.5 rounded-lg tag-pastel-blue flex items-center justify-center gap-2 font-mono text-xs shrink-0">
           <div className="w-2 h-2 bg-[#1F6C9F] dark:bg-[#70B8FF] rounded-full animate-ping" />
           <span>
-            {language === LanguageCode.HI ? 'सुन रहा हूँ... बोलिए' : 'Listening into kiosk microphone...'}
+            {language === LanguageCode.HI ? 'सुन रहा हूँ... बोलिए' : `${langInfo?.name || 'Voice'} listening...`}
           </span>
         </div>
       )}
 
-      {/* Action Footer with Comfortable Touch Heights (>=48px) */}
+      {/* Action Footer */}
       <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 mt-auto shrink-0">
         <button
           type="button"
@@ -426,11 +335,7 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
         >
           <Mic className="w-3.5 h-3.5" />
           <span>
-            {isVoiceRecording
-              ? `${langInfo?.name || 'Voice'} Listening...`
-              : language === LanguageCode.HI
-              ? 'आवाज से उत्तर दें'
-              : `Speak (${langInfo?.name || 'Voice'})`}
+            {isVoiceRecording ? `${langInfo?.name || 'Voice'} Listening...` : `Speak (${langInfo?.name || 'Voice'})`}
           </span>
         </button>
 
@@ -439,7 +344,7 @@ export const InterviewScreen: React.FC<InterviewScreenProps> = ({
           onClick={() => handleSubmitAnswer()}
           className="flex-1 py-3 px-4 min-h-[48px] bg-[#111111] dark:bg-[#F4F4F6] text-[#FFFFFF] dark:text-[#0D0F14] font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer shadow-xs"
         >
-          <span>{language === LanguageCode.HI ? 'पुष्टि करें व आगे बढ़ें' : 'Confirm & Next'}</span>
+          <span>{t.confirm_next}</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>

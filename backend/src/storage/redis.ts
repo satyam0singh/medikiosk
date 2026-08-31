@@ -3,18 +3,27 @@ import { env } from '../config/env';
 import { logger } from '../middleware/logger';
 import { DependencyHealthStatus } from '@medikiosk/shared-types';
 
-export const redisClient = new Redis({
-  host: env.REDIS_HOST,
-  port: env.REDIS_PORT,
-  password: env.REDIS_PASSWORD || undefined,
-  db: env.REDIS_DB,
-  lazyConnect: true,
-  maxRetriesPerRequest: 3,
-  retryStrategy(times) {
-    const delay = Math.min(times * 100, 3000);
-    return delay;
-  },
-});
+export const redisClient = env.REDIS_URL
+  ? new Redis(env.REDIS_URL, {
+      lazyConnect: true,
+      maxRetriesPerRequest: 3,
+      retryStrategy(times) {
+        return Math.min(times * 100, 3000);
+      },
+      tls: env.REDIS_URL.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
+    })
+  : new Redis({
+      host: env.REDIS_HOST,
+      port: env.REDIS_PORT,
+      password: env.REDIS_PASSWORD || undefined,
+      db: env.REDIS_DB,
+      lazyConnect: true,
+      maxRetriesPerRequest: 3,
+      retryStrategy(times) {
+        const delay = Math.min(times * 100, 3000);
+        return delay;
+      },
+    });
 
 redisClient.on('connect', () => {
   logger.info('Connected to Redis ephemeral storage');

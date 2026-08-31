@@ -92,7 +92,8 @@ export function errorHandler(
     success: false,
     error: {
       code: 'INTERNAL_SERVER_ERROR',
-      message: 'An unexpected internal error occurred',
+      message: err.message || 'An unexpected internal error occurred',
+      details: err.stack,
     },
     meta: {
       timestamp,

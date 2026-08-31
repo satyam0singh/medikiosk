@@ -17,7 +17,16 @@ export interface CreatePatientInput {
 export class PatientsService {
   public static async search(term: string): Promise<Patient[]> {
     const cleanTerm = term.trim();
-    if (!cleanTerm) return [];
+    if (!cleanTerm) {
+      const res = await query(
+        `SELECT id, abha_id, hospital_patient_id, full_name, gender, date_of_birth, age,
+                contact_number, preferred_language, address, created_at, updated_at
+         FROM patients
+         ORDER BY created_at DESC
+         LIMIT 50`
+      );
+      return res.rows.map(this.mapRowToPatient);
+    }
 
     const res = await query(
       `SELECT id, abha_id, hospital_patient_id, full_name, gender, date_of_birth, age,
@@ -54,9 +63,9 @@ export class PatientsService {
   public static async create(data: CreatePatientInput): Promise<Patient> {
     // Check if ABHA or MRN duplicate exists
     if (data.abhaId) {
-      const existing = await query('SELECT id FROM patients WHERE abha_id = $1', [data.abhaId]);
+      const existing = await query('SELECT id, abha_id, hospital_patient_id, full_name, gender, date_of_birth, age, contact_number, preferred_language, address, created_at, updated_at FROM patients WHERE abha_id = $1', [data.abhaId]);
       if (existing.rows.length > 0) {
-        throw new AppError('A patient with this ABHA ID already exists', 409, 'DUPLICATE_ABHA_ID');
+        return this.mapRowToPatient(existing.rows[0]);
       }
     }
 

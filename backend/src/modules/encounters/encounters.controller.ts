@@ -112,6 +112,23 @@ export class EncountersController {
     }
   }
 
+  public static async checkin(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const queueItem = await EncountersService.checkin(req.body);
+      const response: ApiResponse = {
+        success: true,
+        data: queueItem,
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+        },
+      };
+      res.status(201).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public static async reassign(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const encounterId = req.params.id as string;
@@ -138,6 +155,60 @@ export class EncountersController {
       const response: ApiResponse = {
         success: true,
         data: briefing,
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+        },
+      };
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public static async getPatientJourney(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const patientId = req.params.patientId as string;
+      const journey = await EncountersService.getPatientJourney(patientId);
+      const response: ApiResponse = {
+        success: true,
+        data: journey,
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+        },
+      };
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public static async getPatientMedications(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const patientId = req.params.patientId as string;
+      const meds = await EncountersService.getPatientMedications(patientId);
+      const response: ApiResponse = {
+        success: true,
+        data: meds,
+        meta: {
+          timestamp: new Date().toISOString(),
+          version: 'v1',
+        },
+      };
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public static async getPatientDocuments(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const patientId = req.params.patientId as string;
+      const docs = await EncountersService.getPatientDocuments(patientId);
+      const response: ApiResponse = {
+        success: true,
+        data: docs,
         meta: {
           timestamp: new Date().toISOString(),
           version: 'v1',

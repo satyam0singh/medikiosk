@@ -111,12 +111,19 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
             const isPreviewing = previewingCode === lang.code;
 
             return (
-              <button
+              <div
                 key={lang.code}
-                type="button"
+                role="button"
+                tabIndex={0}
                 onClick={() => {
                   onSelectLanguage(lang.code);
                   onClose();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    onSelectLanguage(lang.code);
+                    onClose();
+                  }
                 }}
                 className={`p-3 rounded-xl border text-left flex items-center justify-between gap-2.5 transition-all active:scale-[0.98] cursor-pointer group ${
                   isSelected
@@ -159,7 +166,7 @@ export const LanguageSelectorModal: React.FC<LanguageSelectorModalProps> = ({
                 >
                   <Volume2 className="w-4 h-4" />
                 </button>
-              </button>
+              </div>
             );
           })}
         </div>

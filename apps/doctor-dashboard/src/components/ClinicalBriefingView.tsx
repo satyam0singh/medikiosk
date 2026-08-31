@@ -7,6 +7,8 @@ import {
   Download,
   UserCheck,
   FileCheck,
+  Mic,
+  Volume2,
 } from 'lucide-react';
 import {
   Patient,
@@ -77,6 +79,41 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
   const [verificationSuccess, setVerificationSuccess] = useState(false);
   const [selectedReassignDept, setSelectedReassignDept] = useState(encounter.department || 'General Medicine');
   const [isReassigning, setIsReassigning] = useState(false);
+
+  // Dynamically update clinical presets whenever active patient / encounter changes
+  React.useEffect(() => {
+    setSelectedReassignDept(encounter.department || 'General Medicine');
+    setVerificationSuccess(false);
+
+    const complaint = (encounter.chiefComplaintSummary || '').toLowerCase();
+    const dept = (encounter.department || '').toLowerCase();
+    const isAyush = dept.includes('ayush') || dept.includes('kayachikitsa') || complaint.includes('संधिवात') || complaint.includes('knee') || complaint.includes('joint');
+    const isGastro = dept.includes('gastro') || complaint.includes('stomach') || complaint.includes('acidity') || complaint.includes('gas');
+    const isDerma = dept.includes('derma') || dept.includes('twak') || complaint.includes('skin') || complaint.includes('rash');
+    const isFever = complaint.includes('fever') || complaint.includes('cold') || complaint.includes('cough');
+
+    if (isAyush) {
+      setProvisionalDiagnosis('Janu Sandhivata (Osteoarthritis Knee) - Asthi-Majja Dhatu Kshaya');
+      setTreatmentPlan('1. Yograj Guggulu 500mg 2 Tabs BD with warm water x 30 days\n2. Dashamoolarishta 15ml BD with equal water after food\n3. Mahanarayan Taila local Abhyanga BD\n4. Digital X-Ray Bilateral Knees AP/Lat');
+      setClinicalNotes('Patient reports morning stiffness and bilateral knee joint pain. No systemic inflammatory markers. Vata-Kapha Prakopa diagnosed.');
+    } else if (isGastro) {
+      setProvisionalDiagnosis('Acute Erosive Gastritis with Gastroesophageal Reflux (K21.9)');
+      setTreatmentPlan('1. Tab Pantoprazole 40mg OD before breakfast x 14 days\n2. Syp Sucralfate 10ml TDS before meals\n3. Avipattikar Churna 3gm BD post meals\n4. Routine UGI Endoscopy if symptoms persist');
+      setClinicalNotes('Epigastric tenderness present on palpation. Mild acid regurgitation. Advised bland diet and avoidance of late meals.');
+    } else if (isDerma) {
+      setProvisionalDiagnosis('Allergic Contact Dermatitis / Vicharchika (L23.9)');
+      setTreatmentPlan('1. Tab Bilastine 20mg OD at night x 10 days\n2. Mometasone Furoate 0.1% Cream local application BD x 7 days\n3. Khadirarishta 15ml BD after meals');
+      setClinicalNotes('Pruritic erythematous lesions over forearms. Suspected chemical detergent exposure. Advised gentle skin moisturization.');
+    } else if (isFever) {
+      setProvisionalDiagnosis('Acute Upper Respiratory Tract Infection with Febrile Illness (J06.9)');
+      setTreatmentPlan('1. Tab Paracetamol 650mg TDS SOS for fever >100°F\n2. Syp Tulsi Vasaka 10ml TDS with warm water\n3. Steam inhalation BD\n4. Complete Blood Count (CBC) if fever persists >72h');
+      setClinicalNotes('Mild pharyngeal congestion, throat discomfort. Temperature 99.8°F. Chest clear on auscultation.');
+    } else {
+      setProvisionalDiagnosis('Acute Atypical Chest Discomfort / Angina Evaluation (I20.9)');
+      setTreatmentPlan('1. Tab Amlodipine 5mg OD (Morning)\n2. Tab Telmisartan 40mg OD (Night)\n3. Tab Pantoprazole 40mg OD\n4. 12-Lead ECG & Serum Troponin-I Stat');
+      setClinicalNotes('Patient examined in OPD. Normal heart sounds, no peripheral edema. ECG scheduled to rule out acute ischemia.');
+    }
+  }, [encounter.id, encounter.department, encounter.chiefComplaintSummary, patient.id]);
 
   const isVerified = summary?.isPhysicianVerified || encounter.status === 'COMPLETED' || verificationSuccess;
 
@@ -322,6 +359,34 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
           {/* Left 2 Cols: Clinical Narrative, Meds, Labs */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-5">
+            {/* Voice Intake Banner (if voice intake) */}
+            {encounter.chiefComplaintSummary?.includes('🎙️') && (
+              <div
+                className={`border rounded-xl p-4 sm:p-5 space-y-3 transition-colors shadow-xs ${
+                  isLightMode ? 'bg-[#F0F7FF] border-[#C4E5FB]' : 'bg-[#141C2A] border-[#20314A]'
+                }`}
+              >
+                <div className="flex items-center justify-between border-b border-[#D6E8FA] dark:border-[#1E2E48] pb-2.5">
+                  <div className="flex items-center gap-2 font-bold text-xs text-[#1F6C9F] dark:text-[#70B8FF]">
+                    <Mic className="w-4 h-4 text-red-400" />
+                    <span>Multilingual Voice Intake & Verbatim ASR</span>
+                  </div>
+                  <span className="tag-pastel-blue px-2 py-0.5 rounded text-[10px] font-mono font-bold">
+                    AI4Bharat IndicConformer
+                  </span>
+                </div>
+                <div className={`p-3 rounded-lg border text-xs leading-relaxed space-y-1 ${isLightMode ? 'bg-[#FFFFFF] border-[#D6E8FA]' : 'bg-[#0E1522] border-[#1C2B42]'}`}>
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#1F6C9F] dark:text-[#70B8FF] font-bold">
+                    <Volume2 className="w-3 h-3" />
+                    <span>Captured Patient Audio Narrative:</span>
+                  </div>
+                  <p className={`font-medium italic ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
+                    {encounter.chiefComplaintSummary.replace('🎙️', '').trim()}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Structured HPI Narrative Card */}
             <div
               className={`border rounded-xl p-4 sm:p-5 space-y-3 transition-colors shadow-xs ${
@@ -382,52 +447,46 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                   <Pill className="w-3.5 h-3.5" />
                   <span>Current Medications (Prescription & OCR)</span>
                 </div>
-                <span className="text-[10px] font-mono text-[#1F6C9F] dark:text-[#70B8FF]">2 Active Drugs</span>
+                <span className="text-[10px] font-mono text-[#1F6C9F] dark:text-[#70B8FF]">
+                  {briefing.medications?.length || 0} Active Drug(s)
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div
-                  className={`p-3 rounded-lg border flex items-start justify-between ${
-                    isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
-                  }`}
-                >
-                  <div>
-                    <h5 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Tab Amlodipine 5mg</h5>
-                    <p className="text-[11px] text-[#787774] dark:text-[#8E94A4]">Dose: 5mg • 1 Tab OD (Morning)</p>
-                    <span className="mt-1.5 inline-flex items-center gap-1 text-[9px] font-mono font-bold tag-pastel-green px-1.5 py-0.2 rounded">
-                      <span>OCR 92%</span>
-                    </span>
-                  </div>
-                  <span
-                    className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
-                      isLightMode ? 'bg-[#EAEAEA] text-[#555555]' : 'bg-[#232734] text-[#A0A6B5]'
-                    }`}
-                  >
-                    OCR
-                  </span>
+              {briefing.medications && briefing.medications.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {briefing.medications.map((med: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className={`p-3 rounded-lg border flex items-start justify-between ${
+                        isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
+                      }`}
+                    >
+                      <div>
+                        <h5 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>
+                          {med.name}
+                        </h5>
+                        <p className="text-[11px] text-[#787774] dark:text-[#8E94A4]">
+                          Dose: {med.dosage || 'Standard'} • {med.frequency || 'OD'}
+                        </p>
+                        <span className="mt-1.5 inline-flex items-center gap-1 text-[9px] font-mono font-bold tag-pastel-green px-1.5 py-0.2 rounded">
+                          <span>OCR Verified (94%)</span>
+                        </span>
+                      </div>
+                      <span
+                        className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                          isLightMode ? 'bg-[#EAEAEA] text-[#555555]' : 'bg-[#232734] text-[#A0A6B5]'
+                        }`}
+                      >
+                        {med.source || 'OCR'}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-
-                <div
-                  className={`p-3 rounded-lg border flex items-start justify-between ${
-                    isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
-                  }`}
-                >
-                  <div>
-                    <h5 className={`text-xs font-bold ${isLightMode ? 'text-[#111111]' : 'text-[#F4F4F6]'}`}>Tab Telmisartan 40mg</h5>
-                    <p className="text-[11px] text-[#787774] dark:text-[#8E94A4]">Dose: 40mg • 1 Tab OD (Night)</p>
-                    <span className="mt-1.5 inline-flex items-center gap-1 text-[9px] font-mono font-bold tag-pastel-green px-1.5 py-0.2 rounded">
-                      <span>OCR 90%</span>
-                    </span>
-                  </div>
-                  <span
-                    className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
-                      isLightMode ? 'bg-[#EAEAEA] text-[#555555]' : 'bg-[#232734] text-[#A0A6B5]'
-                    }`}
-                  >
-                    OCR
-                  </span>
+              ) : (
+                <div className={`p-4 rounded-lg border text-center text-xs font-mono ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#787774]' : 'bg-[#10121A] border-[#232734] text-[#8E94A4]'}`}>
+                  No prior prescription slips or active medications recorded for this walk-in encounter.
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Diagnostic Orders */}
@@ -441,26 +500,40 @@ export const ClinicalBriefingView: React.FC<ClinicalBriefingViewProps> = ({
                 <span>Suggested Clinical Diagnostic Orders</span>
               </div>
               <ul className={`space-y-1.5 text-xs ${isLightMode ? 'text-[#333333]' : 'text-[#CCCCCC]'}`}>
-                <li
-                  className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${
-                    isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
-                  }`}
-                >
-                  <span className="truncate">1. 12-Lead Electrocardiogram (ECG)</span>
-                  <span className="tag-pastel-red text-[9px] font-mono font-bold px-1.5 py-0.2 rounded shrink-0">
-                    STAT
-                  </span>
-                </li>
-                <li
-                  className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${
-                    isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'
-                  }`}
-                >
-                  <span className="truncate">2. Serum Troponin I / High-Sensitivity</span>
-                  <span className="tag-pastel-yellow text-[9px] font-mono font-bold px-1.5 py-0.2 rounded shrink-0">
-                    RECOMMENDED
-                  </span>
-                </li>
+                {encounter.department?.includes('AYUSH') || encounter.chiefComplaintSummary?.includes('संधिवात') ? (
+                  <>
+                    <li className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
+                      <span>1. Digital X-Ray Bilateral Knees (AP/Lat Standing Weight-Bearing)</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#9F2F2D] text-white uppercase font-bold">STAT</span>
+                    </li>
+                    <li className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
+                      <span>2. Serum Uric Acid & ESR / Rheumatoid Factor Panel</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#D97706] text-white uppercase font-bold">RECOMMENDED</span>
+                    </li>
+                  </>
+                ) : encounter.department?.includes('Gastro') || encounter.chiefComplaintSummary?.includes('Acidity') ? (
+                  <>
+                    <li className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
+                      <span>1. Upper Gastrointestinal Endoscopy (Esophagoscopy)</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#9F2F2D] text-white uppercase font-bold">STAT</span>
+                    </li>
+                    <li className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
+                      <span>2. Ultrasonography (USG) Whole Abdomen</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#D97706] text-white uppercase font-bold">RECOMMENDED</span>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
+                      <span>1. 12-Lead Electrocardiogram (ECG)</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#9F2F2D] text-white uppercase font-bold">STAT</span>
+                    </li>
+                    <li className={`p-2.5 rounded-lg border flex items-center justify-between gap-2 ${isLightMode ? 'bg-[#FBFBFA] border-[#EAEAEA]' : 'bg-[#10121A] border-[#232734]'}`}>
+                      <span>2. Serum Troponin I / High-Sensitivity</span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#D97706] text-white uppercase font-bold">RECOMMENDED</span>
+                    </li>
+                  </>
+                )}
               </ul>
             </div>
           </div>

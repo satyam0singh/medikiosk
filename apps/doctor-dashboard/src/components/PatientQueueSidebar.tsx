@@ -23,6 +23,7 @@ interface PatientQueueSidebarProps {
   onSelectDepartment: (dept: string) => void;
   onSelectEncounter: (encounterId: string) => void;
   onOpenAddPatient: () => void;
+  onOpenSpecialists?: () => void;
   onRefresh: () => void;
   isLoading?: boolean;
   isLightMode?: boolean;
@@ -45,19 +46,30 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
   onSelectDepartment,
   onSelectEncounter,
   onOpenAddPatient,
+  onOpenSpecialists,
   onRefresh,
   isLoading = false,
   isLightMode = false,
 }) => {
   const [filter, setFilter] = useState('');
 
-  const filteredQueue = queue.filter((item) => {
-    const matchesSearch =
-      item.fullName.toLowerCase().includes(filter.toLowerCase()) ||
-      item.abhaId.includes(filter) ||
-      item.chiefComplaint.toLowerCase().includes(filter.toLowerCase());
+  const cleanFilter = filter.trim().toLowerCase().replace(/-/g, '');
+  const hasFilter = cleanFilter.length > 0;
 
+  const filteredQueue = queue.filter((item) => {
+    const cleanAbha = (item.abhaId || '').toLowerCase().replace(/-/g, '');
+    const cleanName = (item.fullName || '').toLowerCase();
+    const cleanComplaint = (item.chiefComplaint || '').toLowerCase();
+
+    const matchesSearch =
+      !hasFilter ||
+      cleanName.includes(cleanFilter) ||
+      cleanAbha.includes(cleanFilter) ||
+      cleanComplaint.includes(cleanFilter);
+
+    // If searching by text/ABHA, search globally across all departments
     const matchesDept =
+      hasFilter ||
       selectedDepartment === 'ALL' ||
       (item.department && item.department.toLowerCase().includes(selectedDepartment.toLowerCase()));
 
@@ -100,6 +112,21 @@ export const PatientQueueSidebar: React.FC<PatientQueueSidebarProps> = ({
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
+
+            {onOpenSpecialists && (
+              <button
+                type="button"
+                onClick={onOpenSpecialists}
+                title="Specialist Directory & Switch Workstation"
+                className={`p-1.5 rounded-md border transition-all active:scale-95 cursor-pointer ${
+                  isLightMode
+                    ? 'bg-[#FBFBFA] border-[#EAEAEA] text-[#1F6C9F] hover:bg-[#F0F0EF]'
+                    : 'bg-[#1E222D] border-[#2D3242] text-[#70B8FF] hover:bg-[#282D3D]'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5" />
+              </button>
+            )}
 
             <button
               type="button"
